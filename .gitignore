@@ -1,6 +1,5 @@
-.claude
+# .claude
 
 *.zip
 *.tar.gz
-
 *stitch*

@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      args:
+        # VITE_ vars são embutidas no bundle em tempo de build.
+        # Para staging/production, substitua pelo valor correto antes de construir.
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+    ports:
+      # Container expõe a porta 80 (nginx). Mapeada para 3000 no host.
+      - "3000:80"
+    restart: unless-stopped

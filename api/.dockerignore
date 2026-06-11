@@ -1,0 +1,27 @@
+# Output de build — recriado dentro do container
+target/
+
+# Controle de versão
+.git/
+.gitignore
+
+# IDE e editor
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Variáveis de ambiente locais
+.env
+.env.local
+
+# Documentação
+*.md
+
+# Logs
+*.log

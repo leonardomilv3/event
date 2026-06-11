@@ -1,0 +1,81 @@
+#!/bin/sh
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Apache Maven Wrapper — simplified version
+
+set -e
+
+MAVEN_PROJECTBASEDIR="$( cd "$(dirname "$0")" && pwd -P )"
+WRAPPER_PROPERTIES="${MAVEN_PROJECTBASEDIR}/.mvn/wrapper/maven-wrapper.properties"
+
+if [ ! -f "$WRAPPER_PROPERTIES" ]; then
+  echo "ERROR: $WRAPPER_PROPERTIES não encontrado" >&2
+  exit 1
+fi
+
+DISTRIBUTION_URL=$(grep '^distributionUrl' "$WRAPPER_PROPERTIES" | cut -d= -f2 | tr -d '\r ')
+ARCHIVE_NAME=$(basename "$DISTRIBUTION_URL")
+# Nome do diretório dentro do zip: apache-maven-X.Y.Z (sem -bin)
+DIR_NAME=$(echo "$ARCHIVE_NAME" | sed 's/-bin\.zip$//')
+
+# ── Procurar Maven no cache do wrapper ──────────────────────────────────────
+MVN_CMD=""
+
+# Localização padrão usada pelo Maven Wrapper oficial
+WRAPPER_DIST_DIR="${HOME}/.m2/wrapper/dists"
+EXPECTED="${WRAPPER_DIST_DIR}/${DIR_NAME}"
+
+# Busca em possíveis subpastas (o wrapper oficial cria subdiretórios com hash)
+if [ -d "$EXPECTED" ]; then
+  FOUND=$(find "$EXPECTED" -maxdepth 3 -name "mvn" -type f 2>/dev/null | head -1)
+  if [ -n "$FOUND" ]; then
+    MVN_CMD="$FOUND"
+  fi
+fi
+
+# Fallback: buscar em qualquer subdiretório do wrapper cache que bata a versão
+if [ -z "$MVN_CMD" ] && [ -d "$WRAPPER_DIST_DIR" ]; then
+  FOUND=$(find "$WRAPPER_DIST_DIR" -maxdepth 4 -name "mvn" -type f 2>/dev/null | grep "$DIR_NAME" | head -1)
+  if [ -n "$FOUND" ]; then
+    MVN_CMD="$FOUND"
+  fi
+fi
+
+# Fallback final: mvn no PATH (SDKMAN, Homebrew, sistema)
+if [ -z "$MVN_CMD" ] && command -v mvn > /dev/null 2>&1; then
+  MVN_CMD=$(command -v mvn)
+fi
+
+# Se ainda não encontrou, baixar
+if [ -z "$MVN_CMD" ]; then
+  mkdir -p "$EXPECTED"
+  PARENT_DIR=$(dirname "$EXPECTED")
+  DOWNLOAD_TO="${PARENT_DIR}/${ARCHIVE_NAME}"
+  echo "Downloading Maven from: $DISTRIBUTION_URL" >&2
+  if command -v curl > /dev/null 2>&1; then
+    curl -fsSL -o "$DOWNLOAD_TO" "$DISTRIBUTION_URL"
+  elif command -v wget > /dev/null 2>&1; then
+    wget -q -O "$DOWNLOAD_TO" "$DISTRIBUTION_URL"
+  else
+    echo "ERROR: instale curl ou wget para usar o Maven wrapper" >&2
+    exit 1
+  fi
+  unzip -q "$DOWNLOAD_TO" -d "$PARENT_DIR"
+  rm -f "$DOWNLOAD_TO"
+  MVN_CMD=$(find "$PARENT_DIR/$DIR_NAME" -maxdepth 3 -name "mvn" -type f 2>/dev/null | head -1)
+fi
+
+if [ -z "$MVN_CMD" ]; then
+  echo "ERROR: Maven não encontrado. Instale via https://maven.apache.org/ ou use SDKMAN: sdk install maven" >&2
+  exit 1
+fi
+
+exec "$MVN_CMD" -f "$MAVEN_PROJECTBASEDIR/pom.xml" "$@"

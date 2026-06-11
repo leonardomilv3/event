@@ -19,7 +19,7 @@
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.version>3.12.3</quarkus.platform.version>
 
-    <maven.compiler.release>25</maven.compiler.release>
+    <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -60,8 +60,18 @@
 
     <!-- ─── Migrations ───────────────────────────────────────────────────── -->
     <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-flyway</artifactId>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-flyway</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-core</artifactId>
+        <version>10.15.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-database-postgresql</artifactId>
+        <version>10.15.0</version>
     </dependency>
 
     <!-- ─── Security ─────────────────────────────────────────────────────── -->
@@ -97,6 +107,13 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-container-image-docker</artifactId>
+    </dependency>
+
+    <!-- ─── Security / Password Hashing ────────────────────────────────── -->
+    <!-- Fornece BcryptUtil.bcryptHash() e BcryptUtil.matches() -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-elytron-security-common</artifactId>
     </dependency>
 
     <!-- ─── Core ─────────────────────────────────────────────────────────── -->

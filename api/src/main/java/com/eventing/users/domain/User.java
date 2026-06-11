@@ -16,14 +16,17 @@ public class User extends PanacheEntityBase {
     @Column(unique = true, nullable = false, length = 255)
     public String email;
 
-    @Column(nullable = false, length = 120)
-    public String name;
+    @Column(unique = true, nullable = false, length = 50)
+    public String username;
 
     @Column(name = "password_hash", nullable = false)
     public String passwordHash;
 
-    @Column(name = "avatar_url")
-    public String avatarUrl;
+    @Column(nullable = false, length = 20)
+    public String role;
+
+    @Column(nullable = false)
+    public boolean active;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     public LocalDateTime createdAt;

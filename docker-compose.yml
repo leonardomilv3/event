@@ -11,3 +11,46 @@ services:
       # Container expõe a porta 80 (nginx). Mapeada para 3000 no host.
       - "3000:80"
     restart: unless-stopped
+
+
+  # ─────────────────────────────────────────────
+  # BANCO DE DADOS (PostgreSQL + PostGIS)
+  # ─────────────────────────────────────────────
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: eventing
+      POSTGRES_USER: eventing
+      POSTGRES_PASSWORD: eventing
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventing -d eventing"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+
+  # ─────────────────────────────────────────────
+  # CACHE (Redis)
+  # ─────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

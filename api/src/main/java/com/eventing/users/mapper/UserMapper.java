@@ -12,8 +12,8 @@ public class UserMapper {
         return new UserDto(
                 user.id,
                 user.email,
-                user.name,
-                user.avatarUrl,
+                user.username,
+                user.role,
                 user.createdAt
         );
     }

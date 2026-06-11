@@ -3,7 +3,7 @@ package com.eventing.events.domain;
 import com.eventing.users.domain.User;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+import org.locationtech.jts.geom.Point;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -15,40 +15,50 @@ public class Event extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.UUID)
     public UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    public User creator;
+
     @Column(nullable = false, length = 200)
     public String title;
 
     @Column(columnDefinition = "TEXT")
     public String description;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 50)
     public String category;
 
-    @Column(nullable = false)
-    public LocalDateTime startAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "event_visibility")
+    public EventVisibility visibility;
 
-    @Column(nullable = false)
-    public LocalDateTime endAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "event_status")
+    public EventStatus status;
 
-    @Column(length = 300)
-    public String location;
+    @Column(name = "cover_image_url")
+    public String coverImageUrl;
 
-    @Column(precision = 10, scale = 2)
-    public BigDecimal price;
+    @Column(name = "location_name", length = 200)
+    public String locationName;
+
+    @Column(columnDefinition = "TEXT")
+    public String address;
+
+    @Column(columnDefinition = "geography(Point,4326)")
+    public Point location;
+
+    @Column(name = "starts_at", nullable = false)
+    public LocalDateTime startsAt;
+
+    @Column(name = "ends_at")
+    public LocalDateTime endsAt;
 
     @Column(name = "max_participants")
     public Integer maxParticipants;
 
-    @Column(name = "image_url")
-    public String imageUrl;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    public EventStatus status;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organizer_id", nullable = false)
-    public User organizer;
+    @Column(name = "participant_count", nullable = false)
+    public int participantCount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     public LocalDateTime createdAt;
@@ -60,6 +70,7 @@ public class Event extends PanacheEntityBase {
     void onCreate() {
         createdAt = updatedAt = LocalDateTime.now();
         if (status == null) status = EventStatus.DRAFT;
+        if (visibility == null) visibility = EventVisibility.PUBLIC;
     }
 
     @PreUpdate

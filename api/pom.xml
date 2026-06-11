@@ -109,6 +109,14 @@
       <artifactId>quarkus-container-image-docker</artifactId>
     </dependency>
 
+    <!-- ─── Spatial / PostGIS ──────────────────────────────────────────── -->
+    <!-- Versão deve bater com hibernate-core gerenciada pelo Quarkus BOM -->
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-spatial</artifactId>
+      <version>6.5.2.Final</version>
+    </dependency>
+
     <!-- ─── Security / Password Hashing ────────────────────────────────── -->
     <!-- Fornece BcryptUtil.bcryptHash() e BcryptUtil.matches() -->
     <dependency>

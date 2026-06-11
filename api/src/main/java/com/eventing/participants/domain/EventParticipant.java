@@ -2,18 +2,16 @@ package com.eventing.participants.domain;
 
 import com.eventing.events.domain.Event;
 import com.eventing.users.domain.User;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "participants",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"event_id", "user_id"}))
-public class Participant extends PanacheEntityBase {
+@Table(name = "event_participants")
+public class EventParticipant {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue
     public UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,15 +23,23 @@ public class Participant extends PanacheEntityBase {
     public User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(columnDefinition = "participant_status", nullable = false)
     public ParticipantStatus status;
 
-    @Column(name = "joined_at", nullable = false, updatable = false)
+    @Column(name = "joined_at")
     public LocalDateTime joinedAt;
 
+    @Column(name = "updated_at")
+    public LocalDateTime updatedAt;
+
     @PrePersist
-    void onCreate() {
+    void prePersist() {
         joinedAt = LocalDateTime.now();
-        if (status == null) status = ParticipantStatus.CONFIRMED;
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    void preUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

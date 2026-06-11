@@ -1,14 +1,14 @@
 package com.eventing.participants.dto;
 
 import com.eventing.participants.domain.ParticipantStatus;
-import com.eventing.users.dto.UserDto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record ParticipantDto(
-        UUID id,
-        UUID eventId,
-        UserDto user,
+public record ParticipantResponse(
+        UUID userId,
+        String username,
+        String displayName,
+        String avatarUrl,
         ParticipantStatus status,
         LocalDateTime joinedAt
 ) {}

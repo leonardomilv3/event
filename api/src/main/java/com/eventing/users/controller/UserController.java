@@ -1,9 +1,7 @@
-package com.eventing.auth;
+package com.eventing.users.controller;
 
-import com.eventing.auth.dto.AuthResponse;
-import com.eventing.auth.dto.LoginRequest;
-import com.eventing.auth.dto.RegisterRequest;
 import com.eventing.shared.response.ApiResponse;
+import com.eventing.users.dto.UpdateProfileRequest;
 import com.eventing.users.dto.UserProfileResponse;
 import com.eventing.users.service.UserService;
 import jakarta.annotation.security.RolesAllowed;
@@ -18,14 +16,11 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import java.util.UUID;
 
-@Path("/api/auth")
+@Path("/api/users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "Auth", description = "Registro e login de usuários")
-public class AuthController {
-
-    @Inject
-    AuthService authService;
+@Tag(name = "Users", description = "Perfis de usuários")
+public class UserController {
 
     @Inject
     UserService userService;
@@ -33,30 +28,33 @@ public class AuthController {
     @Inject
     JsonWebToken jwt;
 
-    @POST
-    @Path("/register")
-    @Operation(summary = "Registrar novo usuário")
-    public Response register(@Valid RegisterRequest request) {
-        AuthResponse response = authService.register(request);
-        return Response.status(Response.Status.CREATED).entity(ApiResponse.ok(response)).build();
-    }
-
-    @POST
-    @Path("/login")
-    @Operation(summary = "Autenticar usuário")
-    public Response login(@Valid LoginRequest request) {
-        AuthResponse response = authService.login(request);
-        return Response.ok(ApiResponse.ok(response)).build();
-    }
-
     @GET
     @Path("/me")
     @RolesAllowed("user")
     @SecurityRequirement(name = "jwt")
-    @Operation(summary = "Dados do usuário autenticado")
+    @Operation(summary = "Perfil completo do usuário autenticado")
     public Response me() {
         UUID id = UUID.fromString(jwt.getSubject());
         UserProfileResponse profile = userService.getProfile(id);
+        return Response.ok(ApiResponse.ok(profile)).build();
+    }
+
+    @PUT
+    @Path("/me")
+    @RolesAllowed("user")
+    @SecurityRequirement(name = "jwt")
+    @Operation(summary = "Atualizar perfil do usuário autenticado")
+    public Response updateMe(@Valid UpdateProfileRequest request) {
+        UUID id = UUID.fromString(jwt.getSubject());
+        UserProfileResponse profile = userService.updateProfile(id, id, request);
+        return Response.ok(ApiResponse.ok(profile)).build();
+    }
+
+    @GET
+    @Path("/{userId}")
+    @Operation(summary = "Perfil público de um usuário")
+    public Response getPublicProfile(@PathParam("userId") UUID userId) {
+        UserProfileResponse profile = userService.getPublicProfile(userId);
         return Response.ok(ApiResponse.ok(profile)).build();
     }
 }

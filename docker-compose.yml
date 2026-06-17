@@ -1,17 +1,52 @@
 services:
+
+  # ─────────────────────────────────────────────
+  # FRONTEND
+  # ─────────────────────────────────────────────
   frontend:
     build:
       context: ./app
       dockerfile: Dockerfile
       args:
-        # VITE_ vars são embutidas no bundle em tempo de build.
-        # Para staging/production, substitua pelo valor correto antes de construir.
         VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
     ports:
-      # Container expõe a porta 80 (nginx). Mapeada para 3000 no host.
       - "3000:80"
+    depends_on:
+      api:
+        condition: service_healthy
     restart: unless-stopped
 
+  # ─────────────────────────────────────────────
+  # BACKEND (Quarkus API)
+  # ─────────────────────────────────────────────
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/eventing
+      DB_USER: eventing
+      DB_PASSWORD: eventing
+      REDIS_URL: redis://redis:6379
+      JWT_PUBLIC_KEY_PATH: /app/keys/publicKey.pem
+      JWT_PRIVATE_KEY_PATH: /app/keys/privateKey.pem
+    volumes:
+      - ./api/src/main/resources/publicKey.pem:/app/keys/publicKey.pem:ro
+      - ./api/src/main/resources/privateKey.pem:/app/keys/privateKey.pem:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
 
   # ─────────────────────────────────────────────
   # BANCO DE DADOS (PostgreSQL + PostGIS)
@@ -32,7 +67,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
 
   # ─────────────────────────────────────────────
   # CACHE (Redis)

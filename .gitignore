@@ -1,5 +1,5 @@
 # .claude
-
+*.sh
 *.zip
 *.tar.gz
 *stitch*

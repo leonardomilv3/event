@@ -5,6 +5,8 @@ import com.eventing.users.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 @Entity
 @Table(name = "event_participants")
@@ -22,7 +24,7 @@ public class EventParticipant {
     @JoinColumn(name = "user_id", nullable = false)
     public User user;
 
-    @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(columnDefinition = "participant_status", nullable = false)
     public ParticipantStatus status;
 

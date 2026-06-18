@@ -3,6 +3,8 @@ package com.eventing.events.domain;
 import com.eventing.users.domain.User;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.locationtech.jts.geom.Point;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,11 +30,12 @@ public class Event extends PanacheEntityBase {
     @Column(nullable = false, length = 50)
     public String category;
 
-    @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false, columnDefinition = "event_visibility")
     public EventVisibility visibility;
 
-    @Enumerated(EnumType.STRING)
+    // @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false, columnDefinition = "event_status")
     public EventStatus status;
 

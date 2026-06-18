@@ -1,6 +1,9 @@
 package com.eventing.users.controller;
 
+import com.eventing.events.dto.EventResponse;
+import com.eventing.participants.service.ParticipantService;
 import com.eventing.shared.response.ApiResponse;
+import com.eventing.shared.response.PageResponse;
 import com.eventing.users.dto.UpdateProfileRequest;
 import com.eventing.users.dto.UserProfileResponse;
 import com.eventing.users.service.UserService;
@@ -14,6 +17,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import java.util.UUID;
 
 @Path("/api/users")
@@ -22,11 +26,9 @@ import java.util.UUID;
 @Tag(name = "Users", description = "Perfis de usuários")
 public class UserController {
 
-    @Inject
-    UserService userService;
-
-    @Inject
-    JsonWebToken jwt;
+    @Inject UserService userService;
+    @Inject ParticipantService participantService;
+    @Inject JsonWebToken jwt;
 
     @GET
     @Path("/me")
@@ -48,6 +50,20 @@ public class UserController {
         UUID id = UUID.fromString(jwt.getSubject());
         UserProfileResponse profile = userService.updateProfile(id, id, request);
         return Response.ok(ApiResponse.ok(profile)).build();
+    }
+
+    @GET
+    @Path("/me/events")
+    @RolesAllowed("user")
+    @SecurityRequirement(name = "jwt")
+    @Operation(summary = "Eventos em que o usuário autenticado está inscrito como APPROVED")
+    public Response getMyEvents(
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("size") @DefaultValue("20") int size
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        PageResponse<EventResponse> result = participantService.getMyEvents(userId, page, size);
+        return Response.ok(ApiResponse.ok(result)).build();
     }
 
     @GET

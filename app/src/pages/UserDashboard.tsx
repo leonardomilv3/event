@@ -1,3 +1,5 @@
+import { useState, useReducer, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import SideNavBar from '../components/organisms/SideNavBar'
 import BottomNav from '../components/organisms/BottomNav'
 import FAB from '../components/organisms/FAB'
@@ -8,7 +10,19 @@ import GlassPanel from '../components/molecules/GlassPanel'
 import AvatarStack from '../components/molecules/AvatarStack'
 import TagChip from '../components/atoms/TagChip'
 import Icon from '../components/atoms/Icon'
+import Button from '../components/atoms/Button'
 import { PulseDot } from '../components/atoms/ActivityPulse'
+import { useProfile } from '../hooks/useProfile'
+
+const AVATAR_FALLBACK = 'https://i.pravatar.cc/160?img=8'
+const INTEREST_TAGS_FALLBACK = ['Electronic', 'Editorial Art', 'Mixology']
+
+const INPUT_CLASS = [
+  'w-full bg-surface-container-low border border-outline-variant rounded-lg',
+  'px-4 py-3 text-on-surface text-body-md placeholder:text-on-surface-variant',
+  'focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container',
+  'transition-colors',
+].join(' ')
 
 const STATS = [
   { label: 'Events Created', value: 24, accent: true },
@@ -16,8 +30,6 @@ const STATS = [
   { label: 'Connections', value: 891, accent: false },
   { label: 'Rating', value: '4.9', accent: true },
 ]
-
-const INTEREST_TAGS = ['Electronic', 'Editorial Art', 'Mixology']
 
 const CHART_BARS = [
   { day: 'M', height: '40%' },
@@ -85,9 +97,45 @@ const TIMELINE_ITEMS = [
   },
 ]
 
-const AVATAR_URL = 'https://i.pravatar.cc/160?img=8'
+interface FormState { displayName: string; bio: string; city: string }
+type FormAction =
+  | { type: 'init'; displayName: string; bio: string; city: string }
+  | { type: 'set'; field: keyof FormState; value: string }
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  if (action.type === 'init') return { displayName: action.displayName, bio: action.bio, city: action.city }
+  return { ...state, [action.field]: action.value }
+}
 
 export default function UserDashboard() {
+  const navigate = useNavigate()
+  const { profile, update, updating, error, success, logout } = useProfile()
+
+  const [form, formDispatch] = useReducer(formReducer, { displayName: '', bio: '', city: '' })
+
+  // Initialize form once when profile first loads.
+  // Calling useState/dispatch during render is the React-recommended pattern for
+  // initializing from async data — triggers one extra render, not flagged by set-state-in-effect.
+  const [formInitialized, setFormInitialized] = useState(false)
+  if (profile && !formInitialized) {
+    setFormInitialized(true)
+    formDispatch({ type: 'init', displayName: profile.displayName ?? '', bio: profile.bio ?? '', city: profile.city ?? '' })
+  }
+
+  const handleSave = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault()
+    await update({ displayName: form.displayName || undefined, bio: form.bio || undefined, city: form.city || undefined })
+  }
+
+  const handleLogout = (): void => {
+    logout()
+    navigate('/login')
+  }
+
+  const displayedName = profile?.displayName ?? profile?.username ?? ''
+  const avatarSrc = profile?.avatarUrl ?? AVATAR_FALLBACK
+  const interestTags = profile?.interests ?? INTEREST_TAGS_FALLBACK
+
   return (
     <div className="min-h-screen bg-background text-on-surface">
       <SideNavBar />
@@ -109,8 +157,8 @@ export default function UserDashboard() {
               {/* Avatar */}
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-xl overflow-hidden glass-panel p-1 flex-shrink-0">
                 <img
-                  src={AVATAR_URL}
-                  alt="Alex Chen"
+                  src={avatarSrc}
+                  alt={displayedName}
                   className="w-full h-full object-cover rounded-lg"
                 />
               </div>
@@ -118,20 +166,26 @@ export default function UserDashboard() {
               {/* Info */}
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="font-serif text-headline-lg-mobile md:text-headline-lg text-on-surface">Alex Chen</h1>
+                  <h1 className="font-serif text-headline-lg-mobile md:text-headline-lg text-on-surface">{displayedName}</h1>
                   <PulseDot className="mt-1" />
                 </div>
                 <p className="font-sans text-body-lg text-on-surface-variant max-w-xl mt-2">
-                  Arquiteto de experiências noturnas. Especializado em warehouse techno pop-ups e encontros secretos em jardins.
+                  {profile?.bio ?? ''}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-4">
-                  {INTEREST_TAGS.map((tag, i) => (
+                  {interestTags.map((tag, i) => (
                     <TagChip key={tag} label={tag} active={i === 0} />
                   ))}
                 </div>
               </div>
 
             </div>
+
+            {/* Logout */}
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="self-start md:self-auto">
+              <Icon name="logout" size={18} />
+              Sair
+            </Button>
           </div>
         </header>
 
@@ -182,6 +236,72 @@ export default function UserDashboard() {
 
             {/* Insights Sidebar */}
             <aside className="lg:col-span-5 space-y-gutter">
+
+              {/* Edit Profile */}
+              <GlassPanel className="p-6 border border-white/5">
+                <h3 className="font-serif text-headline-md text-on-surface mb-4">Editar Perfil</h3>
+                <form onSubmit={handleSave} className="space-y-4">
+                  <div>
+                    <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
+                      Nome de exibição
+                    </label>
+                    <input
+                      type="text"
+                      value={form.displayName}
+                      onChange={(e) => formDispatch({ type: 'set', field: 'displayName', value: e.target.value })}
+                      placeholder={profile?.username ?? ''}
+                      className={INPUT_CLASS}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
+                      Bio
+                    </label>
+                    <textarea
+                      value={form.bio}
+                      onChange={(e) => formDispatch({ type: 'set', field: 'bio', value: e.target.value })}
+                      rows={3}
+                      placeholder="Conte um pouco sobre você..."
+                      className={[INPUT_CLASS, 'resize-none'].join(' ')}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-label-md text-label-md text-on-surface-variant mb-1">
+                      Cidade
+                    </label>
+                    <input
+                      type="text"
+                      value={form.city}
+                      onChange={(e) => formDispatch({ type: 'set', field: 'city', value: e.target.value })}
+                      placeholder="São Paulo, BR"
+                      className={INPUT_CLASS}
+                    />
+                  </div>
+
+                  {success && (
+                    <p className="font-sans text-body-sm text-primary-container flex items-center gap-1">
+                      <Icon name="check_circle" size={16} />
+                      Perfil atualizado com sucesso
+                    </p>
+                  )}
+                  {error && (
+                    <p className="font-sans text-body-sm text-error">{error}</p>
+                  )}
+
+                  <Button type="submit" disabled={updating} className="w-full">
+                    {updating ? (
+                      <>
+                        <Icon name="progress_activity" size={16} className="animate-spin" />
+                        Salvando...
+                      </>
+                    ) : (
+                      'Salvar alterações'
+                    )}
+                  </Button>
+                </form>
+              </GlassPanel>
 
               {/* Growth Pulse bar chart */}
               <GlassPanel className="p-6 border border-white/5">

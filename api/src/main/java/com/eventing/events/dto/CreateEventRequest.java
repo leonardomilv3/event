@@ -16,4 +16,7 @@ public record CreateEventRequest(
         @NotNull @Future LocalDateTime startsAt,
         LocalDateTime endsAt,
         @Positive Integer maxParticipants
-) {}
+) {
+}
+
+    

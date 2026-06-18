@@ -4,6 +4,8 @@ import com.eventing.events.dto.CreateEventRequest;
 import com.eventing.events.dto.EventResponse;
 import com.eventing.events.dto.UpdateEventRequest;
 import com.eventing.events.service.EventService;
+import com.eventing.participants.dto.ParticipantResponse;
+import com.eventing.participants.service.ParticipantService;
 import com.eventing.shared.response.ApiResponse;
 import com.eventing.shared.response.PageResponse;
 import jakarta.annotation.security.RolesAllowed;
@@ -18,6 +20,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 import java.util.UUID;
 
 @Path("/api/events")
@@ -27,6 +30,7 @@ import java.util.UUID;
 public class EventController {
 
     @Inject EventService eventService;
+    @Inject ParticipantService participantService;
     @Inject JsonWebToken jwt;
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
@@ -108,6 +112,45 @@ public class EventController {
             @QueryParam("size") @DefaultValue("20") int size
     ) {
         PageResponse<EventResponse> result = eventService.findFeed(lat, lon, page, size);
+        return Response.ok(ApiResponse.ok(result)).build();
+    }
+
+    // ── Participants ──────────────────────────────────────────────────────────
+
+    @POST
+    @Path("/{eventId}/join")
+    @RolesAllowed("user")
+    @SecurityRequirement(name = "jwt")
+    @Tag(name = "Participants")
+    @Operation(summary = "Participar de um evento (PUBLIC → APPROVED, INVITE_ONLY → REQUESTED)")
+    public Response join(@PathParam("eventId") UUID eventId) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        ParticipantResponse response = participantService.join(userId, eventId);
+        return Response.status(Response.Status.CREATED).entity(ApiResponse.ok(response)).build();
+    }
+
+    @DELETE
+    @Path("/{eventId}/leave")
+    @RolesAllowed("user")
+    @SecurityRequirement(name = "jwt")
+    @Tag(name = "Participants")
+    @Operation(summary = "Sair de um evento (status → DECLINED, decrementa count se APPROVED)")
+    public Response leave(@PathParam("eventId") UUID eventId) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        participantService.leave(userId, eventId);
+        return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/{eventId}/participants")
+    @Tag(name = "Participants")
+    @Operation(summary = "Listar participantes aprovados de um evento")
+    public Response listParticipants(
+            @PathParam("eventId") UUID eventId,
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("size") @DefaultValue("20") int size
+    ) {
+        PageResponse<ParticipantResponse> result = participantService.listParticipants(eventId, page, size);
         return Response.ok(ApiResponse.ok(result)).build();
     }
 }

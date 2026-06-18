@@ -15,6 +15,7 @@ import com.eventing.users.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -52,15 +53,25 @@ public class ParticipantService {
         }
 
         Optional<EventParticipant> existing = participantRepository.findByEventAndUser(eventId, userId);
-        EventParticipant participant = existing.orElseGet(() -> {
-            EventParticipant ep = new EventParticipant();
-            ep.event = event;
-            ep.user = userRepository.findById(userId);
-            return ep;
-        });
-        participant.status = targetStatus;
+        EventParticipant participant;
 
-        participantRepository.persist(participant);
+        if (existing.isPresent()) {
+            // Registro existe (ex: fez leave antes) — atualiza status e timestamp
+            participant = existing.get();
+            participant.status = targetStatus;
+            participant.joinedAt = LocalDateTime.now();
+            // Entidade já gerenciada pelo Hibernate — o flush persiste automaticamente
+        } else {
+            // Novo participante
+            var user = userRepository.findById(userId);
+            if (user == null) throw ApiException.notFound("Usuário");
+            participant = new EventParticipant();
+            participant.event = event;
+            participant.user = user;
+            participant.status = targetStatus;
+            participant.joinedAt = LocalDateTime.now();
+            participantRepository.persist(participant);
+        }
 
         if (targetStatus == ParticipantStatus.APPROVED) {
             eventRepository.update("participantCount = participantCount + 1 where id = ?1", eventId);
@@ -93,6 +104,7 @@ public class ParticipantService {
         }
     }
 
+    @Transactional
     public PageResponse<ParticipantResponse> listParticipants(UUID eventId, int page, int size) {
         if (eventRepository.findById(eventId) == null) throw ApiException.notFound("Evento");
 
@@ -103,6 +115,7 @@ public class ParticipantService {
         return PageResponse.of(content, page, size, total);
     }
 
+    @Transactional
     public PageResponse<EventResponse> getMyEvents(UUID userId, int page, int size) {
         List<EventParticipant> participants = participantRepository.findApprovedByUser(userId, page, size);
         long total = participantRepository.countApprovedByUser(userId);

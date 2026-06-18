@@ -8,39 +8,10 @@ import EventCard from '../components/molecules/EventCard'
 import BentoCard from '../components/molecules/BentoCard'
 import ActivityPulse from '../components/atoms/ActivityPulse'
 import Icon from '../components/atoms/Icon'
+import Button from '../components/atoms/Button'
+import { useEventFeed } from '../hooks/useEventFeed'
 
-const CAROUSEL_EVENTS = [
-  {
-    id: 'techno-underground',
-    title: 'Warehouse Rave: Techno Underground',
-    category: 'SHOWS',
-    imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=900&q=80',
-  },
-  {
-    id: 'secret-omakase',
-    title: 'Secret Omakase Experience',
-    category: 'GASTRONOMIA',
-    imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=80',
-  },
-  {
-    id: 'midnight-yoga',
-    title: 'Midnight Yoga Collective',
-    category: 'ESPORTES',
-    imageUrl: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=900&q=80',
-  },
-  {
-    id: 'vernissage',
-    title: 'Vernissage: Digital Voids',
-    category: 'CULTURA',
-    imageUrl: 'https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=900&q=80',
-  },
-  {
-    id: 'vinyl-session',
-    title: 'Nocturnal Vinyl Session',
-    category: 'MÚSICA',
-    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=900&q=80',
-  },
-]
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=900&q=80'
 
 const HOW_IT_WORKS = [
   {
@@ -77,6 +48,7 @@ const HERO_PULSES = [
 
 export default function LandingPage() {
   const heroRef = useRef<HTMLDivElement>(null)
+  const { events: feedEvents, loading: feedLoading, error: feedError, retry: feedRetry } = useEventFeed()
 
   // Subtle parallax on mouse move
   useEffect(() => {
@@ -150,16 +122,35 @@ export default function LandingPage() {
           sectionLabel="Current Pulse"
           sectionTitle="O que está acontecendo"
         >
-          {CAROUSEL_EVENTS.map(event => (
-            <EventCard
-              key={event.id}
-              id={event.id}
-              title={event.title}
-              category={event.category}
-              imageUrl={event.imageUrl}
-              href={`/events/${event.id}`}
-            />
-          ))}
+          {feedLoading && feedEvents.length === 0 ? (
+            <div className="flex items-center gap-2 px-margin-mobile text-on-surface-variant">
+              <Icon name="progress_activity" className="animate-spin" size={20} />
+              <span className="font-sans text-body-md">Carregando eventos...</span>
+            </div>
+          ) : feedError ? (
+            <div className="flex flex-col gap-stack-sm px-margin-mobile">
+              <p className="font-sans text-body-md text-error">{feedError}</p>
+              <Button variant="ghost" size="sm" onClick={feedRetry}>
+                <Icon name="refresh" size={16} />
+                Tentar novamente
+              </Button>
+            </div>
+          ) : feedEvents.length === 0 ? (
+            <p className="font-sans text-body-md text-on-surface-variant px-margin-mobile">
+              Nenhum evento encontrado na sua região
+            </p>
+          ) : (
+            feedEvents.map((event) => (
+              <EventCard
+                key={event.id}
+                id={event.id}
+                title={event.title}
+                category={event.category}
+                imageUrl={event.coverImageUrl ?? FALLBACK_IMAGE}
+                href={`/events/${event.id}`}
+              />
+            ))
+          )}
         </EventCardCarousel>
       </section>
 

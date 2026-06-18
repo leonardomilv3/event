@@ -42,7 +42,7 @@ public class ParticipantRepository implements PanacheRepositoryBase<EventPartici
                 JOIN users u ON u.id = ep.user_id
                 LEFT JOIN profiles p ON p.user_id = ep.user_id
                 WHERE ep.event_id = :eventId
-                  AND ep.status = 'APPROVED'
+                  AND ep.status = 'APPROVED'::participant_status
                 ORDER BY ep.joined_at ASC
                 """;
         return em.createNativeQuery(sql)
@@ -55,7 +55,7 @@ public class ParticipantRepository implements PanacheRepositoryBase<EventPartici
     public long countApprovedByEvent(UUID eventId) {
         String sql = """
                 SELECT COUNT(*) FROM event_participants
-                WHERE event_id = :eventId AND status = 'APPROVED'
+                WHERE event_id = :eventId AND status = 'APPROVED'::participant_status
                 """;
         return ((Number) em.createNativeQuery(sql)
                 .setParameter("eventId", eventId)

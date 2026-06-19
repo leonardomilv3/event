@@ -9,6 +9,9 @@ Roteamento client-side via React Router v6, configurado em `app/src/App.tsx`.
 | Rota | Componente | Layout de navegação | Arquivo |
 |---|---|---|---|
 | `/` | `LandingPage` | `TopNavBar` + `FAB` + `Footer` | `src/pages/LandingPage.tsx` |
+| `/login` | `LoginPage` | `CinematicAuthLayout` (split-screen) | `src/pages/LoginPage.tsx` |
+| `/register` | `RegisterPage` | `CinematicAuthLayout` (split-screen) | `src/pages/RegisterPage.tsx` |
+| `/forgot-password` | `ForgotPasswordPage` | `CinematicAuthLayout` (centrado) | `src/pages/ForgotPasswordPage.tsx` |
 | `/dashboard` | `UserDashboard` | `SideNavBar` (desktop) + `BottomNav` (mobile) + `FAB` | `src/pages/UserDashboard.tsx` |
 | `/events` | `EventManagement` | `TopNavBar` + `SideNavBar` + `BottomNav` mobile + `FAB` mobile | `src/pages/EventManagement.tsx` |
 | `/events/:id` | `EventDetail` | Nav local inline + persistent CTA + `Footer` | `src/pages/EventDetail.tsx` |

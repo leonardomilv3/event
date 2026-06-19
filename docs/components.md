@@ -79,6 +79,52 @@ Nota: `overflow-hidden` fica no container da track; a barra preenchida usa `shad
 
 ---
 
+### `AuthInput`
+`src/components/atoms/AuthInput.tsx`
+
+Input de formulário para as telas de auth — label em `label-caps`, wrapper com `.input-focus-effect` (borda mint + glow ao focar), erro inline.
+
+| Prop | Tipo | Default | Descrição |
+|---|---|---|---|
+| `id` | `string` | — | Liga `<label htmlFor>` ao `<input id>` |
+| `label` | `string` | — | Texto do label (uppercase via `label-caps`) |
+| `type` | `'text' \| 'email' \| 'password'` | `'text'` | Tipo do input |
+| `placeholder` | `string` | — | Placeholder |
+| `value` | `string` | — | Valor controlado |
+| `onChange` | `(value: string) => void` | — | Callback com o novo valor |
+| `error` | `string` | — | Mensagem de erro exibida abaixo com ícone `error` |
+| `rightElement` | `ReactNode` | — | Slot direito do label (ex: link "Forgot password?") |
+| `leftIcon` | `string` | — | Nome de Material Symbol à esquerda (ex: `'mail'`, `'lock'`). Adiciona `pl-10` no input. |
+| `autoComplete` | `string` | — | Atributo `autocomplete` nativo |
+| `disabled` | `boolean` | `false` | Desabilita input com `opacity-50` |
+
+Notas:
+- `.input-focus-effect` aplicado no wrapper `<div>`, não no `<input>` — glow aparece ao redor do grupo
+- `leftIcon` usa `<span class="material-symbols-outlined">` posicionado com `absolute left-3 top-1/2 -translate-y-1/2`
+- Sem `leftIcon`: `pl-4`. Com `leftIcon`: `pl-10`
+
+### `GlowCursor`
+`src/components/atoms/GlowCursor.tsx`
+
+Efeito atmosférico de cursor — círculo de 400×400px com blur mint que segue o mouse. Puramente visual, sem props.
+
+- Usa `useRef<HTMLDivElement>` para mover via `style.left` / `style.top` (sem re-render)
+- Dois listeners em `document`: `mousemove` (opacity 0.3) e `mouseleave` (opacity 0) — ambos removidos no cleanup
+- Classe `.glow-cursor` definida em `index.css` — `position: fixed`, `pointer-events: none`, `z-index: 50`
+
+### `SocialAuthButton`
+`src/components/atoms/SocialAuthButton.tsx`
+
+Botão de login social para Apple e Google. Estilo ghost com ícone Material Symbol.
+
+| Prop | Tipo | Default | Descrição |
+|---|---|---|---|
+| `provider` | `'google' \| 'apple'` | — | Define ícone e label |
+| `onClick` | `() => void` | — | Handler do clique |
+| `disabled` | `boolean` | `false` | Desabilita com `opacity-50` |
+
+---
+
 ## Moléculas
 
 Compostos de átomos. Encapsulam um padrão de UI recorrente.

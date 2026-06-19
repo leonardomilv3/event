@@ -119,6 +119,8 @@ Todas as decisões arquiteturais estão registradas em [`docs/adrs/`](docs/adrs/
 
 Agentes especializados disponíveis em `.claude/agents/`. Cada agente lê um subconjunto específico da documentação e tem foco bem delimitado.
 
+### Agentes Frontend
+
 | Agente | Arquivo | Quando usar |
 |---|---|---|
 | **Architecture Agent** | `.claude/agents/architecture-agent.md` | Decidir onde colocar um componente; revisar hierarquia; avaliar se uma abstração faz sentido; prevenir duplicação |
@@ -126,6 +128,29 @@ Agentes especializados disponíveis em `.claude/agents/`. Cada agente lê um sub
 | **Design System Guardian** | `.claude/agents/design-system-guardian.md` | Qualquer mudança visual: cor, tipografia, espaçamento, glassmorphism, responsividade, animação |
 | **QA Agent** | `.claude/agents/qa-agent.md` | Revisão antes de merge; validação de acessibilidade; verificação de edge cases; checagem de regressões |
 | **Documentation Agent** | `.claude/agents/documentation-agent.md` | Após mudança estrutural: atualizar `docs/`, criar ADR, sincronizar `CLAUDE.md` |
+
+### Agentes Backend
+
+| Agente | Arquivo | Quando usar |
+|---|---|---|
+| **API Backend Agent** | `.claude/agents/api-backend-agent.md` | Implementar endpoint, service, repository, entidade ou migration; revisar código Java; debugar erros de runtime |
+| **Database Agent** | `.claude/agents/database-agent.md` | Criar ou modificar migrations Flyway; escrever queries PostGIS; otimizar consultas; debugar erros de schema |
+| **API Integration Agent** | `.claude/agents/api-integration-agent.md` | Implementar chamadas HTTP no frontend; criar hooks que consomem a API; mapear responses para props |
+| **DevOps Agent** | `.claude/agents/devops-agent.md` | Modificar docker-compose ou Dockerfiles; configurar variáveis de ambiente; debugar containers |
+
+### Seleção de agente por tarefa
+
+| Tarefa | Agentes a referenciar |
+|---|---|
+| Nova tela frontend | `react-engineer` + `design-system-guardian` |
+| Novo componente UI | `architecture-agent` + `design-system-guardian` |
+| Novo endpoint backend | `api-backend-agent` + `database-agent` |
+| Nova migration | `database-agent` |
+| Integração front+back | `api-integration-agent` + `react-engineer` |
+| Bug fix frontend | `qa-agent` + agente do domínio |
+| Bug fix backend | `api-backend-agent` |
+| Alteração Docker | `devops-agent` |
+| Após qualquer mudança | `documentation-agent` |
 
 ### Checklists
 

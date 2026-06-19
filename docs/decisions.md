@@ -70,3 +70,9 @@ Em vez de repetir `font-['Playfair_Display']` e `font-['Inter']`, o `tailwind.co
 
 ### Glassmorphism via componente `GlassPanel`, não classes diretas
 As classes `.glass-panel` poderiam ser aplicadas diretamente. Encapsular em `GlassPanel` garante que o padrão (incluindo o `rounded-xl` padrão) seja aplicado consistentemente e possa ser atualizado em um único lugar.
+
+### `ForgotPasswordPage` usa layout fullscreen centrado, não `CinematicAuthLayout`
+`LoginPage` e `RegisterPage` usam o split-screen 50/50 do `CinematicAuthLayout`. A `ForgotPasswordPage` usa um layout fullscreen centrado com `glass-panel` ao centro porque o Stitch especifica tela minimalista sem painel visual esquerdo para esta rota — a ação é de recuperação de acesso, não de descoberta da plataforma. Não reverter para split-screen sem nova especificação do design.
+
+### Checkbox de termos estilizado com tokens, sem `accent-color` do browser
+O checkbox nativo (`<input type="checkbox">`) usa `sr-only` para ser acessível por teclado/screen reader mas invisível visualmente. Um `<div>` com `bg-primary-container`/`border-primary-container` e ícone `check` do Material Symbols reproduz fielmente o visual do Stitch sem depender do estilo padrão do browser.

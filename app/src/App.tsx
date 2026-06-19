@@ -7,6 +7,7 @@ import RegisterPage from './pages/RegisterPage'
 import UserDashboard from './pages/UserDashboard'
 import EventManagement from './pages/EventManagement'
 import EventDetail from './pages/EventDetail'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route
             path="/dashboard"
             element={

@@ -7,7 +7,10 @@ import ProgressBar from '../components/atoms/ProgressBar'
 import Icon from '../components/atoms/Icon'
 import { useEvent } from '../hooks/useEvent'
 import { useParticipation } from '../hooks/useParticipation'
+import { useFollow } from '../hooks/useFollow'
 import { useAuthContext } from '../hooks/useAuthContext'
+import { formatEventDate } from '../utils/date'
+import FollowButton from '../components/atoms/FollowButton'
 
 const AGENDA = [
   { title: 'Ambient Warm-up', time: '22:00 - 23:30 • Texturas de baixa fidelidade' },
@@ -19,17 +22,6 @@ const FALLBACK_HERO = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a
 const HOST_IMG = 'https://i.pravatar.cc/160?img=8'
 const VENUE_IMG = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1200&q=60'
 
-const MONTHS_PT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-
-function formatEventDate(iso: string): string {
-  const d = new Date(iso)
-  const day = String(d.getDate()).padStart(2, '0')
-  const month = MONTHS_PT[d.getMonth()]
-  const year = d.getFullYear()
-  const hour = String(d.getHours()).padStart(2, '0')
-  const min = String(d.getMinutes()).padStart(2, '0')
-  return `${day} ${month}, ${year} • ${hour}:${min}`
-}
 
 export default function EventDetail() {
   const { id = '' } = useParams<{ id: string }>()
@@ -45,6 +37,12 @@ export default function EventDetail() {
     join,
     leave,
   } = useParticipation(participants)
+
+  const {
+    isFollowing,
+    actionLoading: followActionLoading,
+    toggleFollow,
+  } = useFollow(event?.creatorId ?? '')
 
   const displayCount = (event?.participantCount ?? 0) + countDelta
   const isCreator = user !== null && event !== null && user.id === event.creatorId
@@ -284,15 +282,25 @@ export default function EventDetail() {
                       />
                     </div>
                     <div>
-                      <h3 className="font-serif text-headline-md text-on-surface">{event.creatorUsername}</h3>
+                      <Link
+                        to={`/users/${event.creatorId}`}
+                        className="font-serif text-headline-md text-on-surface hover:text-primary-container transition-colors"
+                      >
+                        {event.creatorUsername}
+                      </Link>
                       <p className="font-label-md text-label-md text-primary-container uppercase tracking-widest">
                         Organizador
                       </p>
                     </div>
                     <div className="flex gap-stack-sm mt-stack-sm">
-                      <button className="px-stack-md py-2 border border-primary-container text-primary-container rounded-full hover:bg-primary-container hover:text-on-primary-fixed transition-all font-label-md text-label-md">
-                        Seguir
-                      </button>
+                      {!isCreator && (
+                        <FollowButton
+                          isFollowing={isFollowing}
+                          onClick={() => void toggleFollow()}
+                          loading={followActionLoading}
+                          size="sm"
+                        />
+                      )}
                       <button className="p-2 border border-outline-variant rounded-full hover:bg-white/5 transition-all">
                         <Icon name="mail" className="text-on-surface" size={20} />
                       </button>

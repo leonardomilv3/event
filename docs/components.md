@@ -35,6 +35,7 @@ Tag pill em `label-caps`. Usada para categorias de evento (SHOWS, LIVE, DRAFT).
 |---|---|---|---|
 | `label` | `string` | — | Texto da tag (ALL CAPS aplicado via CSS) |
 | `active` | `boolean` | `false` | Mint tint vs. neutro |
+| `onClick` | `() => void` | — | Quando fornecido, renderiza como `<button>` com `cursor-pointer` e hover `border-primary-container/40`. Sem `onClick`: renderiza como `<span>`. |
 
 ---
 
@@ -125,9 +126,78 @@ Botão de login social para Apple e Google. Estilo ghost com ícone Material Sym
 
 ---
 
+### `SegmentedControl`
+`src/components/atoms/SegmentedControl.tsx`
+
+Toggle pill para seleção mutuamente exclusiva entre 2–3 opções. Usado para Visibilidade no formulário de evento (PUBLIC / PRIVATE / INVITE_ONLY).
+
+Diferente de `FilterTabs`: forma pill (`rounded-full`), ativo com fill sólido (`bg-primary-container text-on-primary`). `FilterTabs` é retangular com tint no ativo.
+
+| Prop | Tipo | Default | Descrição |
+|---|---|---|---|
+| `options` | `{ label: string, value: string }[]` | — | Opções disponíveis |
+| `value` | `string` | — | Valor selecionado |
+| `onChange` | `(value: string) => void` | — | Callback de seleção |
+| `className` | `string` | `''` | Classes extras no container |
+
+---
+
+### `FollowButton`
+`src/components/atoms/FollowButton.tsx`
+
+Botão de seguir/deixar de seguir. Dois estados visuais: outline mint (não seguindo) e fill sólido mint com ícone `check` (seguindo). Suporta `loading` com spinner.
+
+| Prop | Tipo | Default | Descrição |
+|---|---|---|---|
+| `isFollowing` | `boolean` | — | Estado atual |
+| `onClick` | `() => void` | — | Toggle handler |
+| `loading` | `boolean` | `false` | Spinner no lugar do texto, `disabled` |
+| `size` | `'sm' \| 'md'` | `'md'` | `'sm'` para lista de seguidores; `'md'` para hero de perfil |
+
+---
+
 ## Moléculas
 
 Compostos de átomos. Encapsulam um padrão de UI recorrente.
+
+### `EventFormPanel`
+`src/components/molecules/EventFormPanel.tsx`
+
+Container glass-panel para formulários de criação e edição de evento. Mesmo papel que `AuthFormPanel` nas telas de auth, mas sem footer de copyright.
+
+| Prop | Tipo | Default | Descrição |
+|---|---|---|---|
+| `title` | `string` | — | Título em `font-serif italic text-headline-lg text-primary-container` |
+| `subtitle` | `string` | — | Subtítulo em `font-body-md text-on-surface-variant` |
+| `children` | `ReactNode` | — | Conteúdo do formulário |
+| `statusBadge` | `ReactNode` | — | Badge de status (ex: "PUBLISHED") renderizado no canto superior direito do header — usado apenas na edição |
+
+Notas:
+- `max-w-2xl mx-auto` — largura máxima centrada
+- `statusBadge` e `title` ficam em `flex items-start justify-between` dentro do header
+
+---
+
+### `FollowListModal`
+`src/components/molecules/FollowListModal.tsx`
+
+Modal de lista de seguidores ou seguidos. Renderiza sobre um backdrop blur com `GlassPanel` centralizado.
+
+| Prop | Tipo | Default | Descrição |
+|---|---|---|---|
+| `title` | `string` | — | Título do modal (ex: "Seguidores") |
+| `users` | `FollowDto[]` | — | Lista de relações de follow |
+| `mode` | `'followers' \| 'following'` | — | Define qual `UserDto` exibir: `dto.follower` (followers) ou `dto.following` (following) |
+| `onClose` | `() => void` | — | Callback de fechamento |
+| `currentUserId` | `string?` | — | ID do usuário autenticado — reservado para uso futuro; MVP não exibe `FollowButton` por linha |
+
+Notas:
+- Fecha com Escape (listener em `window`) ou clique no backdrop
+- Avatar interno mostra as 2 primeiras letras do `username` em `text-primary-container` — `UserDto` não tem `avatarUrl`
+- `max-h-[480px] overflow-y-auto` na lista para scroll interno sem crescer além da viewport
+- Footer com contagem total visível apenas quando `users.length > 0`
+
+---
 
 ### `GlassPanel`
 `src/components/molecules/GlassPanel.tsx`

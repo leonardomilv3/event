@@ -14,7 +14,11 @@ Roteamento client-side via React Router v6, configurado em `app/src/App.tsx`.
 | `/forgot-password` | `ForgotPasswordPage` | `CinematicAuthLayout` (centrado) | `src/pages/ForgotPasswordPage.tsx` |
 | `/dashboard` | `UserDashboard` | `SideNavBar` (desktop) + `BottomNav` (mobile) + `FAB` | `src/pages/UserDashboard.tsx` |
 | `/events` | `EventManagement` | `TopNavBar` + `SideNavBar` + `BottomNav` mobile + `FAB` mobile | `src/pages/EventManagement.tsx` |
+| `/events/new` | `CreateEventPage` | `TopNavBar` + `EventFormPanel` + `Footer` | `src/pages/CreateEventPage.tsx` |
+| `/events/:id/edit` | `EditEventPage` | `TopNavBar` + `EventFormPanel` + `Footer` | `src/pages/EditEventPage.tsx` |
 | `/events/:id` | `EventDetail` | Nav local inline + persistent CTA + `Footer` | `src/pages/EventDetail.tsx` |
+| `/my-events` | `MyEventsPage` | `TopNavBar` + `SideNavBar` + `BottomNav` + `Footer` | `src/pages/MyEventsPage.tsx` |
+| `/users/:userId` | `PublicProfilePage` | `TopNavBar` + `Footer` (público) | `src/pages/PublicProfilePage.tsx` |
 | `*` | Redirect | → `/` | `App.tsx` |
 
 ---
@@ -102,3 +106,81 @@ Página de detalhe de um evento. Acesso público com CTA de participação.
 4. `Footer`
 5. **Persistent CTA mobile** — barra `fixed bottom-0`, botão full-width "Participar"
 6. **Persistent CTA desktop** — floating `glass-panel` pill "Vagas limitadas restantes" + botão pill mint grande
+
+---
+
+## CreateEventPage `/events/new`
+
+Formulário de criação de evento. Requer autenticação.
+
+**Organismos e ordem de renderização:**
+
+1. `TopNavBar` — autenticado, exibe nome do usuário
+2. **`EventFormPanel`** — container glass centrado (`max-w-2xl`), título "Crie seu próximo evento"
+   - Campos: título (`AuthInput`), narrativa (textarea), categoria (grid de `TagChip` clicáveis), visibilidade (`SegmentedControl` PUBLIC/PRIVATE/INVITE_ONLY), local (`AuthInput` com `location_on`), endereço, início + fim (`datetime-local` side-by-side no md), limite de presença
+   - Dois botões de submit: "Publicar Evento" (mint fill, `publishNow=true`) + "Salvar como rascunho" (ghost, `publishNow=false`)
+   - Link "Cancelar" → `/events`
+3. `Footer`
+
+**Notas:**
+- Validação client-side: título obrigatório, categoria obrigatória, data de início obrigatória e futura
+- `useEventForm().create(data, publishNow)` — dois caminhos distintos em um único submit handler
+
+---
+
+## EditEventPage `/events/:id/edit`
+
+Formulário de edição de evento existente. Requer autenticação e ownership.
+
+**Organismos e ordem de renderização:**
+
+1. `TopNavBar` — autenticado, exibe nome do usuário
+2. **`EventFormPanel`** — com `statusBadge` no canto superior direito (pill com status do evento: DRAFT/PUBLISHED/CANCELLED/FINISHED em cores distintas)
+   - Mesmos campos que `CreateEventPage`, pré-populados via `useReducer` + `formInitialized`
+   - Botão único "Salvar Alterações" (mint fill)
+   - **Danger Zone** — seção separada por `border-t border-error/20`, aviso de cancelamento e botão "Cancelar Evento" com confirmação em dois passos (`confirmingCancel` state)
+   - Link "Voltar ao Evento" → `/events/:id`
+3. `Footer`
+
+**Notas:**
+- Redirect automático para `/events/:id` se o usuário autenticado não for o criador do evento
+- `useReducer` + `formInitialized` para popular o formulário uma única vez quando o evento carrega — mesma convenção de `UserDashboard`
+- `startsAt` e `endsAt` são truncados para 16 caracteres (`slice(0, 16)`) para compatibilidade com `<input type="datetime-local">`
+
+---
+
+## MyEventsPage `/my-events`
+
+Lista de eventos em que o usuário tem participação confirmada. Requer autenticação.
+
+**Organismos e ordem de renderização:**
+
+1. `TopNavBar` — autenticado, exibe nome do usuário
+2. `SideNavBar` — `topOffset="top-20"`, inclui item "Meus Eventos" (`event_available`) entre Events e Messages
+3. **Header** — título "Meus Eventos" + subtítulo
+4. **Estados condicionais** (mutuamente exclusivos):
+   - **Loading** — spinner `progress_activity`
+   - **Error** — ícone `error` + mensagem
+   - **Empty** — `pulse-ring` animado + ícone `confirmation_number` + texto de incentivo + Link "Explorar Eventos" → `/`
+   - **Grid** — `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` com `EventCard` (`!w-full` para sobrescrever largura fixa do carousel) + data (`formatEventDate`) + localização abaixo de cada card
+5. `Footer`
+6. `BottomNav`
+
+---
+
+## PublicProfilePage `/users/:userId`
+
+Perfil público de um usuário. **Sem autenticação obrigatória** — `useAuthContext()` retorna `user: null` quando não autenticado.
+
+**Organismos e ordem de renderização:**
+
+1. `TopNavBar` — autenticado condicionalmente (exibe pill se `user !== null`)
+2. **Hero Banner** — `h-[360px] md:h-[460px]`, imagem full-bleed com `bg-gradient-to-t from-background`
+3. **Profile Info** — `-mt-28 md:-mt-36 z-10` sobrepondo o banner:
+   - Avatar `w-36 md:w-48` com `glass-panel` e `shadow-mint-glow`
+   - Nome (`displayName ?? username`), `@username`, cidade com ícone `location_on`
+   - Contadores clicáveis: "N Seguidores" / "N Seguindo" → abre `FollowListModal`
+   - `FollowButton` — visível apenas quando `user !== null && !isOwnProfile`
+4. **Bio & Interests** — biografia e `TagChip` de interesses (visíveis se preenchidos)
+5. `Footer`
+6. **`FollowListModal`** — renderizado condicionalmente ao lado do `Footer` (não dentro do `<main>`); fecha com Escape ou clique no backdrop

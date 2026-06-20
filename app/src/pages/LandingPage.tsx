@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import TopNavBar from '../components/organisms/TopNavBar'
 import EventCardCarousel from '../components/organisms/EventCardCarousel'
 import Footer from '../components/organisms/Footer'
@@ -47,6 +47,7 @@ const HERO_PULSES = [
 ]
 
 export default function LandingPage() {
+  const navigate = useNavigate()
   const heroRef = useRef<HTMLDivElement>(null)
   const { events: feedEvents, loading: feedLoading, error: feedError, retry: feedRetry } = useEventFeed()
 
@@ -235,7 +236,7 @@ export default function LandingPage() {
 
       <Footer />
 
-      <FAB label="Criar Evento" />
+      <FAB label="Criar Evento" onClick={() => navigate('/events/new')} />
     </div>
   )
 }

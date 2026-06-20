@@ -8,6 +8,7 @@ import com.eventing.users.domain.User;
 import com.eventing.users.dto.UpdateProfileRequest;
 import com.eventing.users.dto.UserDto;
 import com.eventing.users.dto.UserProfileResponse;
+import com.eventing.users.dto.UserPublicProfileResponse;
 import com.eventing.users.mapper.UserMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -38,14 +39,14 @@ public class UserService {
         User user = userRepository.findById(userId);
         if (user == null) throw ApiException.notFound("Usuário");
         Profile profile = profileRepository.findById(userId);
-        return toResponse(user, profile, true);
+        return toResponse(user, profile);
     }
 
-    public UserProfileResponse getPublicProfile(UUID userId) {
+    public UserPublicProfileResponse getPublicProfile(UUID userId) {
         User user = userRepository.findById(userId);
         if (user == null) throw ApiException.notFound("Usuário");
         Profile profile = profileRepository.findById(userId);
-        return toResponse(user, profile, false);
+        return toPublicResponse(user, profile);
     }
 
     @Transactional
@@ -67,16 +68,32 @@ public class UserService {
         if (request.interests() != null) profile.interests = request.interests().toArray(String[]::new);
 
         profileRepository.persist(profile);
-        return toResponse(user, profile, true);
+        return toResponse(user, profile);
     }
 
-    private UserProfileResponse toResponse(User user, Profile profile, boolean includeEmail) {
+    private UserProfileResponse toResponse(User user, Profile profile) {
         List<String> interests = (profile != null && profile.interests != null)
                 ? Arrays.asList(profile.interests)
                 : null;
         return new UserProfileResponse(
                 user.id,
-                includeEmail ? user.email : null,
+                user.email,
+                user.username,
+                profile != null ? profile.displayName : null,
+                profile != null ? profile.avatarUrl : null,
+                profile != null ? profile.bio : null,
+                profile != null ? profile.city : null,
+                interests,
+                user.createdAt
+        );
+    }
+
+    private UserPublicProfileResponse toPublicResponse(User user, Profile profile) {
+        List<String> interests = (profile != null && profile.interests != null)
+                ? Arrays.asList(profile.interests)
+                : null;
+        return new UserPublicProfileResponse(
+                user.id,
                 user.username,
                 profile != null ? profile.displayName : null,
                 profile != null ? profile.avatarUrl : null,

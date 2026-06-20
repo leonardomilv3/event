@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import TopNavBar from '../components/organisms/TopNavBar'
 import SideNavBar from '../components/organisms/SideNavBar'
 import BottomNav from '../components/organisms/BottomNav'
@@ -25,6 +25,7 @@ const MOCK_AVATARS = [
 ]
 
 export default function EventManagement() {
+  const navigate = useNavigate()
   const [activeFilter, setActiveFilter] = useState('all')
   const [search, setSearch] = useState('')
 
@@ -49,7 +50,10 @@ export default function EventManagement() {
                 Curate suas experiências noturnas. Gerencie, escale e divulgue o próximo movimento do seu coletivo.
               </p>
             </div>
-            <button className="flex items-center gap-2 bg-primary-container text-on-primary-fixed font-bold px-6 py-3 rounded-lg hover:shadow-mint-glow-strong transition-all active:scale-95">
+            <button
+              onClick={() => navigate('/events/new')}
+              className="flex items-center gap-2 bg-primary-container text-on-primary-fixed font-bold px-6 py-3 rounded-lg hover:shadow-mint-glow-strong transition-all active:scale-95"
+            >
               <Icon name="add" size={20} />
               Criar Evento
             </button>
@@ -224,7 +228,7 @@ export default function EventManagement() {
       </div>
 
       <Footer />
-      <FAB mobileOnly icon="add" label="Criar Evento" />
+      <FAB mobileOnly icon="add" label="Criar Evento" onClick={() => navigate('/events/new')} />
       <BottomNav />
     </div>
   )

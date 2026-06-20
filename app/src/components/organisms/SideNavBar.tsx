@@ -4,6 +4,7 @@ import Icon from '../atoms/Icon'
 const NAV_ITEMS = [
   { label: 'Dashboard', icon: 'grid_view', href: '/dashboard' },
   { label: 'Events', icon: 'confirmation_number', href: '/events' },
+  { label: 'Meus Eventos', icon: 'event_available', href: '/my-events' },
   { label: 'Messages', icon: 'chat_bubble', href: '/messages' },
   { label: 'Insights', icon: 'analytics', href: '/insights' },
   { label: 'Settings', icon: 'settings', href: '/settings' },

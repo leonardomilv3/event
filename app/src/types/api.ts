@@ -23,9 +23,10 @@ export interface AuthResponse {
   username: string;
 }
 
-export interface UserProfile {
+// Perfil público — GET /api/users/{userId}
+// Backend omits email via Jackson serialization-inclusion=non-null (includeEmail=false)
+export interface PublicUserProfile {
   id: string;
-  email: string;
   username: string;
   displayName?: string;
   avatarUrl?: string;
@@ -33,6 +34,12 @@ export interface UserProfile {
   city?: string;
   interests?: string[];
   createdAt: string;
+}
+
+// Perfil do próprio usuário autenticado — GET /api/users/me, /api/auth/me
+// email é sempre presente neste contexto
+export interface UserProfile extends PublicUserProfile {
+  email: string;
 }
 
 export interface EventResponse {
@@ -65,4 +72,51 @@ export interface ParticipantResponse {
   avatarUrl?: string;
   status: string;
   joinedAt: string;
+}
+
+// ── Events: create/update ──────────────────────────────────────────────
+
+export interface CreateEventRequest {
+  title: string;
+  description?: string;
+  category: string;
+  visibility: 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY';
+  latitude?: number;
+  longitude?: number;
+  locationName?: string;
+  address?: string;
+  startsAt: string;
+  endsAt?: string;
+  maxParticipants?: number;
+}
+
+export interface UpdateEventRequest {
+  title?: string;
+  description?: string;
+  category?: string;
+  visibility?: 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY';
+  latitude?: number;
+  longitude?: number;
+  locationName?: string;
+  address?: string;
+  startsAt?: string;
+  endsAt?: string;
+  maxParticipants?: number;
+}
+
+// ── Social ────────────────────────────────────────────────────────────
+
+export interface UserDto {
+  id: string;
+  email?: string;
+  username: string;
+  role: string;
+  createdAt: string;
+}
+
+export interface FollowDto {
+  id: string;
+  follower: UserDto;
+  following: UserDto;
+  createdAt: string;
 }

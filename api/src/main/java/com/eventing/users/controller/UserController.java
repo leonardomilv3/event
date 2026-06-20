@@ -6,6 +6,7 @@ import com.eventing.shared.response.ApiResponse;
 import com.eventing.shared.response.PageResponse;
 import com.eventing.users.dto.UpdateProfileRequest;
 import com.eventing.users.dto.UserProfileResponse;
+import com.eventing.users.dto.UserPublicProfileResponse;
 import com.eventing.users.service.UserService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -70,7 +71,7 @@ public class UserController {
     @Path("/{userId}")
     @Operation(summary = "Perfil público de um usuário")
     public Response getPublicProfile(@PathParam("userId") UUID userId) {
-        UserProfileResponse profile = userService.getPublicProfile(userId);
+        UserPublicProfileResponse profile = userService.getPublicProfile(userId);
         return Response.ok(ApiResponse.ok(profile)).build();
     }
 }

@@ -76,3 +76,9 @@ As classes `.glass-panel` poderiam ser aplicadas diretamente. Encapsular em `Gla
 
 ### Checkbox de termos estilizado com tokens, sem `accent-color` do browser
 O checkbox nativo (`<input type="checkbox">`) usa `sr-only` para ser acessível por teclado/screen reader mas invisível visualmente. Um `<div>` com `bg-primary-container`/`border-primary-container` e ícone `check` do Material Symbols reproduz fielmente o visual do Stitch sem depender do estilo padrão do browser.
+
+### `CreateEventPage` e `EditEventPage` são páginas separadas (não uma página com modo)
+Assim como `LoginPage` e `RegisterPage` são separadas apesar de compartilharem lógica de auth, criar e editar eventos são intenções distintas: criar não tem dados de partida (estado local puro), editar precisa de fetch, `useReducer` com `formInitialized`, verificação de ownership e Danger Zone. Unificar em uma única página com prop `mode` adicionaria complexidade ao grafo de estado sem benefício real para o usuário.
+
+### `FollowListModal` não exibe `FollowButton` por linha (MVP)
+Renderizar um `FollowButton` por linha exigiria chamar `useFollow(userId)` para cada item da lista — ou um fetch batch não disponível na API atual. Para o MVP, a lista exibe apenas avatar + nome. O `currentUserId` prop existe como slot reservado para uma versão futura que adicione essa interação sem quebrar a interface do componente.

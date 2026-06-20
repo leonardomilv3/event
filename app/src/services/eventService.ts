@@ -1,4 +1,4 @@
-import { type EventResponse, type PageResponse, type ParticipantResponse } from '../types/api';
+import { type EventResponse, type PageResponse, type ParticipantResponse, type CreateEventRequest, type UpdateEventRequest } from '../types/api';
 import { http } from './httpClient';
 
 export async function getFeed(
@@ -46,4 +46,20 @@ export async function getParticipants(
   return http.get<PageResponse<ParticipantResponse>>(
     `/api/events/${eventId}/participants?${q}`
   );
+}
+
+export async function createEvent(data: CreateEventRequest): Promise<EventResponse> {
+  return http.post<EventResponse>('/api/events', data);
+}
+
+export async function updateEvent(id: string, data: UpdateEventRequest): Promise<EventResponse> {
+  return http.put<EventResponse>(`/api/events/${id}`, data);
+}
+
+export async function deleteEvent(id: string): Promise<void> {
+  await http.delete<void>(`/api/events/${id}`);
+}
+
+export async function publishEvent(id: string): Promise<EventResponse> {
+  return http.post<EventResponse>(`/api/events/${id}/publish`);
 }

@@ -5,16 +5,19 @@ interface RawApiResponse<T> {
   success: boolean;
   message?: string;
   errors?: string[];
+  errorCode?: string;
 }
 
 export class ApiError extends Error {
   readonly success = false as const;
   readonly errors?: string[];
+  readonly code?: string;
 
-  constructor(message: string, errors?: string[]) {
+  constructor(message: string, errors?: string[], code?: string) {
     super(message);
     this.name = 'ApiError';
     this.errors = errors;
+    this.code = code;
   }
 }
 
@@ -53,7 +56,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   }
 
   if (!body.success) {
-    throw new ApiError(body.message ?? 'Erro desconhecido', body.errors);
+    throw new ApiError(body.message ?? 'Erro desconhecido', body.errors, body.errorCode);
   }
 
   return body.data as T;

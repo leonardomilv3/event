@@ -33,6 +33,27 @@ public class EventController {
     @Inject ParticipantService participantService;
     @Inject JsonWebToken jwt;
 
+    // ── Listagens ─────────────────────────────────────────────────────────────
+
+    @GET
+    @Operation(summary = "Listar eventos públicos — filtrável por categoria ou criador")
+    public Response listEvents(
+            @QueryParam("category") String category,
+            @QueryParam("creatorId") UUID creatorId,
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("size") @DefaultValue("20") int size
+    ) {
+        PageResponse<EventResponse> result;
+        if (category != null) {
+            result = eventService.getByCategory(category, page, size);
+        } else if (creatorId != null) {
+            result = eventService.getByCreatorId(creatorId, page, size);
+        } else {
+            result = eventService.getPublicEvents(page, size);
+        }
+        return Response.ok(ApiResponse.ok(result)).build();
+    }
+
     // ── CRUD ──────────────────────────────────────────────────────────────────
 
     @POST

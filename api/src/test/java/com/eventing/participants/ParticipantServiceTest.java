@@ -10,7 +10,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,7 +45,7 @@ public class ParticipantServiceTest {
             -47.8825,
             "Brasília",
             null,
-            LocalDateTime.now().plusDays(1),
+            OffsetDateTime.now(ZoneOffset.UTC).plusDays(1),
             null,
             null
         );

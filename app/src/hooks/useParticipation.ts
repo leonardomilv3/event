@@ -41,7 +41,13 @@ export function useParticipation(participants: ParticipantResponse[]): Participa
       setIsParticipatingOverride(true)
       setCountDelta((d) => d + 1)
     } catch (err: unknown) {
-      setError(err instanceof ApiError ? err.message : 'Erro ao participar do evento')
+      if (err instanceof ApiError && err.code === 'ALREADY_PARTICIPANT') {
+        // Backend confirma que usuário já é participante — sincronizar UI com essa realidade
+        setIsParticipatingOverride(true)
+        setError(null)
+      } else {
+        setError(err instanceof ApiError ? err.message : 'Erro ao participar do evento')
+      }
     } finally {
       setLoading(false)
     }

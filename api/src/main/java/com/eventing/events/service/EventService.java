@@ -1,6 +1,7 @@
 package com.eventing.events.service;
 
 import com.eventing.events.EventRepository;
+import com.eventing.events.NativeEventRow;
 import com.eventing.events.domain.Event;
 import com.eventing.events.domain.EventStatus;
 import com.eventing.events.domain.EventVisibility;
@@ -13,6 +14,7 @@ import com.eventing.users.UserRepository;
 import com.eventing.users.domain.User;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.panache.common.Page;
 import io.quarkus.redis.datasource.RedisDataSource;
 import io.quarkus.redis.datasource.value.SetArgs;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,9 +24,9 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,8 +57,8 @@ public class EventService {
         event.visibility = request.visibility() != null ? request.visibility() : EventVisibility.PUBLIC;
         event.locationName = request.locationName();
         event.address = request.address();
-        event.startsAt = request.startsAt();
-        event.endsAt = request.endsAt();
+        event.startsAt = toUtcLocalDateTime(request.startsAt());
+        event.endsAt = request.endsAt() != null ? toUtcLocalDateTime(request.endsAt()) : null;
         event.maxParticipants = request.maxParticipants();
         if (request.latitude() != null && request.longitude() != null) {
             event.location = toPoint(request.longitude(), request.latitude());
@@ -81,8 +83,8 @@ public class EventService {
         if (request.visibility() != null) event.visibility = request.visibility();
         if (request.locationName() != null) event.locationName = request.locationName();
         if (request.address() != null) event.address = request.address();
-        if (request.startsAt() != null) event.startsAt = request.startsAt();
-        if (request.endsAt() != null) event.endsAt = request.endsAt();
+        if (request.startsAt() != null) event.startsAt = toUtcLocalDateTime(request.startsAt());
+        if (request.endsAt() != null) event.endsAt = toUtcLocalDateTime(request.endsAt());
         if (request.maxParticipants() != null) event.maxParticipants = request.maxParticipants();
         if (request.latitude() != null && request.longitude() != null) {
             event.location = toPoint(request.longitude(), request.latitude());
@@ -108,6 +110,32 @@ public class EventService {
         return toResponse(event, null);
     }
 
+    // ── Listagens paginadas ───────────────────────────────────────────────────
+
+    @Transactional
+    public PageResponse<EventResponse> getPublicEvents(int page, int size) {
+        List<EventResponse> content = eventRepository.findPublishedPublic(Page.of(page, size))
+                .stream().map(e -> toResponse(e, null)).toList();
+        long total = eventRepository.countPublishedPublic();
+        return PageResponse.of(content, page, size, total);
+    }
+
+    @Transactional
+    public PageResponse<EventResponse> getByCategory(String category, int page, int size) {
+        List<EventResponse> content = eventRepository.findByCategory(category, Page.of(page, size))
+                .stream().map(e -> toResponse(e, null)).toList();
+        long total = eventRepository.countByCategory(category);
+        return PageResponse.of(content, page, size, total);
+    }
+
+    @Transactional
+    public PageResponse<EventResponse> getByCreatorId(UUID creatorId, int page, int size) {
+        List<EventResponse> content = eventRepository.findByCreatorId(creatorId, Page.of(page, size))
+                .stream().map(e -> toResponse(e, null)).toList();
+        long total = eventRepository.countByCreatorId(creatorId);
+        return PageResponse.of(content, page, size, total);
+    }
+
     // ── Geolocalização ────────────────────────────────────────────────────────
 
     public PageResponse<EventResponse> findNearby(double lat, double lon, double radiusKm, int page, int size) {
@@ -116,7 +144,7 @@ public class EventService {
         if (cached != null) return cached;
 
         List<EventResponse> content = eventRepository.findNearby(lat, lon, radiusKm, page, size)
-                .stream().map(this::fromRow).toList();
+                .stream().map(this::fromNativeRow).toList();
         long total = eventRepository.countNearby(lat, lon, radiusKm);
 
         PageResponse<EventResponse> result = PageResponse.of(content, page, size, total);
@@ -130,7 +158,7 @@ public class EventService {
         if (cached != null) return cached;
 
         List<EventResponse> content = eventRepository.findFeed(lat, lon, page, size)
-                .stream().map(this::fromRow).toList();
+                .stream().map(this::fromNativeRow).toList();
         long total = eventRepository.countFeed();
 
         PageResponse<EventResponse> result = PageResponse.of(content, page, size, total);
@@ -183,69 +211,31 @@ public class EventService {
         return String.format("events:feed:%.2f:%.2f", la, lo);
     }
 
-    // ── Mapeamento de Object[] → EventResponse ────────────────────────────────
+    // ── Mapeamento de NativeEventRow → EventResponse ─────────────────────────
 
-    /**
-     * Ordem das colunas conforme EventRepository.findNearby / findFeed:
-     *   0=id, 1=creator_id, 2=creator_username,
-     *   3=title, 4=description, 5=category,
-     *   6=visibility, 7=status,
-     *   8=cover_image_url, 9=location_name, 10=address,
-     *   11=latitude, 12=longitude,
-     *   13=starts_at, 14=ends_at,
-     *   15=max_participants, 16=participant_count,
-     *   17=created_at, 18=updated_at,
-     *   19=distance_km
-     */
-    private EventResponse fromRow(Object[] r) {
+    private EventResponse fromNativeRow(NativeEventRow r) {
         return new EventResponse(
-                asUuid(r[0]),
-                asUuid(r[1]),
-                (String) r[2],
-                (String) r[3],
-                (String) r[4],
-                (String) r[5],
-                r[6] != null ? EventVisibility.valueOf((String) r[6]) : null,
-                r[7] != null ? EventStatus.valueOf((String) r[7]) : null,
-                (String) r[8],
-                (String) r[9],
-                (String) r[10],
-                asDouble(r[11]),
-                asDouble(r[12]),
-                asLocalDateTime(r[13]),
-                asLocalDateTime(r[14]),
-                asInteger(r[15]),
-                asInteger(r[16]) != null ? asInteger(r[16]) : 0,
-                asDouble(r[19]),
-                asLocalDateTime(r[17]),
-                asLocalDateTime(r[18])
+                r.id(),
+                r.creatorId(),
+                r.creatorUsername(),
+                r.title(),
+                r.description(),
+                r.category(),
+                r.visibility() != null ? EventVisibility.valueOf(r.visibility()) : null,
+                r.status() != null ? EventStatus.valueOf(r.status()) : null,
+                r.coverImageUrl(),
+                r.locationName(),
+                r.address(),
+                r.latitude(),
+                r.longitude(),
+                r.startsAt() != null ? r.startsAt().toLocalDateTime() : null,
+                r.endsAt() != null ? r.endsAt().toLocalDateTime() : null,
+                r.maxParticipants(),
+                r.participantCount() != null ? r.participantCount() : 0,
+                r.distanceKm(),
+                r.createdAt() != null ? r.createdAt().toLocalDateTime() : null,
+                r.updatedAt() != null ? r.updatedAt().toLocalDateTime() : null
         );
-    }
-
-    // ── Helpers de conversão JDBC → Java ─────────────────────────────────────
-
-    private static UUID asUuid(Object o) {
-        if (o == null) return null;
-        if (o instanceof UUID uuid) return uuid;
-        return UUID.fromString(o.toString());
-    }
-
-    private static Double asDouble(Object o) {
-        if (o == null) return null;
-        return ((Number) o).doubleValue();
-    }
-
-    private static Integer asInteger(Object o) {
-        if (o == null) return null;
-        return ((Number) o).intValue();
-    }
-
-    private static LocalDateTime asLocalDateTime(Object o) {
-        if (o == null) return null;
-        if (o instanceof LocalDateTime ldt) return ldt;
-        if (o instanceof Timestamp ts) return ts.toLocalDateTime();
-        if (o instanceof OffsetDateTime odt) return odt.toLocalDateTime();
-        return null;
     }
 
     // ── Helpers internos ──────────────────────────────────────────────────────
@@ -259,6 +249,10 @@ public class EventService {
 
     private Point toPoint(double longitude, double latitude) {
         return GEO_FACTORY.createPoint(new Coordinate(longitude, latitude));
+    }
+
+    private static LocalDateTime toUtcLocalDateTime(OffsetDateTime odt) {
+        return odt.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 
     private EventResponse toResponse(Event event, Double distanceKm) {

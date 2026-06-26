@@ -32,3 +32,7 @@ Acesse **http://localhost:5173**.
 | [`docs/components.md`](docs/components.md) | Todos os componentes — props e responsabilidades |
 | [`docs/development-workflow.md`](docs/development-workflow.md) | Scripts, build, checklist pré-merge |
 | [`docs/decisions.md`](docs/decisions.md) | Decisões arquiteturais e seus porquês |
+
+<!-- claude --resume 5d2aa2b9-e1a8-45af-aa95-1603c41eb360 
+eventing_prisma_refactor_prompts
+-->

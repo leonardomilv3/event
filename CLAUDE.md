@@ -98,7 +98,7 @@ Documentação completa: [`docs/design-system.md`](docs/design-system.md)
 
 ## ADRs
 
-Todas as decisões arquiteturais estão registradas em [`docs/adrs/`](docs/adrs/).
+### Frontend — [`docs/adrs/`](docs/adrs/)
 
 | ADR | Decisão |
 |---|---|
@@ -112,6 +112,18 @@ Todas as decisões arquiteturais estão registradas em [`docs/adrs/`](docs/adrs/
 | [008](docs/adrs/008-no-styled-components.md) | Sem styled-components |
 | [009](docs/adrs/009-design-system-tokens.md) | Tokens do Stitch como fonte única de verdade |
 | [010](docs/adrs/010-typescript-strict.md) | TypeScript strict + verbatimModuleSyntax |
+
+### Backend — [`api/docs/adrs/`](api/docs/adrs/)
+
+| ADR | Decisão |
+|---|---|
+| [001](api/docs/adrs/001-java-quarkus.md) | Java 21 + Quarkus 3 |
+| [002](api/docs/adrs/002-smallrye-jwt.md) | SmallRye JWT (sem Keycloak no MVP) |
+| [003](api/docs/adrs/003-postgresql-postgis.md) | PostgreSQL + PostGIS (geolocalização nativa) |
+| [004](api/docs/adrs/004-flyway.md) | Flyway para migrations |
+| [005](api/docs/adrs/005-redis-cache.md) | Redis para cache de feed |
+| [006](api/docs/adrs/006-ddd-modular.md) | DDD leve por módulo de domínio |
+| [007](api/docs/adrs/007-native-queries-postgis.md) | Native queries + records tipados para operações PostGIS |
 
 ---
 

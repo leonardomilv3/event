@@ -11,6 +11,9 @@ import { useEventForm } from '../hooks/useEventForm'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { getById } from '../services/eventService'
 import { type EventResponse, type UpdateEventRequest } from '../types/api'
+import { datetimeLocalToIso } from '../utils/date'
+
+const MIN_LEAD_TIME_MS = 60_000
 
 const CATEGORIES = ['MUSIC', 'ART', 'FOOD', 'SPORTS', 'NETWORKING', 'NIGHTLIFE']
 
@@ -169,6 +172,10 @@ export default function EditEventPage() {
       setValidationError('A data de início é obrigatória')
       return
     }
+    if (new Date(form.startsAt) <= new Date(Date.now() + MIN_LEAD_TIME_MS)) {
+      setValidationError('A data de início deve ser pelo menos 1 minuto no futuro')
+      return
+    }
 
     const data: UpdateEventRequest = {
       title: form.title.trim(),
@@ -177,8 +184,8 @@ export default function EditEventPage() {
       visibility: form.visibility as 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY',
       locationName: form.locationName.trim() || undefined,
       address: form.address.trim() || undefined,
-      startsAt: form.startsAt,
-      endsAt: form.endsAt || undefined,
+      startsAt: datetimeLocalToIso(form.startsAt),
+      endsAt: form.endsAt ? datetimeLocalToIso(form.endsAt) : undefined,
       maxParticipants: form.maxParticipants ? Number(form.maxParticipants) : undefined,
     }
 

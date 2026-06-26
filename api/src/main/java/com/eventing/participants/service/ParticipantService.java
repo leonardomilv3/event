@@ -5,6 +5,7 @@ import com.eventing.events.domain.Event;
 import com.eventing.events.domain.EventStatus;
 import com.eventing.events.domain.EventVisibility;
 import com.eventing.events.dto.EventResponse;
+import com.eventing.participants.ApprovedParticipantRow;
 import com.eventing.participants.ParticipantRepository;
 import com.eventing.participants.domain.EventParticipant;
 import com.eventing.participants.domain.ParticipantStatus;
@@ -16,9 +17,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,7 +38,7 @@ public class ParticipantService {
         }
 
         if (participantRepository.hasActiveParticipation(eventId, userId)) {
-            throw ApiException.conflict("Usuário já é participante deste evento");
+            throw ApiException.alreadyParticipant();
         }
 
         ParticipantStatus targetStatus;
@@ -108,10 +107,10 @@ public class ParticipantService {
     public PageResponse<ParticipantResponse> listParticipants(UUID eventId, int page, int size) {
         if (eventRepository.findById(eventId) == null) throw ApiException.notFound("Evento");
 
-        List<Object[]> rows = participantRepository.findApprovedByEvent(eventId, page, size);
+        List<ApprovedParticipantRow> rows = participantRepository.findApprovedByEvent(eventId, page, size);
         long total = participantRepository.countApprovedByEvent(eventId);
 
-        List<ParticipantResponse> content = rows.stream().map(this::fromParticipantRow).toList();
+        List<ParticipantResponse> content = rows.stream().map(this::fromApprovedRow).toList();
         return PageResponse.of(content, page, size, total);
     }
 
@@ -128,14 +127,14 @@ public class ParticipantService {
 
     // ── Row mapping ───────────────────────────────────────────────────────────
 
-    private ParticipantResponse fromParticipantRow(Object[] r) {
+    private ParticipantResponse fromApprovedRow(ApprovedParticipantRow r) {
         return new ParticipantResponse(
-                asUuid(r[0]),
-                (String) r[1],
-                (String) r[2],
-                (String) r[3],
-                r[4] != null ? ParticipantStatus.valueOf((String) r[4]) : null,
-                asLocalDateTime(r[5])
+                r.userId(),
+                r.username(),
+                r.displayName(),
+                r.avatarUrl(),
+                r.status() != null ? ParticipantStatus.valueOf(r.status()) : null,
+                r.joinedAt() != null ? r.joinedAt().toLocalDateTime() : null
         );
     }
 
@@ -155,19 +154,4 @@ public class ParticipantService {
         );
     }
 
-    // ── Type helpers ──────────────────────────────────────────────────────────
-
-    private static UUID asUuid(Object o) {
-        if (o == null) return null;
-        if (o instanceof UUID uuid) return uuid;
-        return UUID.fromString(o.toString());
-    }
-
-    private static LocalDateTime asLocalDateTime(Object o) {
-        if (o == null) return null;
-        if (o instanceof LocalDateTime ldt) return ldt;
-        if (o instanceof Timestamp ts) return ts.toLocalDateTime();
-        if (o instanceof OffsetDateTime odt) return odt.toLocalDateTime();
-        return null;
-    }
 }

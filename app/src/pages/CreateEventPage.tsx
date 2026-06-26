@@ -10,6 +10,9 @@ import Icon from '../components/atoms/Icon'
 import { useEventForm } from '../hooks/useEventForm'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { type CreateEventRequest } from '../types/api'
+import { datetimeLocalToIso } from '../utils/date'
+
+const MIN_LEAD_TIME_MS = 60_000
 
 const CATEGORIES = ['MUSIC', 'ART', 'FOOD', 'SPORTS', 'NETWORKING', 'NIGHTLIFE']
 
@@ -59,8 +62,8 @@ export default function CreateEventPage() {
       setValidationError('A data de início é obrigatória')
       return
     }
-    if (new Date(startsAt) <= new Date()) {
-      setValidationError('A data de início deve ser no futuro')
+    if (new Date(startsAt) <= new Date(Date.now() + MIN_LEAD_TIME_MS)) {
+      setValidationError('A data de início deve ser pelo menos 1 minuto no futuro')
       return
     }
 
@@ -71,8 +74,8 @@ export default function CreateEventPage() {
       visibility,
       locationName: locationName.trim() || undefined,
       address: address.trim() || undefined,
-      startsAt,
-      endsAt: endsAt || undefined,
+      startsAt: datetimeLocalToIso(startsAt),
+      endsAt: endsAt ? datetimeLocalToIso(endsAt) : undefined,
       maxParticipants: maxParticipants ? Number(maxParticipants) : undefined,
     }
 

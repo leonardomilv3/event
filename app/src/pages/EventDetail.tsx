@@ -25,10 +25,10 @@ const VENUE_IMG = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?
 
 export default function EventDetail() {
   const { id = '' } = useParams<{ id: string }>()
-  const { user } = useAuthContext()
+  const { user, loading: authLoading } = useAuthContext()
   const navRef = useRef<HTMLElement>(null)
 
-  const { event, participants, loading, error } = useEvent(id)
+  const { event, participants, loading: eventLoading, error } = useEvent(id)
   const {
     isParticipating,
     countDelta,
@@ -45,6 +45,8 @@ export default function EventDetail() {
   } = useFollow(event?.creatorId ?? '')
 
   const displayCount = (event?.participantCount ?? 0) + countDelta
+  // authLoading garante que isCreator não computa com user=null enquanto /api/auth/me ainda está em voo
+  const stillLoading = authLoading || eventLoading
   const isCreator = user !== null && event !== null && user.id === event.creatorId
   const capacityValue =
     event?.maxParticipants != null
@@ -114,14 +116,14 @@ export default function EventDetail() {
       </nav>
 
       {/* ── Loading ── */}
-      {loading && (
+      {stillLoading && (
         <div className="min-h-screen pt-20 flex items-center justify-center">
           <Icon name="progress_activity" className="text-primary-container animate-spin" size={40} />
         </div>
       )}
 
       {/* ── Error ── */}
-      {!loading && (error || !event) && (
+      {!stillLoading && (error || !event) && (
         <div className="min-h-screen pt-20 flex flex-col items-center justify-center gap-stack-md">
           <Icon name="event_busy" className="text-on-surface-variant" size={48} />
           <p className="font-sans text-body-lg text-on-surface-variant">
@@ -131,7 +133,7 @@ export default function EventDetail() {
       )}
 
       {/* ── Content ── */}
-      {!loading && !error && event && (
+      {!stillLoading && !error && event && (
         <>
           <main className="pt-0">
 
@@ -373,6 +375,16 @@ export default function EventDetail() {
               </button>
             </div>
           )}
+          {isCreator && (
+            <div className="fixed bottom-0 left-0 w-full z-40 px-margin-mobile py-stack-md bg-background/80 backdrop-blur-md border-t border-outline-variant/30 md:hidden">
+              <div className="w-full flex items-center justify-center gap-2 py-stack-md rounded-xl bg-surface-container-low border border-primary-container/30">
+                <Icon name="verified" className="text-primary-container" size={18} />
+                <span className="font-label-caps text-label-caps text-primary-container uppercase tracking-widest">
+                  Você é o organizador
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* ── Persistent CTA — desktop ── */}
           {!isCreator && (
@@ -401,6 +413,16 @@ export default function EventDetail() {
                 }
                 {isParticipating ? 'Sair' : 'Participar'}
               </button>
+            </div>
+          )}
+          {isCreator && (
+            <div className="hidden md:flex fixed bottom-stack-lg right-stack-lg z-50">
+              <GlassPanel className="px-stack-lg py-stack-md rounded-full flex items-center gap-stack-sm">
+                <Icon name="verified" className="text-primary-container" size={20} />
+                <span className="font-label-caps text-label-caps text-primary-container uppercase tracking-widest">
+                  Você é o organizador
+                </span>
+              </GlassPanel>
             </div>
           )}
         </>

@@ -20,7 +20,9 @@ public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
         return switch (exception) {
             case ApiException e -> Response
                     .status(e.getStatus())
-                    .entity(ApiResponse.error(e.getMessage()))
+                    .entity(e.getErrorCode() != null
+                            ? ApiResponse.errorWithCode(e.getMessage(), e.getErrorCode())
+                            : ApiResponse.error(e.getMessage()))
                     .type(MediaType.APPLICATION_JSON)
                     .build();
 

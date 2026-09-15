@@ -38,6 +38,5 @@ Acesse **http://localhost:5173**.
 claude --resume 5d2aa2b9-e1a8-45af-aa95-1603c41eb360 
 eventing_prisma_refactor_prompts
 
-Leia `eventing_test_prompts.md` e execute os prompts indicados. Execute os prompts em sequência, e após finalizar
-  um prompt solicite a minha confirmação antes de seguir para o próximo prompt.
+
 -->

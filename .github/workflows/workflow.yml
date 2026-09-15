@@ -57,35 +57,18 @@ jobs:
             ${{ env.IMAGE_NAME }}:1.1
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
+
   deploy-render:
     name: Deploy no Render
     needs: build-and-push
-    environment: production
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Trigger deploy no Render
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_WEBHOOK_URL }}"
+
+      - name: Aguardar boot e validar health
         run: |
-          curl --fail-with-body \
-            --show-error \
-            --silent \
-            -X POST \
-            "${{ secrets.RENDER_DEPLOY_WEBHOOK_URL }}"
-
-      - name: Aguardar Render subir
-        run: |
-          for i in {1..30}; do
-            echo "Tentativa $i/30..."
-
-            if curl --fail --silent \
-              https://eventing-api.onrender.com/q/health/ready; then
-              echo
-              echo "Aplicação está saudável."
-              exit 0
-            fi
-
-            sleep 10
-          done
-
-          echo "Aplicação não ficou saudável a tempo."
-          exit 1
+          sleep 60
+          curl -f https://eventing-api.onrender.com/q/health/ready || exit 1

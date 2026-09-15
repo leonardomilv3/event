@@ -14,10 +14,10 @@ Implementar e revisar a camada de integração HTTP do frontend Eventing. Garant
 ## Base URL
 
 ```ts
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.API_URL;
 ```
 
-Nunca hardcodar a URL — sempre via `import.meta.env.VITE_API_URL`.
+Nunca hardcodar a URL — sempre via `import.meta.env.API_URL`.
 
 ---
 

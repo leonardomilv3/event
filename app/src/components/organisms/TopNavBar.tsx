@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import Icon from '../atoms/Icon'
+import { useAuthContext } from '../../hooks/useAuthContext'
 
 const NAV_LINKS = [
   { label: 'Explore', href: '/' },
@@ -9,13 +10,9 @@ const NAV_LINKS = [
   { label: 'Collective', href: '/collective' },
 ]
 
-interface TopNavBarProps {
-  authenticated?: boolean
-  userName?: string
-}
-
-export default function TopNavBar({ authenticated = false, userName }: TopNavBarProps) {
+export default function TopNavBar() {
   const { pathname } = useLocation()
+  const { user, isAuthenticated } = useAuthContext()
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -23,6 +20,8 @@ export default function TopNavBar({ authenticated = false, userName }: TopNavBar
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  const displayName = user?.displayName ?? user?.username
 
   return (
     <nav className={[
@@ -65,15 +64,18 @@ export default function TopNavBar({ authenticated = false, userName }: TopNavBar
             <Icon name="notifications" className="text-on-surface" size={24} />
           </button>
 
-          {authenticated && userName ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-variant/30 rounded-full border border-white/5">
+          {isAuthenticated && displayName ? (
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-2 px-3 py-1.5 bg-surface-variant/30 rounded-full border border-white/5 hover:border-primary-container/40 transition-colors"
+            >
               <Icon name="account_circle" className="text-primary-container" size={20} />
-              <span className="hidden md:inline font-label-md text-label-md text-on-surface">{userName}</span>
-            </div>
+              <span className="hidden md:inline font-label-md text-label-md text-on-surface">{displayName}</span>
+            </Link>
           ) : (
-            <button className="p-2 rounded-full hover:bg-white/5 transition-all" aria-label="Perfil">
+            <Link to="/login" className="p-2 rounded-full hover:bg-white/5 transition-all" aria-label="Perfil">
               <Icon name="account_circle" className="text-on-surface" size={24} />
-            </button>
+            </Link>
           )}
         </div>
       </div>

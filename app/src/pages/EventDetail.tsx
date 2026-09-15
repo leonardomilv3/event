@@ -2,25 +2,17 @@ import { useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Footer from '../components/organisms/Footer'
 import GlassPanel from '../components/molecules/GlassPanel'
-import AgendaItem from '../components/molecules/AgendaItem'
 import ProgressBar from '../components/atoms/ProgressBar'
 import Icon from '../components/atoms/Icon'
 import { useEvent } from '../hooks/useEvent'
 import { useParticipation } from '../hooks/useParticipation'
 import { useFollow } from '../hooks/useFollow'
 import { useAuthContext } from '../hooks/useAuthContext'
+import { usePublicProfile } from '../hooks/usePublicProfile'
 import { formatEventDate } from '../utils/date'
 import FollowButton from '../components/atoms/FollowButton'
 
-const AGENDA = [
-  { title: 'Ambient Warm-up', time: '22:00 - 23:30 • Texturas de baixa fidelidade' },
-  { title: 'The Vinyl Session', time: '23:30 - 02:00 • Jornada analógica curada' },
-  { title: 'Sonic Descent', time: '02:00 - 04:00 • Frequências profundas de encerramento' },
-]
-
 const FALLBACK_HERO = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1600&q=80'
-const HOST_IMG = 'https://i.pravatar.cc/160?img=8'
-const VENUE_IMG = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1200&q=60'
 
 
 export default function EventDetail() {
@@ -43,6 +35,8 @@ export default function EventDetail() {
     actionLoading: followActionLoading,
     toggleFollow,
   } = useFollow(event?.creatorId ?? '')
+
+  const { profile: creatorProfile } = usePublicProfile(event?.creatorId ?? '')
 
   const displayCount = (event?.participantCount ?? 0) + countDelta
   // authLoading garante que isCreator não computa com user=null enquanto /api/auth/me ainda está em voo
@@ -179,10 +173,10 @@ export default function EventDetail() {
                     {/* Social proof */}
                     <div className="flex items-center gap-2">
                       <div className="flex -space-x-3">
-                        {participants.slice(0, 3).map((p, n) => (
+                        {participants.slice(0, 3).map((p) => (
                           <div key={p.userId} className="w-10 h-10 rounded-full border-2 border-surface overflow-hidden">
                             <img
-                              src={p.avatarUrl ?? `https://i.pravatar.cc/40?img=${n + 10}`}
+                              src={p.avatarUrl ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1C4532&color=6EE7B7&size=40`}
                               alt={p.username}
                               className="w-full h-full object-cover"
                             />
@@ -226,31 +220,18 @@ export default function EventDetail() {
                     </article>
                   )}
 
-                  {/* Agenda */}
-                  <div className="flex flex-col gap-stack-md">
-                    <h2 className="font-serif text-headline-lg text-primary-container">The Agenda</h2>
-                    <div className="space-y-stack-md">
-                      {AGENDA.map((item, i) => (
-                        <AgendaItem
-                          key={i}
-                          index={i + 1}
-                          title={item.title}
-                          time={item.time}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Venue */}
                   <div className="flex flex-col gap-stack-md">
                     <h2 className="font-serif text-headline-lg text-primary-container">The Venue</h2>
-                    <div className="h-[400px] rounded-xl overflow-hidden grayscale contrast-125 border border-outline-variant">
-                      <img
-                        src={VENUE_IMG}
-                        alt="Venue Map"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    {event.coverImageUrl && (
+                      <div className="h-[400px] rounded-xl overflow-hidden grayscale contrast-125 border border-outline-variant">
+                        <img
+                          src={event.coverImageUrl}
+                          alt={event.locationName ?? 'Local do evento'}
+                          className="w-full h-full object-cover opacity-60"
+                        />
+                      </div>
+                    )}
                     {(event.locationName ?? event.address) && (
                       <div className="flex justify-between items-center p-stack-md bg-surface-container rounded-xl">
                         <div>
@@ -278,7 +259,7 @@ export default function EventDetail() {
                   <GlassPanel className="p-stack-lg flex flex-col gap-stack-md items-center text-center">
                     <div className="w-24 h-24 rounded-full border-4 border-primary-container/20 p-1">
                       <img
-                        src={HOST_IMG}
+                        src={creatorProfile?.avatarUrl ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(event.creatorUsername)}&background=1C4532&color=6EE7B7&size=160`}
                         alt={event.creatorUsername}
                         className="w-full h-full rounded-full object-cover"
                       />

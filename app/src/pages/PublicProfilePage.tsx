@@ -11,7 +11,8 @@ import { useFollow } from '../hooks/useFollow'
 import { useAuthContext } from '../hooks/useAuthContext'
 
 const BANNER_FALLBACK = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1400&q=80'
-const AVATAR_FALLBACK = 'https://i.pravatar.cc/160?img=8'
+const AVATAR_FALLBACK = (name: string) =>
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'U')}&background=1C4532&color=6EE7B7&size=160`
 
 export default function PublicProfilePage() {
   const { userId = '' } = useParams<{ userId: string }>()
@@ -26,10 +27,7 @@ export default function PublicProfilePage() {
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <TopNavBar
-        authenticated={user !== null}
-        userName={user?.username ?? ''}
-      />
+      <TopNavBar />
 
       {/* Loading */}
       {loading && (
@@ -69,7 +67,7 @@ export default function PublicProfilePage() {
               {/* Avatar */}
               <div className="w-36 h-36 md:w-48 md:h-48 rounded-xl overflow-hidden glass-panel p-1 flex-shrink-0 shadow-mint-glow">
                 <img
-                  src={profile.avatarUrl ?? AVATAR_FALLBACK}
+                  src={profile.avatarUrl ?? AVATAR_FALLBACK(profile.displayName ?? profile.username)}
                   alt={profile.displayName ?? profile.username}
                   className="w-full h-full object-cover rounded-lg"
                 />

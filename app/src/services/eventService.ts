@@ -1,6 +1,15 @@
 import { type EventResponse, type PageResponse, type ParticipantResponse, type CreateEventRequest, type UpdateEventRequest } from '../types/api';
 import { http } from './httpClient';
 
+export async function getEventsByCreator(
+  creatorId: string,
+  page = 0,
+  size = 20
+): Promise<PageResponse<EventResponse>> {
+  const q = new URLSearchParams({ creatorId, page: String(page), size: String(size) });
+  return http.get<PageResponse<EventResponse>>(`/api/events?${q}`);
+}
+
 export async function getFeed(
   lat: number,
   lon: number,

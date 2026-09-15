@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Icon from '../atoms/Icon'
+import { useAuthContext } from '../../hooks/useAuthContext'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', icon: 'grid_view', href: '/dashboard' },
@@ -11,19 +12,22 @@ const NAV_ITEMS = [
 ]
 
 interface SideNavBarProps {
-  userName?: string
-  userRole?: string
-  userAvatar?: string
   topOffset?: string
 }
 
-export default function SideNavBar({
-  userName = 'Alex Chen',
-  userRole = 'Pro Organizer',
-  userAvatar,
-  topOffset = 'top-0',
-}: SideNavBarProps) {
+export default function SideNavBar({ topOffset = 'top-0' }: SideNavBarProps) {
   const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const { user, logout } = useAuthContext()
+
+  const userName = user?.displayName ?? user?.username ?? ''
+  const userRole = 'Organizer'
+  const userAvatar = user?.avatarUrl
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
 
   return (
     <aside className={`hidden md:flex flex-col h-screen w-64 fixed left-0 ${topOffset} bg-surface-container py-8 px-4 z-40`}>
@@ -79,7 +83,10 @@ export default function SideNavBar({
           <Icon name="help" size={20} />
           <span className="font-label-caps text-label-caps">Support</span>
         </Link>
-        <button className="w-full flex items-center gap-3 py-2 px-4 text-on-tertiary-fixed-variant hover:text-primary-container transition-colors">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 py-2 px-4 text-on-tertiary-fixed-variant hover:text-primary-container transition-colors"
+        >
           <Icon name="logout" size={20} />
           <span className="font-label-caps text-label-caps">Logout</span>
         </button>

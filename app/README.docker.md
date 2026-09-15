@@ -25,7 +25,7 @@ Tamanho estimado da imagem final: **~25–30 MB** (apenas nginx + dist).
 
 | Variável | Descrição | Padrão |
 |---|---|---|
-| `VITE_API_URL` | URL base do backend Quarkus | `http://localhost:8080` |
+| `API_URL` | URL base do backend Quarkus | `http://localhost:8080` |
 
 Para configurar, copie `.env.example` e ajuste:
 
@@ -52,18 +52,18 @@ npm run dev        # http://localhost:5173
 ### Build da imagem
 
 ```bash
-# Com VITE_API_URL padrão (localhost:8080)
+# Com API_URL padrão (localhost:8080)
 docker build -t eventing-frontend ./app
 
 # Com URL de staging
 docker build \
-  --build-arg VITE_API_URL=https://api.staging.eventing.com.br \
+  --build-arg API_URL=https://api.staging.eventing.com.br \
   -t eventing-frontend:staging \
   ./app
 
 # Com URL de produção
 docker build \
-  --build-arg VITE_API_URL=https://api.eventing.com.br \
+  --build-arg API_URL=https://api.eventing.com.br \
   -t eventing-frontend:latest \
   ./app
 ```
@@ -94,10 +94,10 @@ docker compose down
 
 Acesse: [http://localhost:3000](http://localhost:3000)
 
-Para mudar a `VITE_API_URL` via Compose:
+Para mudar a `API_URL` via Compose:
 
 ```bash
-VITE_API_URL=https://api.staging.eventing.com.br docker compose up --build
+API_URL=https://api.staging.eventing.com.br docker compose up --build
 ```
 
 ---
@@ -116,7 +116,7 @@ az acr login --name eventingregistry
 
 ```bash
 docker build \
-  --build-arg VITE_API_URL=https://api.eventing.com.br \
+  --build-arg API_URL=https://api.eventing.com.br \
   -t eventingregistry.azurecr.io/eventing-frontend:latest \
   ./app
 ```
@@ -159,7 +159,7 @@ az containerapp update \
 Internet
   → Azure Front Door (CDN + WAF)
   → Frontend React Container App (porta 80, esta imagem)
-  → Backend Quarkus Container App (VITE_API_URL)
+  → Backend Quarkus Container App (API_URL)
 ```
 
 ---
@@ -169,7 +169,7 @@ Internet
 | Melhoria | Contexto |
 |---|---|
 | Health check endpoint no nginx | Azure Container Apps usa `/` por padrão; um `/health` dedicado é mais limpo |
-| Config runtime via `window.__ENV__` | Permite trocar `VITE_API_URL` sem rebuild via script injetado pelo nginx no `index.html` |
+| Config runtime via `window.__ENV__` | Permite trocar `API_URL` sem rebuild via script injetado pelo nginx no `index.html` |
 | Cabeçalho `Content-Security-Policy` | Adicionar após mapear todos os domínios externos (Google Fonts, CDN de imagens) |
 | Build multi-arch (`--platform linux/amd64,linux/arm64`) | Para suporte a Apple Silicon em CI sem emulação |
 | CI/CD via GitHub Actions | Trigger no push para `main` → build → push ACR → deploy Container App |

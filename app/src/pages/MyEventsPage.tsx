@@ -6,18 +6,16 @@ import Footer from '../components/organisms/Footer'
 import EventCard from '../components/molecules/EventCard'
 import Icon from '../components/atoms/Icon'
 import { useMyEvents } from '../hooks/useMyEvents'
-import { useAuthContext } from '../hooks/useAuthContext'
 import { formatEventDate } from '../utils/date'
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=900&q=80'
 
 export default function MyEventsPage() {
-  const { user } = useAuthContext()
   const { events, loading, error } = useMyEvents()
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <TopNavBar authenticated userName={user?.username ?? ''} />
+      <TopNavBar />
       <SideNavBar topOffset="top-20" />
 
       <div className="flex min-h-screen pt-20">

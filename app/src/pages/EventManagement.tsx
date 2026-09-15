@@ -7,8 +7,9 @@ import FAB from '../components/organisms/FAB'
 import Footer from '../components/organisms/Footer'
 import FilterTabs from '../components/molecules/FilterTabs'
 import SearchInput from '../components/molecules/SearchInput'
-import AvatarStack from '../components/molecules/AvatarStack'
 import Icon from '../components/atoms/Icon'
+import { useCreatedEvents } from '../hooks/useCreatedEvents'
+import { type EventResponse } from '../types/api'
 
 const FILTER_TABS = [
   { label: 'Todos', value: 'all' },
@@ -18,20 +19,67 @@ const FILTER_TABS = [
   { label: 'Ao Vivo', value: 'live' },
 ]
 
-const MOCK_AVATARS = [
-  { src: 'https://i.pravatar.cc/32?img=1', alt: 'Attendee' },
-  { src: 'https://i.pravatar.cc/32?img=2', alt: 'Attendee' },
-  { src: 'https://i.pravatar.cc/32?img=3', alt: 'Attendee' },
-]
+function StatusBadge({ status, visibility, startsAt }: Pick<EventResponse, 'status' | 'visibility' | 'startsAt'>) {
+  const isLive = status === 'PUBLISHED' && new Date(startsAt) <= new Date()
+
+  if (isLive) {
+    return (
+      <div className="absolute top-4 left-4 flex items-center gap-2 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-secondary/30">
+        <span className="w-2 h-2 rounded-full bg-secondary animate-pulse-red" />
+        <span className="font-label-caps text-label-caps text-secondary">LIVE</span>
+      </div>
+    )
+  }
+  if (status === 'DRAFT') {
+    return (
+      <div className="absolute top-4 left-4 bg-white/5 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+        <span className="font-label-caps text-label-caps text-on-surface-variant">DRAFT</span>
+      </div>
+    )
+  }
+  if (status === 'CANCELLED') {
+    return (
+      <div className="absolute top-4 left-4 bg-error/20 backdrop-blur-md px-3 py-1 rounded-full border border-error/30">
+        <span className="font-label-caps text-label-caps text-error">CANCELADO</span>
+      </div>
+    )
+  }
+  if (visibility === 'INVITE_ONLY') {
+    return (
+      <div className="absolute top-4 left-4 bg-white/5 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-1">
+        <Icon name="lock" size={12} className="text-on-surface-variant" />
+        <span className="font-label-caps text-label-caps text-on-surface-variant">PRIVADO</span>
+      </div>
+    )
+  }
+  return (
+    <div className="absolute top-4 left-4 bg-primary-container/20 backdrop-blur-md px-3 py-1 rounded-full border border-primary-container/30">
+      <span className="font-label-caps text-label-caps text-primary-container">PÚBLICO</span>
+    </div>
+  )
+}
 
 export default function EventManagement() {
   const navigate = useNavigate()
+  const { events, loading, error } = useCreatedEvents()
   const [activeFilter, setActiveFilter] = useState('all')
   const [search, setSearch] = useState('')
 
+  const filtered = events.filter(ev => {
+    if (activeFilter === 'draft') return ev.status === 'DRAFT'
+    if (activeFilter === 'public') return ev.visibility === 'PUBLIC'
+    if (activeFilter === 'private') return ev.visibility === 'INVITE_ONLY'
+    if (activeFilter === 'live') return ev.status === 'PUBLISHED' && new Date(ev.startsAt) <= new Date()
+    return true
+  })
+
+  const searched = filtered.filter(ev =>
+    ev.title.toLowerCase().includes(search.toLowerCase())
+  )
+
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <TopNavBar authenticated userName="Alex Chen" />
+      <TopNavBar />
       <SideNavBar topOffset="top-20" />
 
       <div className="flex min-h-screen pt-20">
@@ -79,149 +127,82 @@ export default function EventManagement() {
           {/* Card Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
 
-            {/* Card: Live */}
-            <Link to="/events/neon-pulse" className="group bg-[#181C1F] border border-white/5 rounded-xl overflow-hidden hover:border-primary-container/40 hover:shadow-mint-glow transition-all duration-300 flex flex-col">
-              <div className="relative h-48">
-                <img
-                  src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80"
-                  alt="Neon Pulse Warehouse"
-                  className="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-500"
-                />
-                {/* Live badge */}
-                <div className="absolute top-4 left-4 flex items-center gap-2 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-secondary/30">
-                  <span className="w-2 h-2 rounded-full bg-secondary animate-pulse-red" />
-                  <span className="font-label-caps text-label-caps text-secondary">LIVE</span>
-                </div>
-                {/* Actions */}
-                <div className="absolute bottom-4 right-4 bg-background/60 backdrop-blur-md p-2 rounded-lg flex gap-2">
-                  <button className="hover:text-primary-container transition-colors" onClick={e => e.preventDefault()}>
-                    <Icon name="share" className="text-on-surface" size={18} />
-                  </button>
-                  <button className="hover:text-primary-container transition-colors" onClick={e => e.preventDefault()}>
-                    <Icon name="more_vert" className="text-on-surface" size={18} />
-                  </button>
-                </div>
+            {loading && (
+              <div className="col-span-full flex justify-center py-stack-xl">
+                <Icon name="progress_activity" size={32} className="animate-spin text-primary-container" />
               </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <div className="mb-4">
-                  <h3 className="font-serif text-headline-md text-on-surface mb-1">Neon Pulse Warehouse</h3>
-                  <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Berlin Industrial • Techno</p>
-                </div>
-                <div className="mt-auto flex justify-between items-center">
-                  <AvatarStack avatars={MOCK_AVATARS} overflow={842} size={8} />
-                  <div className="text-right">
-                    <p className="font-label-caps text-label-caps text-primary-container">OUT 24</p>
-                    <p className="text-on-surface-variant text-xs">22:00 - LATE</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
+            )}
 
-            {/* Card: Public */}
-            <div className="group bg-[#181C1F] border border-white/5 rounded-xl overflow-hidden hover:border-primary-container/40 hover:shadow-mint-glow transition-all duration-300 flex flex-col">
-              <div className="relative h-48">
-                <img
-                  src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80"
-                  alt="Vanguard Editorial"
-                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                />
-                <div className="absolute top-4 left-4 bg-primary-container/20 backdrop-blur-md px-3 py-1 rounded-full border border-primary-container/30">
-                  <span className="font-label-caps text-label-caps text-primary-container">PÚBLICO</span>
-                </div>
+            {!loading && error && (
+              <div className="col-span-full text-center py-stack-xl">
+                <p className="text-error font-label-md flex items-center justify-center gap-2">
+                  <Icon name="error" size={18} />
+                  {error}
+                </p>
               </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <div className="mb-4">
-                  <h3 className="font-serif text-headline-md text-on-surface mb-1">Vanguard Editorial</h3>
-                  <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">The Glass House • Fashion</p>
-                </div>
-                <div className="flex gap-2 mt-2">
-                  <button className="flex-1 bg-surface-variant/50 hover:bg-surface-variant py-2 rounded-lg font-label-md text-label-md text-on-surface transition-colors border border-white/5">
-                    Editar
-                  </button>
-                  <button className="flex-1 bg-surface-variant/50 hover:bg-surface-variant py-2 rounded-lg font-label-md text-label-md text-on-surface transition-colors border border-white/5">
-                    Duplicar
-                  </button>
-                </div>
-                <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-                  <span className="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
-                    <Icon name="groups" size={16} />
-                    12.4k Registrados
-                  </span>
-                  <span className="font-label-caps text-label-caps text-primary-container">NOV 12</span>
-                </div>
-              </div>
-            </div>
+            )}
 
-            {/* Card: Draft */}
-            <div className="group bg-[#181C1F] border border-white/5 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300 flex flex-col">
-              <div className="relative h-48 bg-surface-variant/10 flex items-center justify-center">
-                <Icon name="image" size={64} className="text-white/5" />
-                <div className="absolute top-4 left-4 bg-white/5 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                  <span className="font-label-caps text-label-caps text-on-surface-variant">DRAFT</span>
-                </div>
+            {!loading && !error && searched.length === 0 && (
+              <div className="col-span-full text-center py-stack-xl">
+                <p className="font-sans text-body-md text-on-surface-variant">
+                  {events.length === 0 ? 'Você ainda não criou nenhum evento.' : 'Nenhum evento encontrado.'}
+                </p>
               </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <div className="mb-4">
-                  <h3 className="font-serif text-headline-md text-on-surface/60 mb-1 italic">Projeto Sem Título 04</h3>
-                  <p className="font-label-caps text-label-caps text-on-surface-variant/60 uppercase tracking-widest">Local a Definir</p>
-                </div>
-                <div className="mt-auto">
-                  <button className="w-full border-2 border-primary-container text-primary-container hover:bg-primary-container/5 py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2">
-                    <Icon name="edit_note" size={18} />
-                    Finalizar Configuração
-                  </button>
-                </div>
-              </div>
-            </div>
+            )}
 
-            {/* Card: Private — wide */}
-            <div className="group bg-[#181C1F] border border-white/5 rounded-xl overflow-hidden hover:bg-[#1A1E21] transition-all duration-300 flex flex-col lg:col-span-2">
-              <div className="flex flex-col md:flex-row h-full">
-                <div className="md:w-2/5 relative h-48 md:h-full overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=800&q=80"
-                    alt="The Alchemist Sessions"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#181C1F] via-transparent to-transparent hidden md:block" />
-                </div>
-                <div className="p-8 md:w-3/5 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Icon name="lock" className="text-on-surface-variant" size={16} />
-                    <span className="font-label-caps text-label-caps text-on-surface-variant">COLETIVO PRIVADO</span>
-                  </div>
-                  <h3 className="font-serif text-display-lg-mobile text-on-surface mb-2">The Alchemist Sessions</h3>
-                  <p className="font-sans text-body-md text-on-surface-variant mb-6">
-                    Apenas convidados. Uma noite curada de jazz experimental e síntese modular ambiente. Limitado a 50 patronos.
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-4">
-                      <button className="hover:scale-110 transition-transform">
-                        <Icon name="share" className="text-primary-container" size={22} />
-                      </button>
-                      <button className="hover:text-on-surface transition-colors">
-                        <Icon name="content_copy" className="text-on-surface-variant" size={22} />
-                      </button>
-                      <button className="hover:text-on-surface transition-colors">
-                        <Icon name="edit" className="text-on-surface-variant" size={22} />
-                      </button>
+            {!loading && !error && searched.map(ev => (
+              <Link
+                key={ev.id}
+                to={`/events/${ev.id}`}
+                className="group bg-[#181C1F] border border-white/5 rounded-xl overflow-hidden hover:border-primary-container/40 hover:shadow-mint-glow transition-all duration-300 flex flex-col"
+              >
+                <div className="relative h-48">
+                  {ev.coverImageUrl ? (
+                    <img
+                      src={ev.coverImageUrl}
+                      alt={ev.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-surface-variant/10 flex items-center justify-center">
+                      <Icon name="image" size={64} className="text-white/5" />
                     </div>
-                    <span className="font-label-caps text-label-caps text-primary-container">DEZ 05</span>
+                  )}
+                  <StatusBadge status={ev.status} visibility={ev.visibility} startsAt={ev.startsAt} />
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <h3 className="font-serif text-headline-md text-on-surface mb-1">{ev.title}</h3>
+                  <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">
+                    {ev.locationName ?? 'Local a definir'} • {ev.category}
+                  </p>
+                  <div className="mt-auto pt-4 border-t border-white/5 flex justify-between items-center">
+                    <span className="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
+                      <Icon name="groups" size={16} />
+                      {ev.participantCount} participantes
+                    </span>
+                    <span className="font-label-caps text-label-caps text-primary-container">
+                      {new Date(ev.startsAt).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }).toUpperCase()}
+                    </span>
                   </div>
                 </div>
-              </div>
-            </div>
+              </Link>
+            ))}
 
-            {/* Card: Empty CTA */}
-            <div className="group border-2 border-dashed border-outline-variant/30 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:border-primary-container/50 transition-all cursor-pointer">
-              <div className="w-16 h-16 rounded-full bg-surface-variant/30 flex items-center justify-center mb-4 group-hover:bg-primary-container/10 transition-colors">
-                <Icon name="add_circle" className="text-primary-container" size={32} />
-              </div>
-              <h3 className="font-serif text-headline-md text-on-surface mb-2">Novo Conceito</h3>
-              <p className="font-sans text-body-md text-on-surface-variant px-8">
-                Duplique um sucesso anterior ou comece uma nova visão do zero.
-              </p>
-            </div>
+            {/* CTA: Novo Conceito */}
+            {!loading && (
+              <button
+                onClick={() => navigate('/events/new')}
+                className="group border-2 border-dashed border-outline-variant/30 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:border-primary-container/50 transition-all"
+              >
+                <div className="w-16 h-16 rounded-full bg-surface-variant/30 flex items-center justify-center mb-4 group-hover:bg-primary-container/10 transition-colors">
+                  <Icon name="add_circle" className="text-primary-container" size={32} />
+                </div>
+                <h3 className="font-serif text-headline-md text-on-surface mb-2">Novo Conceito</h3>
+                <p className="font-sans text-body-md text-on-surface-variant px-8">
+                  Duplique um sucesso anterior ou comece uma nova visão do zero.
+                </p>
+              </button>
+            )}
 
           </div>
         </main>

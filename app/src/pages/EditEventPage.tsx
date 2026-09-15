@@ -131,7 +131,7 @@ export default function EditEventPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background text-on-surface flex flex-col">
-        <TopNavBar authenticated userName={user?.username ?? ''} />
+        <TopNavBar />
         <div className="flex-1 flex items-center justify-center">
           <Icon name="progress_activity" size={32} className="animate-spin text-primary-container" />
         </div>
@@ -142,7 +142,7 @@ export default function EditEventPage() {
   if (fetchError || !event) {
     return (
       <div className="min-h-screen bg-background text-on-surface flex flex-col">
-        <TopNavBar authenticated userName={user?.username ?? ''} />
+        <TopNavBar />
         <div className="flex-1 flex items-center justify-center">
           <p className="font-label-md text-label-md text-error flex items-center gap-2">
             <Icon name="error" size={18} />
@@ -211,7 +211,7 @@ export default function EditEventPage() {
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <TopNavBar authenticated userName={user?.username ?? ''} />
+      <TopNavBar />
 
       <main className="pt-32 pb-stack-xl px-margin-mobile md:px-0">
         <EventFormPanel
@@ -226,7 +226,7 @@ export default function EditEventPage() {
               id="event-title"
               label="Nome do Evento"
               type="text"
-              placeholder="Ex: Neon Pulse Warehouse"
+              placeholder="Ex: Festival da Cidade"
               value={form.title}
               onChange={(v) => formDispatch({ type: 'set', field: 'title', value: v })}
               disabled={saving}

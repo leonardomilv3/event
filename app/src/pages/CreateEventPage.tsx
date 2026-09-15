@@ -8,7 +8,6 @@ import TagChip from '../components/atoms/TagChip'
 import SegmentedControl from '../components/atoms/SegmentedControl'
 import Icon from '../components/atoms/Icon'
 import { useEventForm } from '../hooks/useEventForm'
-import { useAuthContext } from '../hooks/useAuthContext'
 import { type CreateEventRequest } from '../types/api'
 import { datetimeLocalToIso } from '../utils/date'
 
@@ -32,8 +31,6 @@ const INPUT_CLASS = [
 const LABEL_CLASS = 'font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider'
 
 export default function CreateEventPage() {
-  const { user } = useAuthContext()
-
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
@@ -86,7 +83,7 @@ export default function CreateEventPage() {
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      <TopNavBar authenticated userName={user?.username ?? ''} />
+      <TopNavBar />
 
       <main className="pt-32 pb-stack-xl px-margin-mobile md:px-0">
         <EventFormPanel
@@ -100,7 +97,7 @@ export default function CreateEventPage() {
               id="event-title"
               label="Nome do Evento"
               type="text"
-              placeholder="Ex: Neon Pulse Warehouse"
+              placeholder="Ex: Festival da Cidade"
               value={title}
               onChange={setTitle}
               disabled={saving}

@@ -7,8 +7,8 @@ WORKDIR /app
 
 # VITE_ vars são injetados em tempo de build (não de runtime).
 # Passe-os via --build-arg ao construir a imagem.
-ARG API_URL=http://localhost:8080
-ENV API_URL=$API_URL
+ARG VITE_API_URL=http://localhost:8080
+ENV VITE_API_URL=$VITE_API_URL
 
 # Instalar dependências com lockfile travado (determinístico)
 COPY package.json package-lock.json ./

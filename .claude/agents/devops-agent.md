@@ -115,7 +115,7 @@ docker compose up postgres -d
 
 ### Variáveis de ambiente necessárias
 ```bash
-API_URL=http://localhost:8080  # frontend
+VITE_API_URL=http://localhost:8080  # frontend
 DB_URL=jdbc:postgresql://postgres:5432/eventing  # api prod
 DB_USER=eventing
 DB_PASSWORD=eventing

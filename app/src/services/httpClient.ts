@@ -30,7 +30,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
 
   let res: Response;
   try {
-    res = await fetch(`${import.meta.env.API_URL}${path}`, {
+    res = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
       ...options,
       headers,
     });

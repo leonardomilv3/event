@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import Footer from '../components/organisms/Footer'
 import GlassPanel from '../components/molecules/GlassPanel'
 import ProgressBar from '../components/atoms/ProgressBar'
 import Icon from '../components/atoms/Icon'
 import { useEvent } from '../hooks/useEvent'
+import { deleteEvent } from '../services/eventService';
 import { useParticipation } from '../hooks/useParticipation'
 import { useFollow } from '../hooks/useFollow'
 import { useAuthContext } from '../hooks/useAuthContext'
@@ -19,6 +20,9 @@ export default function EventDetail() {
   const { id = '' } = useParams<{ id: string }>()
   const { user, loading: authLoading } = useAuthContext()
   const navRef = useRef<HTMLElement>(null)
+  const navigate = useNavigate();
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const { event, participants, loading: eventLoading, error } = useEvent(id)
   const {
@@ -54,6 +58,25 @@ export default function EventDetail() {
       void join(id)
     }
   }
+
+  const handleDelete = async () => {
+    if (!event) return;
+
+    const confirmed = window.confirm(
+      `Tem certeza que deseja cancelar "${event.title}"? Essa ação não pode ser desfeita.`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteEvent(event.id); // DELETE /api/events/{id}
+      navigate('/my-events');
+    } catch (err) {
+      setDeleteError('Não foi possível cancelar o evento. Tente novamente.');
+      setDeleting(false);
+    }
+  };
 
   // Scroll-based nav opacity
   useEffect(() => {
@@ -325,6 +348,41 @@ export default function EventDetail() {
                       </div>
                     </div>
                   </div>
+
+                  {isCreator && (
+                    <div className="bg-surface-container p-stack-lg rounded-xl flex flex-col gap-stack-md">
+                      <h4 className="font-label-caps text-label-caps text-on-surface-variant">
+                        Ações do Organizador
+                      </h4>
+
+                      {deleteError && (
+                        <p className="font-sans text-label-md text-error">{deleteError}</p>
+                      )}
+
+                      <div className="flex gap-stack-sm">
+                        <Link
+                          to={`/events/${event.id}/edit`}
+                          className="flex-1 flex items-center justify-center gap-2 bg-surface-variant text-on-surface p-stack-sm rounded-lg hover:bg-white/10 transition-all font-label-md text-label-md"
+                        >
+                          <Icon name="edit" size={18} />
+                          Editar
+                        </Link>
+
+                        <button
+                          onClick={() => void handleDelete()}
+                          disabled={deleting}
+                          className="flex-1 flex items-center justify-center gap-2 bg-error/10 text-error border border-error/30 p-stack-sm rounded-lg hover:bg-error/20 transition-all font-label-md text-label-md disabled:opacity-50"
+                        >
+                          {deleting ? (
+                            <Icon name="progress_activity" size={18} className="animate-spin" />
+                          ) : (
+                            <Icon name="delete" size={18} />
+                          )}
+                          {deleting ? 'Cancelando...' : 'Cancelar Evento'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                 </div>
               </div>

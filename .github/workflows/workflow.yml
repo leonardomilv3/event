@@ -70,5 +70,5 @@ jobs:
 
       - name: Aguardar boot e validar health
         run: |
-          sleep 60
+          sleep 120
           curl -f https://eventing-api.onrender.com/q/health/ready || exit 1

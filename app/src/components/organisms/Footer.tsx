@@ -16,7 +16,7 @@ export default function Footer() {
         <div className="flex flex-col items-center md:items-start gap-4">
           <span className="font-serif text-headline-md text-on-surface">Eventing</span>
           <p className="font-label-caps text-label-caps text-on-tertiary-fixed-variant">
-            © 2024 Eventing. Nocturnal Culture Collective.
+            © 2026 Eventing. Nocturnal Culture Collective.
           </p>
         </div>
 

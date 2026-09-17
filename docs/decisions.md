@@ -11,7 +11,7 @@ Para decisões futuras de maior impacto, criar um ADR formal em `docs/adrs/`.
 CRA está em modo de manutenção desde 2023. Vite oferece HMR instantâneo, build via Rollup e configuração TypeScript nativa sem ejetar.
 
 ### Tailwind CSS v3 em vez de v4
-Tailwind v4 (alfa em 2024) mudou radicalmente a API de configuração. O design system exportado pelo Stitch usa a API v3 (`tailwind.config.ts` com `theme.extend`). Migrar para v4 exigiria reescrever todos os tokens sem benefício imediato.
+Tailwind v4 (alfa em 2026) mudou radicalmente a API de configuração. O design system exportado pelo Stitch usa a API v3 (`tailwind.config.ts` com `theme.extend`). Migrar para v4 exigiria reescrever todos os tokens sem benefício imediato.
 
 ### Tailwind via `theme.extend` em vez de `theme`
 Usar `theme.colors` substituiria toda a paleta padrão do Tailwind. `theme.extend.colors` adiciona os tokens do design sem perder utilitários como `white`, `black` e `transparent`.

@@ -3,7 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import CinematicAuthLayout from '../components/organisms/CinematicAuthLayout'
 import AuthFormPanel from '../components/molecules/AuthFormPanel'
 import AuthInput from '../components/atoms/AuthInput'
-import SocialAuthButton from '../components/atoms/SocialAuthButton'
+// import SocialAuthButton from '../components/atoms/SocialAuthButton'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { ApiError } from '../services/httpClient'
 
@@ -102,7 +102,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-stack-lg">
+        {/* <div className="mt-stack-lg">
           <div className="relative flex items-center mb-stack-md">
             <div className="flex-grow border-t border-surface-container-highest" />
             <span className="flex-shrink mx-4 font-label-caps text-on-surface-variant/50">
@@ -123,7 +123,7 @@ export default function LoginPage() {
               disabled={loading}
             />
           </div>
-        </div>
+        </div> */}
       </AuthFormPanel>
     </CinematicAuthLayout>
   )

@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-O projeto precisa de um ambiente de desenvolvimento com HMR (Hot Module Replacement) ágil e um processo de build de produção confiável. A escolha do build tool afeta diretamente a velocidade do ciclo de desenvolvimento e a qualidade do output final. As alternativas principais para projetos React em 2024 são Vite, Create React App (CRA) e Next.js.
+O projeto precisa de um ambiente de desenvolvimento com HMR (Hot Module Replacement) ágil e um processo de build de produção confiável. A escolha do build tool afeta diretamente a velocidade do ciclo de desenvolvimento e a qualidade do output final. As alternativas principais para projetos React em 2026 são Vite, Create React App (CRA) e Next.js.
 
 ## Decision
 

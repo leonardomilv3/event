@@ -35,7 +35,7 @@ export default function AuthFormPanel({
       </div>
 
       <footer className="mt-stack-lg flex justify-between font-label-md text-on-tertiary-fixed-variant opacity-60">
-        <span>© 2024 Eventing</span>
+        <span>© 2026 Eventing</span>
         <div className="flex gap-4">
           <a href="#" className="hover:text-primary transition-colors">Privacy</a>
           <a href="#" className="hover:text-primary transition-colors">Terms</a>

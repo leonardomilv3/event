@@ -96,6 +96,7 @@ public class EventService {
     public void delete(UUID currentUserId, UUID eventId) {
         Event event = requireOwnership(currentUserId, eventId);
         event.status = EventStatus.CANCELLED;
+        eventRepository.delete(event);
         invalidateCaches();
     }
 

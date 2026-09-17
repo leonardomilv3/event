@@ -67,7 +67,7 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                 WHERE e.status = 'PUBLISHED'
                   AND e.visibility = 'PUBLIC'
                   AND ST_DWithin(e.location, ST_Point(:lon, :lat)::geography, :radiusMeters)
-                  AND e.starts_at > now()
+                  AND e.ends_at > now()
                 ORDER BY distance_km ASC
                 """;
         List<Object[]> rows = em.createNativeQuery(sql)
@@ -86,7 +86,7 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                 WHERE e.status = 'PUBLISHED'
                   AND e.visibility = 'PUBLIC'
                   AND ST_DWithin(e.location, ST_Point(:lon, :lat)::geography, :radiusMeters)
-                  AND e.starts_at > now()
+                  AND e.ends_at > now()
                 """;
         Number result = (Number) em.createNativeQuery(sql)
                 .setParameter("lat", lat)
@@ -114,7 +114,8 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                 JOIN users u ON u.id = e.creator_id
                 WHERE e.status = 'PUBLISHED'
                   AND e.visibility = 'PUBLIC'
-                  AND e.starts_at BETWEEN now() AND now() + INTERVAL '30 days'
+                  AND COALESCE(e.ends_at, e.starts_at) >= now() - INTERVAL '1 minute'
+                  AND e.starts_at <= now() + INTERVAL '30 days'
                 ORDER BY (
                     COALESCE(0.4 * (1 - LEAST(ST_Distance(e.location, ST_Point(:lon, :lat)::geography) / 50000, 1)), 0) +
                     0.3 * LEAST(COALESCE(e.participant_count, 0) / 100.0, 1) +
@@ -202,7 +203,8 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                 SELECT COUNT(*) FROM events e
                 WHERE e.status = 'PUBLISHED'
                   AND e.visibility = 'PUBLIC'
-                  AND e.starts_at BETWEEN now() AND now() + INTERVAL '30 days'
+                  AND COALESCE(e.ends_at, e.starts_at) >= now() - INTERVAL '1 minute'
+                  AND e.starts_at <= now() + INTERVAL '30 days'
                 """;
         return ((Number) em.createNativeQuery(sql).getSingleResult()).longValue();
     }

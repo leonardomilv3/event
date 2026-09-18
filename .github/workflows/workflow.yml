@@ -55,7 +55,6 @@ jobs:
           platforms: linux/amd64
           tags: |
             ${{ env.IMAGE_NAME }}:1.1
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
 
   deploy-render:

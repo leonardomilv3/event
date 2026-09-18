@@ -172,6 +172,10 @@ export default function EditEventPage() {
       setValidationError('A data de início é obrigatória')
       return
     }
+    if (!form.endsAt){
+      setValidationError('A data de término é obrigatória')
+      return
+    }
     if (new Date(form.startsAt) <= new Date(Date.now() + MIN_LEAD_TIME_MS)) {
       setValidationError('A data de início deve ser pelo menos 1 minuto no futuro')
       return
@@ -316,7 +320,7 @@ export default function EditEventPage() {
                 />
               </div>
               <div className="flex flex-col gap-stack-xs">
-                <label htmlFor="event-ends-at" className={LABEL_CLASS}>Fim (Opcional)</label>
+                <label htmlFor="event-ends-at" className={LABEL_CLASS}>Fim</label>
                 <input
                   id="event-ends-at"
                   type="datetime-local"

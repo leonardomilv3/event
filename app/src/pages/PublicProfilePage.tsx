@@ -26,19 +26,19 @@ export default function PublicProfilePage() {
   const isOwnProfile = user !== null && user.id === userId
 
   return (
-    <div className="min-h-screen bg-background text-on-surface">
+    <div className="min-h-screen flex flex-col bg-background text-on-surface">
       <TopNavBar />
 
       {/* Loading */}
       {loading && (
-        <div className="min-h-screen pt-20 flex items-center justify-center">
+        <div className="flex-1 pt-20 flex items-center justify-center">
           <Icon name="progress_activity" size={40} className="animate-spin text-primary-container" />
         </div>
       )}
 
       {/* Error */}
       {!loading && (error || !profile) && (
-        <div className="min-h-screen pt-20 flex flex-col items-center justify-center gap-stack-md">
+        <div className="flex-1 pt-20 flex flex-col items-center justify-center gap-stack-md">
           <Icon name="person_off" size={48} className="text-on-surface-variant" />
           <p className="font-sans text-body-lg text-on-surface-variant">
             {error ?? 'Perfil não encontrado'}
@@ -48,7 +48,7 @@ export default function PublicProfilePage() {
 
       {/* Content */}
       {!loading && !error && profile && (
-        <main className="pt-0 pb-stack-xl">
+        <main className="flex-1 pt-0 pb-stack-xl">
 
           {/* Hero Banner */}
           <section className="relative h-[360px] md:h-[460px] w-full overflow-hidden">

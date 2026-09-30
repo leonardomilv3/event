@@ -102,4 +102,20 @@ public class ParticipantRepository implements PanacheRepositoryBase<EventPartici
     public long countApprovedByUser(UUID userId) {
         return count("user.id = ?1 and status = ?2", userId, ParticipantStatus.APPROVED);
     }
+
+    // ── Notificações ──────────────────────────────────────────────────────────
+
+    @SuppressWarnings("unchecked")
+    public List<String> findParticipantEmailsByEvent(UUID eventId) {
+        return em.createNativeQuery("""
+                SELECT u.email
+                FROM event_participants ep
+                JOIN users u ON u.id = ep.user_id
+                WHERE ep.event_id = :eventId
+                  AND ep.status = 'APPROVED'::participant_status
+                  AND u.active = true
+                """)
+                .setParameter("eventId", eventId)
+                .getResultList();
+    }
 }

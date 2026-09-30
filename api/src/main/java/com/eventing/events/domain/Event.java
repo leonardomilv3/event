@@ -69,6 +69,12 @@ public class Event extends PanacheEntityBase {
     @Column(name = "updated_at", nullable = false)
     public LocalDateTime updatedAt;
 
+    @Column(name = "notified_24h", nullable = false)
+    public boolean notified24h = false;
+
+    @Column(name = "notified_1h", nullable = false)
+    public boolean notified1h = false;
+
     @PrePersist
     void onCreate() {
         createdAt = updatedAt = LocalDateTime.now();

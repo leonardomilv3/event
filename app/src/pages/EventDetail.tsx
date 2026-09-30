@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
+import { QRCodeSVG } from 'qrcode.react'
 import Footer from '../components/organisms/Footer'
 import GlassPanel from '../components/molecules/GlassPanel'
 import ProgressBar from '../components/atoms/ProgressBar'
@@ -23,6 +24,14 @@ export default function EventDetail() {
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = () => {
+    void navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  };
 
   const { event, participants, loading: eventLoading, error } = useEvent(id)
   const {
@@ -224,6 +233,21 @@ export default function EventDetail() {
                         </span>
                       )}
                     </div>
+
+                    {/* Share button */}
+                    <button
+                      onClick={handleShare}
+                      className="flex items-center gap-2 px-stack-md py-2 rounded-full border border-outline-variant/50 hover:border-primary-container/50 hover:bg-white/5 transition-all"
+                    >
+                      <Icon
+                        name={copied ? 'check_circle' : 'share'}
+                        className={copied ? 'text-primary-container' : 'text-on-surface-variant'}
+                        size={18}
+                      />
+                      <span className="font-label-md text-label-md text-on-surface-variant">
+                        {copied ? 'Link copiado!' : 'Compartilhar'}
+                      </span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -385,6 +409,25 @@ export default function EventDetail() {
                           )}
                           {deleting ? 'Cancelando...' : 'Cancelar Evento'}
                         </button>
+                      </div>
+
+                      {/* QR Code para divulgação do evento */}
+                      <div className="flex flex-col items-center gap-stack-sm pt-stack-sm border-t border-outline-variant/30">
+                        <span className="font-label-caps text-label-caps text-on-surface-variant">
+                          QR Code do Evento
+                        </span>
+                        <div className="p-3 bg-white rounded-xl">
+                          <QRCodeSVG
+                            value={window.location.href}
+                            size={140}
+                            bgColor="#ffffff"
+                            fgColor="#131618"
+                            level="M"
+                          />
+                        </div>
+                        <span className="font-label-md text-label-md text-on-surface-variant text-center">
+                          Escaneie para acessar o evento
+                        </span>
                       </div>
                     </div>
                   )}

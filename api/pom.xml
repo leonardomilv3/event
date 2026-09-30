@@ -129,6 +129,18 @@
       <artifactId>quarkus-elytron-security-common</artifactId>
     </dependency>
 
+    <!-- ─── Scheduler ──────────────────────────────────────────────────── -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-scheduler</artifactId>
+    </dependency>
+
+    <!-- ─── Mailer ──────────────────────────────────────────────────────── -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-mailer</artifactId>
+    </dependency>
+
     <!-- ─── Core ─────────────────────────────────────────────────────────── -->
     <dependency>
       <groupId>io.quarkus</groupId>

@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -197,6 +198,16 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
         if (o instanceof OffsetDateTime odt) return odt;
         if (o instanceof Timestamp ts) return ts.toInstant().atOffset(ZoneOffset.UTC);
         return null;
+    }
+
+    // ── Notificações ─────────────────────────────────────────────────────────
+
+    public List<Event> findEventsToNotify(LocalDateTime windowStart, LocalDateTime windowEnd, boolean is24h) {
+        String notifiedField = is24h ? "notified24h" : "notified1h";
+        return find(
+                "status = ?1 AND starts_at BETWEEN ?2 AND ?3 AND " + notifiedField + " = false",
+                EventStatus.PUBLISHED, windowStart, windowEnd
+        ).list();
     }
 
     // ── CRUD count helpers ────────────────────────────────────────────────────

@@ -67,7 +67,7 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                 WHERE e.status = 'PUBLISHED'
                   AND e.visibility = 'PUBLIC'
                   AND ST_DWithin(e.location, ST_Point(:lon, :lat)::geography, :radiusMeters)
-                  AND e.ends_at > now()
+                  AND COALESCE(e.ends_at, e.starts_at) >= now() - INTERVAL '1 minute'
                 ORDER BY distance_km ASC
                 """;
         List<Object[]> rows = em.createNativeQuery(sql)
@@ -86,7 +86,7 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                 WHERE e.status = 'PUBLISHED'
                   AND e.visibility = 'PUBLIC'
                   AND ST_DWithin(e.location, ST_Point(:lon, :lat)::geography, :radiusMeters)
-                  AND e.ends_at > now()
+                  AND COALESCE(e.ends_at, e.starts_at) >= now() - INTERVAL '1 minute'
                 """;
         Number result = (Number) em.createNativeQuery(sql)
                 .setParameter("lat", lat)
@@ -100,26 +100,42 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
 
     @SuppressWarnings("unchecked")
     public List<NativeEventRow> findFeed(double lat, double lon, int page, int size) {
+        // CTE calcula ST_Distance uma única vez por linha e reutiliza o alias
+        // tanto na projeção (distance_km) quanto no score do ORDER BY.
         String sql = """
-                SELECT e.id, e.creator_id, u.username,
-                       e.title, e.description, e.category,
-                       e.visibility::text, e.status::text,
-                       e.cover_image_url, e.location_name, e.address,
-                       ST_Y(e.location::geometry), ST_X(e.location::geometry),
-                       e.starts_at, e.ends_at,
-                       e.max_participants, e.participant_count,
-                       e.created_at, e.updated_at,
-                       COALESCE(ST_Distance(e.location, ST_Point(:lon, :lat)::geography) / 1000, NULL) AS distance_km
-                FROM events e
-                JOIN users u ON u.id = e.creator_id
-                WHERE e.status = 'PUBLISHED'
-                  AND e.visibility = 'PUBLIC'
-                  AND COALESCE(e.ends_at, e.starts_at) >= now() - INTERVAL '1 minute'
-                  AND e.starts_at <= now() + INTERVAL '30 days'
+                WITH base AS (
+                    SELECT e.id, e.creator_id, u.username,
+                           e.title, e.description, e.category,
+                           e.visibility::text AS visibility,
+                           e.status::text     AS status,
+                           e.cover_image_url, e.location_name, e.address,
+                           ST_Y(e.location::geometry) AS latitude,
+                           ST_X(e.location::geometry) AS longitude,
+                           e.starts_at, e.ends_at,
+                           e.max_participants, e.participant_count,
+                           e.created_at, e.updated_at,
+                           ST_Distance(e.location, ST_Point(:lon, :lat)::geography) AS dist_m
+                    FROM events e
+                    JOIN users u ON u.id = e.creator_id
+                    WHERE e.status = 'PUBLISHED'
+                      AND e.visibility = 'PUBLIC'
+                      AND COALESCE(e.ends_at, e.starts_at) >= now() - INTERVAL '1 minute'
+                      AND e.starts_at <= now() + INTERVAL '30 days'
+                )
+                SELECT id, creator_id, username,
+                       title, description, category,
+                       visibility, status,
+                       cover_image_url, location_name, address,
+                       latitude, longitude,
+                       starts_at, ends_at,
+                       max_participants, participant_count,
+                       created_at, updated_at,
+                       dist_m / 1000 AS distance_km
+                FROM base
                 ORDER BY (
-                    COALESCE(0.4 * (1 - LEAST(ST_Distance(e.location, ST_Point(:lon, :lat)::geography) / 50000, 1)), 0) +
-                    0.3 * LEAST(COALESCE(e.participant_count, 0) / 100.0, 1) +
-                    0.1 * (1 - LEAST(EXTRACT(EPOCH FROM (e.starts_at - now())) / 604800, 1))
+                    COALESCE(0.4 * (1 - LEAST(dist_m / 50000, 1)), 0) +
+                    0.3 * LEAST(COALESCE(participant_count, 0) / 100.0, 1) +
+                    0.1 * (1 - LEAST(EXTRACT(EPOCH FROM (starts_at - now())) / 604800, 1))
                 ) DESC NULLS LAST
                 """;
         List<Object[]> rows = em.createNativeQuery(sql)

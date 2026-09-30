@@ -201,15 +201,17 @@ public class EventService {
     }
 
     private static String nearbyKey(double lat, double lon, double radiusKm) {
-        double la = Math.round(lat * 100.0) / 100.0;
-        double lo = Math.round(lon * 100.0) / 100.0;
-        return String.format("events:nearby:%.2f:%.2f:%.0f", la, lo, radiusKm);
+        // Arredonda para 1 casa decimal (~11 km de granularidade) para maximizar
+        // reuso de cache entre usuários próximos sem prejudicar relevância percebida.
+        double la = Math.round(lat * 10.0) / 10.0;
+        double lo = Math.round(lon * 10.0) / 10.0;
+        return String.format("events:nearby:%.1f:%.1f:%.0f", la, lo, radiusKm);
     }
 
     private static String feedKey(double lat, double lon) {
-        double la = Math.round(lat * 100.0) / 100.0;
-        double lo = Math.round(lon * 100.0) / 100.0;
-        return String.format("events:feed:%.2f:%.2f", la, lo);
+        double la = Math.round(lat * 10.0) / 10.0;
+        double lo = Math.round(lon * 10.0) / 10.0;
+        return String.format("events:feed:%.1f:%.1f", la, lo);
     }
 
     // ── Mapeamento de NativeEventRow → EventResponse ─────────────────────────

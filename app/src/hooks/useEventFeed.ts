@@ -55,22 +55,36 @@ export interface EventFeedState {
   retry: () => void
 }
 
+const roundTo1 = (n: number) => Math.round(n * 10) / 10
+
 export function useEventFeed(): EventFeedState {
-  const [location, setLocation] = useState<Location | null>(null)
+  // Inicia com o fallback de Brasília para que o primeiro fetch não espere
+  // a resolução do prompt de geolocalização do browser.
+  const [location, setLocation] = useState<Location>({ lat: BRASILIA_LAT, lon: BRASILIA_LON })
   const [fetchTrigger, setFetchTrigger] = useState(0)
   const [state, dispatch] = useReducer(feedReducer, INITIAL)
 
-  // Resolve geolocation once on mount
+  // Tenta obter localização real com timeout de 3s.
+  // Se diferente do fallback na granularidade do cache (~11 km), re-dispara o fetch.
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
-      (pos) => setLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-      () => setLocation({ lat: BRASILIA_LAT, lon: BRASILIA_LON })
+      (pos) => {
+        const realLat = pos.coords.latitude
+        const realLon = pos.coords.longitude
+        setLocation((prev) => {
+          if (roundTo1(realLat) !== roundTo1(prev.lat) || roundTo1(realLon) !== roundTo1(prev.lon)) {
+            return { lat: realLat, lon: realLon }
+          }
+          return prev
+        })
+      },
+      () => {}, // já está no fallback de Brasília, sem ação necessária
+      { timeout: 3000, maximumAge: 60000 }
     )
   }, [])
 
   // Reset and fetch page 0 whenever location resolves or retry is triggered
   useEffect(() => {
-    if (!location) return
     let cancelled = false
 
     dispatch({ type: 'reset' })
@@ -91,7 +105,7 @@ export function useEventFeed(): EventFeedState {
   }, [location, fetchTrigger])
 
   const loadMore = async (): Promise<void> => {
-    if (!state.hasMore || state.loading || !location) return
+    if (!state.hasMore || state.loading) return
     const nextPage = state.page + 1
     dispatch({ type: 'loading' })
     try {

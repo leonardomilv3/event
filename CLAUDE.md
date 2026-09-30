@@ -124,6 +124,7 @@ Documentação completa: [`docs/design-system.md`](docs/design-system.md)
 | [005](api/docs/adrs/005-redis-cache.md) | Redis para cache de feed |
 | [006](api/docs/adrs/006-ddd-modular.md) | DDD leve por módulo de domínio |
 | [007](api/docs/adrs/007-native-queries-postgis.md) | Native queries + records tipados para operações PostGIS |
+| [008](api/docs/adrs/008-managed-infrastructure-mvp.md) | Infraestrutura managed no MVP (Vercel, Render, Supabase, Upstash) |
 
 ---
 

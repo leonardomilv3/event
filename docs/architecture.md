@@ -2,15 +2,41 @@
 
 ## Stack
 
+### Frontend
+
 | Camada | Tecnologia |
 |---|---|
 | Framework | React 18 + TypeScript |
-| Build | Vite |
+| Build | Vite 8 |
 | Estilos | Tailwind CSS v3 |
 | Roteamento | React Router v6 |
-| Animações | Framer Motion |
+| Animações | Framer Motion 12 |
 | Ícones | Material Symbols Outlined (Google Fonts) |
 | Fontes | Inter (UI) + Playfair Display (editorial) |
+| QR Code | qrcode.react 4.2 |
+
+### Backend
+
+| Camada | Tecnologia |
+|---|---|
+| Framework | Java 21 + Quarkus 3.12.3 |
+| ORM | Hibernate ORM + Panache |
+| Banco de dados | PostgreSQL 16.4 + PostGIS |
+| Migrations | Flyway |
+| Cache | Redis (Upstash TLS), TTL 5 min |
+| Auth | SmallRye JWT (RSA RS256) |
+| Scheduler | Quarkus Scheduler (`@Scheduled`) |
+| Mailer | Quarkus Mailer (SMTP / mock em dev) |
+
+### Infraestrutura (MVP)
+
+| Serviço | Plataforma | Notas |
+|---|---|---|
+| Frontend | Vercel | Deploy automático via GitHub |
+| Backend | Render | Container Docker; deploy via Actions |
+| Banco de dados | Supabase | PostgreSQL + PostGIS managed |
+| Cache | Upstash | Redis serverless TLS |
+| CI/CD | GitHub Actions | Build + push Docker Hub + Render hook |
 
 ---
 

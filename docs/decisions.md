@@ -82,3 +82,22 @@ Assim como `LoginPage` e `RegisterPage` são separadas apesar de compartilharem 
 
 ### `FollowListModal` não exibe `FollowButton` por linha (MVP)
 Renderizar um `FollowButton` por linha exigiria chamar `useFollow(userId)` para cada item da lista — ou um fetch batch não disponível na API atual. Para o MVP, a lista exibe apenas avatar + nome. O `currentUserId` prop existe como slot reservado para uma versão futura que adicione essa interação sem quebrar a interface do componente.
+
+---
+
+## Performance e backend
+
+### CTE para `ST_Distance` no feed (P1)
+A query original calculava `ST_Distance` duas vezes: uma no SELECT e outra no ORDER BY. Reescrita com CTE (`WITH base AS (...)`) calcula `dist_m` uma única vez. Junto com o índice composto `(status, visibility, starts_at)` (V6), reduziu latência cold cache de ~3s para ~350ms (~89% de melhora).
+
+### Cache key com 1 casa decimal (~11km)
+Cache keys do feed/nearby usavam 2 casas decimais (~1.1km). Reduzir para 1 casa decimal (~11km) aumenta a taxa de acerto sem comprometer a relevância dos resultados. Usuários dentro do mesmo raio de ~11km compartilham o cache.
+
+### Geolocalização inicializada com fallback de Brasília
+`useEventFeed` antes bloqueava a primeira request do feed até o browser resolver GPS (até 3s de timeout). Agora inicializa com Brasília imediatamente, dispara a request, e só faz re-fetch se o GPS real diferir >~11km. Elimina o spinner inicial para a maioria dos usuários.
+
+### Notificações por e-mail desabilitadas por padrão
+O scheduler de lembretes (`NotificationScheduler`) roda a cada 15 min em produção, mas retorna imediatamente se `NOTIFICATIONS_ENABLED=false` (default). Isso permite deploy seguro sem configurar SMTP no Render. Habilitar definindo `NOTIFICATIONS_ENABLED=true` + variáveis SMTP no painel do Render.
+
+### QR code gerado no frontend, sem endpoint de backend
+O QR code do evento em `EventDetail.tsx` usa `qrcode.react` (SVG client-side). Não requer endpoint novo. O código aponta para a URL do evento — serve para divulgação; validação de presença por QR pode ser adicionada em iteração futura.

@@ -72,7 +72,7 @@ export default function EventDetail() {
     try {
       await deleteEvent(event.id); // DELETE /api/events/{id}
       navigate('/my-events');
-    } catch (err) {
+    } catch {
       setDeleteError('Não foi possível cancelar o evento. Tente novamente.');
       setDeleting(false);
     }

@@ -43,9 +43,14 @@ export default function EventDetail() {
   const { profile: creatorProfile } = usePublicProfile(event?.creatorId ?? '')
 
   const displayCount = (event?.participantCount ?? 0) + countDelta
-  // authLoading garante que isCreator não computa com user=null enquanto /api/auth/me ainda está em voo
+  // authLoading garante que isCreator não computa com user=null enquanto /api/auth/me ainda está em voo.
+  // toLowerCase: defensive normalization — Jackson serializa UUIDs em minúsculas em ambas as fontes,
+  // mas o JWT sub pode divergir de case em ambientes de terceiros.
   const stillLoading = authLoading || eventLoading
-  const isCreator = user !== null && event !== null && user.id === event.creatorId
+  const isCreator =
+    user !== null &&
+    event !== null &&
+    user.id.toLowerCase() === event.creatorId.toLowerCase()
   const capacityValue =
     event?.maxParticipants != null
       ? Math.min(Math.round((displayCount / event.maxParticipants) * 100), 100)

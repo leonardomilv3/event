@@ -70,7 +70,7 @@ public class EventController {
     @Path("/{id}")
     @Operation(summary = "Buscar evento por ID")
     public Response getById(@PathParam("id") UUID id) {
-        EventResponse event = eventService.getById(id);
+        EventResponse event = eventService.getById(id, currentUserIdOrNull());
         return Response.ok(ApiResponse.ok(event)).build();
     }
 
@@ -171,7 +171,17 @@ public class EventController {
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("20") int size
     ) {
+        // Mesma regra do GET /{id}: lista de participantes não pode vazar evento não público
+        eventService.requireViewable(eventId, currentUserIdOrNull());
         PageResponse<ParticipantResponse> result = participantService.listParticipants(eventId, page, size);
         return Response.ok(ApiResponse.ok(result)).build();
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /** Endpoints públicos recebem um JsonWebToken vazio quando não há Authorization. */
+    private UUID currentUserIdOrNull() {
+        String subject = jwt != null ? jwt.getSubject() : null;
+        return subject != null ? UUID.fromString(subject) : null;
     }
 }

@@ -92,6 +92,90 @@ class EventControllerTest {
             .body("success", is(true));
     }
 
+    // ── Controle de acesso a eventos não públicos ─────────────────────────────
+
+    @Test
+    void getByIdPrivateShouldReturn404ForAnonymous() {
+        UUID eventId = createAndPublishEvent(registerAndLogin(), "PRIVATE");
+
+        given()
+        .when()
+            .get("/api/events/" + eventId)
+        .then()
+            .statusCode(404)
+            .body("data", nullValue());
+    }
+
+    @Test
+    void getByIdPrivateShouldReturn404ForAuthenticatedNonParticipant() {
+        UUID eventId = createAndPublishEvent(registerAndLogin(), "PRIVATE");
+        String strangerToken = registerAndLogin();
+
+        given()
+            .header("Authorization", "Bearer " + strangerToken)
+        .when()
+            .get("/api/events/" + eventId)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void getByIdPrivateShouldReturn200ForCreator() {
+        String ownerToken = registerAndLogin();
+        UUID eventId = createAndPublishEvent(ownerToken, "PRIVATE");
+
+        given()
+            .header("Authorization", "Bearer " + ownerToken)
+        .when()
+            .get("/api/events/" + eventId)
+        .then()
+            .statusCode(200)
+            .body("data.id", equalTo(eventId.toString()));
+    }
+
+    @Test
+    void getByIdPrivateShouldReturn200ForConfirmedParticipant() {
+        UUID eventId = createAndPublishEvent(registerAndLogin(), "PRIVATE");
+        String participantToken = registerAndLogin();
+        given().header("Authorization", "Bearer " + participantToken).contentType(ContentType.JSON)
+            .post("/api/events/" + eventId + "/join").then().statusCode(201);
+
+        given()
+            .header("Authorization", "Bearer " + participantToken)
+        .when()
+            .get("/api/events/" + eventId)
+        .then()
+            .statusCode(200)
+            .body("data.id", equalTo(eventId.toString()));
+    }
+
+    @Test
+    void getByIdInviteOnlyShouldReturn404ForPendingRequest() {
+        UUID eventId = createAndPublishEvent(registerAndLogin(), "INVITE_ONLY");
+        String requesterToken = registerAndLogin();
+        given().header("Authorization", "Bearer " + requesterToken).contentType(ContentType.JSON)
+            .post("/api/events/" + eventId + "/join").then().statusCode(201)
+            .body("data.status", equalTo("REQUESTED"));
+
+        given()
+            .header("Authorization", "Bearer " + requesterToken)
+        .when()
+            .get("/api/events/" + eventId)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void listParticipantsPrivateShouldReturn404ForAnonymous() {
+        UUID eventId = createAndPublishEvent(registerAndLogin(), "PRIVATE");
+
+        given()
+        .when()
+            .get("/api/events/" + eventId + "/participants")
+        .then()
+            .statusCode(404);
+    }
+
     @Test
     void getByIdShouldReturn404ForNonexistentId() {
         given()

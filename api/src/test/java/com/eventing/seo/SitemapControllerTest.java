@@ -3,6 +3,8 @@ package com.eventing.seo;
 import com.eventing.TestFixtures;
 import com.eventing.auth.AuthService;
 import com.eventing.auth.dto.AuthResponse;
+import com.eventing.events.domain.EventVisibility;
+import com.eventing.events.dto.CreateEventRequest;
 import com.eventing.events.dto.EventResponse;
 import com.eventing.events.service.EventService;
 import io.quarkus.redis.datasource.RedisDataSource;
@@ -51,12 +53,18 @@ class SitemapControllerTest {
     }
 
     @Test
-    void sitemapShouldNotListDraftOrInviteOnlyEvents() {
+    void sitemapShouldNotListDraftPrivateOrInviteOnlyEvents() {
         AuthResponse creator = registerUser();
         OffsetDateTime startsAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(2);
         EventResponse draft = eventService.create(creator.userId(), TestFixtures.publicEventRequest(startsAt));
         EventResponse inviteOnly = eventService.create(creator.userId(), TestFixtures.inviteOnlyEventRequest(startsAt));
         eventService.publish(creator.userId(), inviteOnly.id());
+        var base = TestFixtures.publicEventRequest(startsAt);
+        EventResponse privateEvent = eventService.create(creator.userId(), new CreateEventRequest(
+            base.title(), base.description(), base.category(), EventVisibility.PRIVATE,
+            base.latitude(), base.longitude(), base.locationName(), base.address(),
+            base.startsAt(), base.endsAt(), base.maxParticipants()));
+        eventService.publish(creator.userId(), privateEvent.id());
 
         given()
         .when()
@@ -64,7 +72,8 @@ class SitemapControllerTest {
         .then()
             .statusCode(200)
             .body(not(containsString(draft.id().toString())))
-            .body(not(containsString(inviteOnly.id().toString())));
+            .body(not(containsString(inviteOnly.id().toString())))
+            .body(not(containsString(privateEvent.id().toString())));
     }
 
     private AuthResponse registerUser() {

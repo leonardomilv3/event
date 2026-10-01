@@ -68,10 +68,28 @@ public class EventService {
         return toResponse(event, null);
     }
 
+    /** Visão anônima — eventos não públicos respondem 404. */
     public EventResponse getById(UUID id) {
-        Event event = eventRepository.findById(id);
+        return getById(id, null);
+    }
+
+    public EventResponse getById(UUID id, UUID viewerId) {
+        return toResponse(requireViewable(id, viewerId), null);
+    }
+
+    /**
+     * Eventos PRIVATE/INVITE_ONLY só são visíveis ao criador ou a participantes confirmados.
+     * Sem acesso → 404 (não 403) para não revelar que o evento existe.
+     */
+    public Event requireViewable(UUID eventId, UUID viewerId) {
+        Event event = eventRepository.findById(eventId);
         if (event == null) throw ApiException.notFound("Evento");
-        return toResponse(event, null);
+        if (event.visibility == EventVisibility.PUBLIC) return event;
+        if (viewerId != null
+                && (event.creator.id.equals(viewerId) || eventRepository.isConfirmedParticipant(eventId, viewerId))) {
+            return event;
+        }
+        throw ApiException.notFound("Evento");
     }
 
     @Transactional

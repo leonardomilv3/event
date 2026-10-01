@@ -210,6 +210,27 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
         ).list();
     }
 
+    // ── Controle de acesso ───────────────────────────────────────────────────
+
+    /**
+     * Participação confirmada (APPROVED/ATTENDED). Native para não acoplar o módulo
+     * events à entidade de participants (dependência hoje é só participants → events).
+     */
+    public boolean isConfirmedParticipant(UUID eventId, UUID userId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM event_participants
+                    WHERE event_id = :eventId
+                      AND user_id = :userId
+                      AND status IN ('APPROVED'::participant_status, 'ATTENDED'::participant_status)
+                )
+                """;
+        return (Boolean) em.createNativeQuery(sql)
+                .setParameter("eventId", eventId)
+                .setParameter("userId", userId)
+                .getSingleResult();
+    }
+
     // ── SEO ──────────────────────────────────────────────────────────────────
 
     /** Eventos PUBLISHED + PUBLIC que ainda não terminaram — nunca expõe PRIVATE/INVITE_ONLY. */

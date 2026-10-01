@@ -81,7 +81,7 @@ class EventControllerTest {
     @Test
     void getByIdShouldReturn200() {
         String token = registerAndLogin();
-        UUID eventId = createEvent(token);
+        UUID eventId = createAndPublishEvent(token, "PUBLIC");
 
         given()
         .when()
@@ -135,10 +135,13 @@ class EventControllerTest {
 
     @Test
     void getByIdPrivateShouldReturn200ForConfirmedParticipant() {
-        UUID eventId = createAndPublishEvent(registerAndLogin(), "PRIVATE");
+        // Admissão legítima: entra enquanto PUBLIC; criador depois torna o evento PRIVATE
+        String ownerToken = registerAndLogin();
+        UUID eventId = createAndPublishEvent(ownerToken, "PUBLIC");
         String participantToken = registerAndLogin();
         given().header("Authorization", "Bearer " + participantToken).contentType(ContentType.JSON)
             .post("/api/events/" + eventId + "/join").then().statusCode(201);
+        makePrivate(ownerToken, eventId);
 
         given()
             .header("Authorization", "Bearer " + participantToken)
@@ -163,6 +166,126 @@ class EventControllerTest {
             .get("/api/events/" + eventId)
         .then()
             .statusCode(404);
+    }
+
+    // ── Rascunhos: só o criador enxerga ───────────────────────────────────────
+
+    @Test
+    void getByIdDraftShouldReturn404ForAnonymous() {
+        UUID eventId = createEvent(registerAndLogin());
+
+        given()
+        .when()
+            .get("/api/events/" + eventId)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void getByIdDraftShouldReturn404ForOtherUser() {
+        UUID eventId = createEvent(registerAndLogin());
+
+        given()
+            .header("Authorization", "Bearer " + registerAndLogin())
+        .when()
+            .get("/api/events/" + eventId)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void getByIdDraftShouldReturn200ForCreator() {
+        String ownerToken = registerAndLogin();
+        UUID eventId = createEvent(ownerToken);
+
+        given()
+            .header("Authorization", "Bearer " + ownerToken)
+        .when()
+            .get("/api/events/" + eventId)
+        .then()
+            .statusCode(200)
+            .body("data.status", equalTo("DRAFT"));
+    }
+
+    // ── Join em PRIVATE: só quem já foi admitido ──────────────────────────────
+
+    @Test
+    void joinPrivateEventShouldReturn404ForNonAdmittedUser() {
+        UUID eventId = createAndPublishEvent(registerAndLogin(), "PRIVATE");
+
+        given()
+            .header("Authorization", "Bearer " + registerAndLogin())
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/api/events/" + eventId + "/join")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void rejoinPrivateEventShouldWorkForPreviouslyAdmittedUser() {
+        String ownerToken = registerAndLogin();
+        UUID eventId = createAndPublishEvent(ownerToken, "PUBLIC");
+        String participantToken = registerAndLogin();
+        given().header("Authorization", "Bearer " + participantToken).contentType(ContentType.JSON)
+            .post("/api/events/" + eventId + "/join").then().statusCode(201);
+        makePrivate(ownerToken, eventId);
+        given().header("Authorization", "Bearer " + participantToken)
+            .delete("/api/events/" + eventId + "/leave").then().statusCode(204);
+
+        given()
+            .header("Authorization", "Bearer " + participantToken)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/api/events/" + eventId + "/join")
+        .then()
+            .statusCode(201)
+            .body("data.status", equalTo("APPROVED"));
+    }
+
+    // ── GET /api/events?creatorId= ────────────────────────────────────────────
+
+    @Test
+    void listByCreatorShouldHideNonPublicAndDraftsFromOthers() {
+        String ownerToken = registerAndLogin();
+        UUID publicId = createAndPublishEvent(ownerToken, "PUBLIC");
+        UUID privateId = createAndPublishEvent(ownerToken, "PRIVATE");
+        UUID inviteOnlyId = createAndPublishEvent(ownerToken, "INVITE_ONLY");
+        UUID draftId = createEvent(ownerToken);
+        String creatorId = given().header("Authorization", "Bearer " + ownerToken)
+            .get("/api/events/" + publicId).then().extract().path("data.creatorId");
+
+        given()
+            .queryParam("creatorId", creatorId)
+        .when()
+            .get("/api/events")
+        .then()
+            .statusCode(200)
+            .body("data.totalElements", equalTo(1))
+            .body("data.content.id", contains(publicId.toString()))
+            .body("data.content.id", not(hasItems(privateId.toString())))
+            .body("data.content.id", not(hasItems(inviteOnlyId.toString())))
+            .body("data.content.id", not(hasItems(draftId.toString())));
+    }
+
+    @Test
+    void listByCreatorShouldShowAllEventsToOwner() {
+        String ownerToken = registerAndLogin();
+        UUID publicId = createAndPublishEvent(ownerToken, "PUBLIC");
+        UUID privateId = createAndPublishEvent(ownerToken, "PRIVATE");
+        UUID draftId = createEvent(ownerToken);
+        String creatorId = given().header("Authorization", "Bearer " + ownerToken)
+            .get("/api/events/" + publicId).then().extract().path("data.creatorId");
+
+        given()
+            .header("Authorization", "Bearer " + ownerToken)
+            .queryParam("creatorId", creatorId)
+        .when()
+            .get("/api/events")
+        .then()
+            .statusCode(200)
+            .body("data.totalElements", equalTo(3))
+            .body("data.content.id", hasItems(publicId.toString(), privateId.toString(), draftId.toString()));
     }
 
     @Test
@@ -427,13 +550,27 @@ class EventControllerTest {
     }
 
     @Test
-    void joinUnpublishedEventShouldReturn400() {
+    void joinDraftOfOtherUserShouldReturn404() {
         String ownerToken = registerAndLogin();
-        UUID eventId = createEvent(ownerToken); // DRAFT — não publicado
+        UUID eventId = createEvent(ownerToken); // DRAFT — invisível para terceiros
         String joinerToken = registerAndLogin();
 
         given()
             .header("Authorization", "Bearer " + joinerToken)
+            .contentType(ContentType.JSON)
+        .when()
+            .post("/api/events/" + eventId + "/join")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void joinOwnDraftShouldReturn400() {
+        String ownerToken = registerAndLogin();
+        UUID eventId = createEvent(ownerToken);
+
+        given()
+            .header("Authorization", "Bearer " + ownerToken)
             .contentType(ContentType.JSON)
         .when()
             .post("/api/events/" + eventId + "/join")
@@ -582,6 +719,13 @@ class EventControllerTest {
         .when().post("/api/events")
         .then().statusCode(201).extract().path("data.id");
         return UUID.fromString(id);
+    }
+
+    private void makePrivate(String ownerToken, UUID eventId) {
+        given().header("Authorization", "Bearer " + ownerToken).contentType(ContentType.JSON)
+            .body(Map.of("visibility", "PRIVATE"))
+            .put("/api/events/" + eventId).then().statusCode(200)
+            .body("data.visibility", equalTo("PRIVATE"));
     }
 
     private UUID createAndPublishEvent(String token, String visibility) {

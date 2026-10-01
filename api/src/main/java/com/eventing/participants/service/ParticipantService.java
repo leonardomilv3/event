@@ -33,6 +33,16 @@ public class ParticipantService {
     public ParticipantResponse join(UUID userId, UUID eventId) {
         Event event = eventRepository.findById(eventId);
         if (event == null) throw ApiException.notFound("Evento");
+        boolean isCreator = event.creator.id.equals(userId);
+        Optional<EventParticipant> existing = participantRepository.findByEventAndUser(eventId, userId);
+
+        // Rascunho de terceiro e PRIVATE sem admissão prévia: 404, igual ao GET /{id}.
+        // PRIVATE não tem fluxo de pedido — só quem já foi admitido (inclusive quem saiu) pode (re)entrar.
+        if (!isCreator && event.status == EventStatus.DRAFT) throw ApiException.notFound("Evento");
+        if (!isCreator && event.visibility == EventVisibility.PRIVATE
+                && existing.filter(p -> p.status != ParticipantStatus.REQUESTED).isEmpty()) {
+            throw ApiException.notFound("Evento");
+        }
         if (event.status != EventStatus.PUBLISHED) {
             throw ApiException.badRequest("Evento não está publicado");
         }
@@ -51,7 +61,6 @@ public class ParticipantService {
             targetStatus = ParticipantStatus.APPROVED;
         }
 
-        Optional<EventParticipant> existing = participantRepository.findByEventAndUser(eventId, userId);
         EventParticipant participant;
 
         if (existing.isPresent()) {

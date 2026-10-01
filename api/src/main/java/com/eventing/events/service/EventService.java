@@ -78,17 +78,17 @@ public class EventService {
     }
 
     /**
-     * Eventos PRIVATE/INVITE_ONLY só são visíveis ao criador ou a participantes confirmados.
-     * Sem acesso → 404 (não 403) para não revelar que o evento existe.
+     * O criador sempre vê. Rascunhos só o criador. PUBLIC é aberto; PRIVATE/INVITE_ONLY
+     * só para participantes confirmados. Sem acesso → 404 (não 403) para não revelar
+     * que o evento existe.
      */
     public Event requireViewable(UUID eventId, UUID viewerId) {
         Event event = eventRepository.findById(eventId);
         if (event == null) throw ApiException.notFound("Evento");
+        if (viewerId != null && event.creator.id.equals(viewerId)) return event;
+        if (event.status == EventStatus.DRAFT) throw ApiException.notFound("Evento");
         if (event.visibility == EventVisibility.PUBLIC) return event;
-        if (viewerId != null
-                && (event.creator.id.equals(viewerId) || eventRepository.isConfirmedParticipant(eventId, viewerId))) {
-            return event;
-        }
+        if (viewerId != null && eventRepository.isConfirmedParticipant(eventId, viewerId)) return event;
         throw ApiException.notFound("Evento");
     }
 
@@ -147,11 +147,23 @@ public class EventService {
         return PageResponse.of(content, page, size, total);
     }
 
+    /** Visão de terceiros — só eventos PUBLISHED + PUBLIC. */
     @Transactional
     public PageResponse<EventResponse> getByCreatorId(UUID creatorId, int page, int size) {
-        List<EventResponse> content = eventRepository.findByCreatorId(creatorId, Page.of(page, size))
-                .stream().map(e -> toResponse(e, null)).toList();
-        long total = eventRepository.countByCreatorId(creatorId);
+        return getByCreatorId(creatorId, null, page, size);
+    }
+
+    /** O próprio criador vê todos os seus eventos (rascunhos e não públicos inclusive). */
+    @Transactional
+    public PageResponse<EventResponse> getByCreatorId(UUID creatorId, UUID viewerId, int page, int size) {
+        boolean isOwner = creatorId.equals(viewerId);
+        List<Event> events = isOwner
+                ? eventRepository.findByCreatorId(creatorId, Page.of(page, size))
+                : eventRepository.findPublishedPublicByCreatorId(creatorId, Page.of(page, size));
+        long total = isOwner
+                ? eventRepository.countByCreatorId(creatorId)
+                : eventRepository.countPublishedPublicByCreatorId(creatorId);
+        List<EventResponse> content = events.stream().map(e -> toResponse(e, null)).toList();
         return PageResponse.of(content, page, size, total);
     }
 

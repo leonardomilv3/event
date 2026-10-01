@@ -96,7 +96,7 @@ class EventServiceTest {
         AuthResponse creator = registerUser();
         EventResponse created = createDraftEvent(creator);
 
-        EventResponse found = eventService.getById(created.id());
+        EventResponse found = eventService.getById(created.id(), creator.userId());
 
         assertEquals(created.id(), found.id());
         assertEquals(created.title(), found.title());
@@ -352,6 +352,18 @@ class EventServiceTest {
         assertNotNull(result);
         // nenhum evento de SPORT nos testes — pode ser 0
         assertTrue(result.totalElements() >= 0);
+    }
+
+    @Test
+    void shouldGetByCreatorIdHideDraftsFromOthersButShowToOwner() {
+        AuthResponse creator = registerUser();
+        EventResponse draft = createDraftEvent(creator);
+
+        PageResponse<EventResponse> asOther = eventService.getByCreatorId(creator.userId(), 0, 20);
+        PageResponse<EventResponse> asOwner = eventService.getByCreatorId(creator.userId(), creator.userId(), 0, 20);
+
+        assertTrue(asOther.content().stream().noneMatch(e -> e.id().equals(draft.id())));
+        assertTrue(asOwner.content().stream().anyMatch(e -> e.id().equals(draft.id())));
     }
 
     @Test

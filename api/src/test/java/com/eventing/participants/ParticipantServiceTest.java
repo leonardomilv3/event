@@ -74,13 +74,25 @@ public class ParticipantServiceTest {
     @Test
     void shouldFailJoinOnDraftEvent() {
         AuthResponse creator = registerUser();
-        EventResponse event = createDraft(creator); // não publicado
+        EventResponse event = createDraft(creator); // rascunho é invisível para terceiros
         AuthResponse joiner = registerUser();
 
         ApiException ex = assertThrows(ApiException.class,
             () -> participantService.join(joiner.userId(), event.id()));
 
-        assertEquals(Response.Status.BAD_REQUEST, ex.getStatus());
+        assertEquals(Response.Status.NOT_FOUND, ex.getStatus());
+    }
+
+    @Test
+    void shouldFailJoinOnPrivateEventWithoutPriorAdmission() {
+        AuthResponse creator = registerUser();
+        EventResponse event = createAndPublish(creator, EventVisibility.PRIVATE);
+        AuthResponse stranger = registerUser();
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> participantService.join(stranger.userId(), event.id()));
+
+        assertEquals(Response.Status.NOT_FOUND, ex.getStatus());
     }
 
     @Test

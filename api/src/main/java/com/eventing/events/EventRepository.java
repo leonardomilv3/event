@@ -49,6 +49,13 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
         return find("creator.id", creatorId).page(page).list();
     }
 
+    /** Visão de terceiros: só eventos PUBLISHED + PUBLIC do criador. */
+    public List<Event> findPublishedPublicByCreatorId(UUID creatorId, Page page) {
+        return find("creator.id = ?1 and status = ?2 and visibility = ?3",
+                creatorId, EventStatus.PUBLISHED, EventVisibility.PUBLIC)
+                .page(page).list();
+    }
+
     // ── PostGIS — nearby ──────────────────────────────────────────────────────
 
     @SuppressWarnings("unchecked")
@@ -263,6 +270,11 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
 
     public long countByCreatorId(UUID creatorId) {
         return count("creator.id", creatorId);
+    }
+
+    public long countPublishedPublicByCreatorId(UUID creatorId) {
+        return count("creator.id = ?1 and status = ?2 and visibility = ?3",
+                creatorId, EventStatus.PUBLISHED, EventVisibility.PUBLIC);
     }
 
     public long countFeed() {

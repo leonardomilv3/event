@@ -47,7 +47,7 @@ public class EventController {
         if (category != null) {
             result = eventService.getByCategory(category, page, size);
         } else if (creatorId != null) {
-            result = eventService.getByCreatorId(creatorId, page, size);
+            result = eventService.getByCreatorId(creatorId, currentUserIdOrNull(), page, size);
         } else {
             result = eventService.getPublicEvents(page, size);
         }

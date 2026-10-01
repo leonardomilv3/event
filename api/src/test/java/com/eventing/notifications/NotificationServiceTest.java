@@ -8,6 +8,7 @@ import io.quarkus.mailer.Mail;
 import io.quarkus.mailer.Mailer;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,13 +25,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
+@TestProfile(NotificationTestProfile.class)
 class NotificationServiceTest {
 
     @Inject NotificationService notificationService;
 
     @InjectMock EventRepository eventRepository;
     @InjectMock ParticipantRepository participantRepository;
-    @InjectMock Mailer mailer;
+    @InjectMock Mailer mailer; // normal-scoped via MockMailerProducer (ver NotificationTestProfile)
 
     @BeforeEach
     void resetMocks() {

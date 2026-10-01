@@ -255,6 +255,14 @@ class EventControllerTest {
             .delete("/api/events/" + eventId)
         .then()
             .statusCode(204);
+
+        // Hard delete: o evento deixa de existir
+        given()
+            .header("Authorization", "Bearer " + token)
+        .when()
+            .get("/api/events/" + eventId)
+        .then()
+            .statusCode(404);
     }
 
     @Test

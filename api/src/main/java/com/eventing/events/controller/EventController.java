@@ -89,7 +89,7 @@ public class EventController {
     @Path("/{id}")
     @RolesAllowed("user")
     @SecurityRequirement(name = "jwt")
-    @Operation(summary = "Cancelar evento — soft delete via status CANCELLED")
+    @Operation(summary = "Cancelar evento — remove o evento definitivamente (hard delete)")
     public Response delete(@PathParam("id") UUID id) {
         UUID currentUserId = UUID.fromString(jwt.getSubject());
         eventService.delete(currentUserId, id);

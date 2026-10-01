@@ -174,17 +174,18 @@ class EventServiceTest {
         assertEquals(Response.Status.NOT_FOUND, ex.getStatus());
     }
 
-    // ── DELETE (soft delete → CANCELLED) ─────────────────────────────────────
+    // ── DELETE (hard delete) ─────────────────────────────────────────────────
 
     @Test
-    void shouldCancelEventAsSoftDelete() {
+    void shouldHardDeleteEvent() {
         AuthResponse creator = registerUser();
         EventResponse event = createDraftEvent(creator);
 
         eventService.delete(creator.userId(), event.id());
 
-        EventResponse cancelled = eventService.getById(event.id());
-        assertEquals(EventStatus.CANCELLED, cancelled.status());
+        ApiException ex = assertThrows(ApiException.class,
+            () -> eventService.getById(event.id()));
+        assertEquals(Response.Status.NOT_FOUND, ex.getStatus());
     }
 
     @Test

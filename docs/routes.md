@@ -16,7 +16,7 @@ Roteamento client-side via React Router v6, configurado em `app/src/App.tsx`.
 | `/events` | `EventManagement` | `TopNavBar` + `SideNavBar` + `BottomNav` mobile + `FAB` mobile | `src/pages/EventManagement.tsx` |
 | `/events/new` | `CreateEventPage` | `TopNavBar` + `EventFormPanel` + `Footer` | `src/pages/CreateEventPage.tsx` |
 | `/events/:id/edit` | `EditEventPage` | `TopNavBar` + `EventFormPanel` + `Footer` | `src/pages/EditEventPage.tsx` |
-| `/events/:id` | `EventDetail` | Nav local inline + persistent CTA + `Footer` | `src/pages/EventDetail.tsx` |
+| `/events/:id` | `EventDetail` | Nav local inline + persistent CTA + `Footer` (**público**) | `src/pages/EventDetail.tsx` |
 | `/my-events` | `MyEventsPage` | `TopNavBar` + `SideNavBar` + `BottomNav` + `Footer` | `src/pages/MyEventsPage.tsx` |
 | `/users/:userId` | `PublicProfilePage` | `TopNavBar` + `Footer` (público) | `src/pages/PublicProfilePage.tsx` |
 | `*` | Redirect | → `/` | `App.tsx` |
@@ -89,7 +89,18 @@ Gestão de eventos do organizador. Requer autenticação.
 
 ## EventDetail `/events/:id`
 
-Página de detalhe de um evento. Acesso público com CTA de participação.
+Página de detalhe de um evento. **Rota pública** (fora de `ProtectedRoute`): um link compartilhado abre para qualquer pessoa, sem conta. Login só é pedido no clique de ação.
+
+**Auth e redirect:**
+- "Participar", "Sair" e "Seguir" sem sessão → `/login?redirect=/events/:id?...`; após login/cadastro, volta automaticamente ao evento (`utils/redirect.ts` aceita só caminhos relativos, sem open redirect)
+- `ProtectedRoute` também passa a anexar `?redirect=` em todas as rotas protegidas
+- Token expirado não expulsa o visitante: `httpClient` repete a chamada sem token em 401 e só redireciona se o endpoint exigir auth; `/api/auth/me` nunca redireciona
+
+**Compartilhamento e funil (ADR-011/012):**
+- Botão "Compartilhar" no hero e QR code do organizador usam `/events/:id?ref=share&via=…` (`useShareEvent`)
+- Após `join` confirmado pela API → `ShareInviteModal` (copiar link, WhatsApp, X, share nativo). Fechar o modal não afeta a participação
+- `event_viewed`, `event_join_clicked`, `event_join_confirmed` e eventos `share_*` via `track()`
+- Para crawlers, `app/middleware.ts` serve `<title>`, `<meta description>`, Open Graph, Twitter Card e JSON-LD do evento nesta mesma URL
 
 **Organismos e ordem de renderização:**
 
@@ -104,8 +115,9 @@ Página de detalhe de um evento. Acesso público com CTA de participação.
      - Host card (`GlassPanel`) — avatar, nome, role, bio, botões Follow + Mail
      - Capacity card — label, contagem "14 / 150", `ProgressBar` com mint glow, indicadores de demanda
 4. `Footer`
-5. **Persistent CTA mobile** — barra `fixed bottom-0`, botão full-width "Participar"
-6. **Persistent CTA desktop** — floating `glass-panel` pill "Vagas limitadas restantes" + botão pill mint grande
+5. **`ShareInviteModal`** — renderizado só após participação confirmada
+6. **Persistent CTA mobile** — barra `fixed bottom-0`, botão full-width "Participar"
+7. **Persistent CTA desktop** — floating `glass-panel` pill "Vagas limitadas restantes" + botão pill mint grande
 
 ---
 

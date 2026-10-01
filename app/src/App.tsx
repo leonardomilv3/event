@@ -71,14 +71,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/events/:id"
-            element={
-              <ProtectedRoute>
-                <EventDetail />
-              </ProtectedRoute>
-            }
-          />
+          {/* Público: link compartilhado precisa abrir sem conta; ações pedem login no clique */}
+          <Route path="/events/:id" element={<EventDetail />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Analytics />

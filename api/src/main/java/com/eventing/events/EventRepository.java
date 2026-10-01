@@ -210,6 +210,25 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
         ).list();
     }
 
+    // ── SEO ──────────────────────────────────────────────────────────────────
+
+    /** Eventos PUBLISHED + PUBLIC que ainda não terminaram — nunca expõe PRIVATE/INVITE_ONLY. */
+    public List<SitemapEventRow> findSitemapEntries(LocalDateTime nowUtc, int limit) {
+        return em.createQuery("""
+                SELECT new com.eventing.events.SitemapEventRow(e.id, e.updatedAt)
+                FROM Event e
+                WHERE e.status = :status
+                  AND e.visibility = :visibility
+                  AND COALESCE(e.endsAt, e.startsAt) >= :now
+                ORDER BY e.startsAt ASC
+                """, SitemapEventRow.class)
+                .setParameter("status", EventStatus.PUBLISHED)
+                .setParameter("visibility", EventVisibility.PUBLIC)
+                .setParameter("now", nowUtc)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
     // ── CRUD count helpers ────────────────────────────────────────────────────
 
     public long countPublishedPublic() {

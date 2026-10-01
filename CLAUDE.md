@@ -30,6 +30,8 @@ A interface reflete a energia da cidade à noite: superfícies escuras, acentos 
 | Roteamento | React Router | v6 |
 | Animações | Framer Motion | 12 |
 | Ícones | Material Symbols Outlined | Google Fonts |
+| Analytics | PostHog (`posthog-js`) | ver ADR-012 |
+| Edge | Vercel Routing Middleware (`@vercel/functions`) | ver ADR-011 |
 | Fontes | Inter + Playfair Display | Google Fonts |
 
 > **Tailwind v3 é obrigatório.** O design system usa `tailwind.config.ts` com `theme.extend` — API incompatível com v4.
@@ -66,12 +68,14 @@ app/src/
 │   └── organisms/   # Seções completas; podem ter estado local
 ├── pages/           # Montam organismos; uma por rota
 ├── hooks/           # Custom hooks compartilhados
+├── lib/             # Clientes de terceiros (PostHog) + `analytics.ts` (eventos de funil tipados)
+├── utils/           # Funções puras (datas, redirect seguro pós-login)
 └── types/           # Interfaces e tipos globais
 ```
 
 Documentação detalhada:
 - [`docs/architecture.md`](docs/architecture.md) — estrutura, princípios, convenções de código
-- [`docs/components.md`](docs/components.md) — todos os 20 componentes com props e notas de uso
+- [`docs/components.md`](docs/components.md) — todos os componentes com props e notas de uso
 - [`docs/routes.md`](docs/routes.md) — 4 rotas com layouts, organismos e seções de cada página
 
 ---
@@ -112,6 +116,8 @@ Documentação completa: [`docs/design-system.md`](docs/design-system.md)
 | [008](docs/adrs/008-no-styled-components.md) | Sem styled-components |
 | [009](docs/adrs/009-design-system-tokens.md) | Tokens do Stitch como fonte única de verdade |
 | [010](docs/adrs/010-typescript-strict.md) | TypeScript strict + verbatimModuleSyntax |
+| [011](docs/adrs/011-edge-prerender-og-seo.md) | `app/middleware.ts` serve OG/SEO de `/events/:id` para crawlers + proxy de `/sitemap.xml` |
+| [012](docs/adrs/012-posthog-funnel-analytics.md) | PostHog para funil share → join e retenção; eventos via `track()` tipado |
 
 ### Backend — [`api/docs/adrs/`](api/docs/adrs/)
 
@@ -239,6 +245,7 @@ A tarefa só está concluída quando **ambos os comandos passam sem erros**.
 - ❌ Lógica de negócio dentro de componentes visuais (fetch, transformação de dados, regras de negócio)
 - ❌ Estado global prematuro — criar store só quando houver dados realmente compartilhados entre páginas
 - ❌ `any` — nem implícito nem explícito
+- ❌ `posthog.capture` direto para eventos de funil — usar `track()` de `src/lib/analytics.ts` (nomes são contrato com dashboards)
 
 ### Design
 - ❌ Ignorar tokens do design system — `primary-container` ≠ `primary` (ver ADR-009)

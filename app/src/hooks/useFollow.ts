@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { type FollowDto } from '../types/api'
 import { getFollowers, getFollowing, follow as followService, unfollow as unfollowService } from '../services/socialService'
 import { useAuthContext } from './useAuthContext'
 import { ApiError } from '../services/httpClient'
+import posthog from '../lib/posthog'
+import { buildAuthPath } from '../utils/redirect'
 
 export interface UseFollowReturn {
   followers: FollowDto[]
@@ -17,6 +20,8 @@ export interface UseFollowReturn {
 
 export function useFollow(profileUserId: string): UseFollowReturn {
   const { user } = useAuthContext()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [followers, setFollowers] = useState<FollowDto[]>([])
   const [following, setFollowing] = useState<FollowDto[]>([])
   const [loading, setLoading] = useState(true)
@@ -54,14 +59,19 @@ export function useFollow(profileUserId: string): UseFollowReturn {
   const isFollowing = user !== null && followers.some((f) => f.follower.id === user.id)
 
   const toggleFollow = async (): Promise<void> => {
-    if (!user) return
+    if (!user) {
+      navigate(buildAuthPath(location.pathname + location.search))
+      return
+    }
     setActionLoading(true)
     setError(null)
     try {
       if (isFollowing) {
         await unfollowService(profileUserId)
+        posthog.capture('user_unfollowed')
       } else {
         await followService(profileUserId)
+        posthog.capture('user_followed')
       }
       setRefreshTrigger((n) => n + 1)
     } catch (err: unknown) {

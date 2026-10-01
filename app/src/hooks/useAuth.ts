@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import { type UserProfile } from '../types/api';
 import * as authService from '../services/authService';
 import { TOKEN_KEY } from '../services/httpClient';
+import posthog from '../lib/posthog';
+
+function identifyUser(profile: UserProfile): void {
+  posthog.identify(profile.id, {
+    email: profile.email,
+    username: profile.username,
+    ...(profile.displayName ? { name: profile.displayName } : {}),
+  });
+}
 
 export interface AuthState {
   user: UserProfile | null;
@@ -26,6 +35,7 @@ export function useAuth(): AuthState {
     authService
       .me()
       .then((profile) => {
+        identifyUser(profile);
         setUser(profile);
       })
       .catch(() => {
@@ -41,6 +51,8 @@ export function useAuth(): AuthState {
     const auth = await authService.login(email, password);
     setToken(auth.token);
     const profile = await authService.me();
+    identifyUser(profile);
+    posthog.capture('user_logged_in');
     setUser(profile);
   };
 
@@ -52,10 +64,13 @@ export function useAuth(): AuthState {
     const auth = await authService.register(email, username, password);
     setToken(auth.token);
     const profile = await authService.me();
+    identifyUser(profile);
+    posthog.capture('user_registered');
     setUser(profile);
   };
 
   const logout = (): void => {
+    posthog.reset();
     authService.logout();
     setUser(null);
     setToken(null);
@@ -64,6 +79,7 @@ export function useAuth(): AuthState {
   const refreshUser = async (): Promise<void> => {
     try {
       const profile = await authService.me();
+      identifyUser(profile);
       setUser(profile);
     } catch {
       // silently ignore — token may have expired

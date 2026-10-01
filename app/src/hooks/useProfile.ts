@@ -3,6 +3,7 @@ import { type UserProfile } from '../types/api'
 import { useAuthContext } from './useAuthContext'
 import { updateMe, type UpdateProfileRequest } from '../services/userService'
 import { ApiError } from '../services/httpClient'
+import posthog from '../lib/posthog'
 
 export interface ProfileState {
   profile: UserProfile | null
@@ -32,6 +33,11 @@ export function useProfile(): ProfileState {
     try {
       await updateMe(data)
       await refreshUser()
+      posthog.capture('profile_updated', {
+        has_display_name: Boolean(data.displayName),
+        has_bio: Boolean(data.bio),
+        has_city: Boolean(data.city),
+      })
       setSuccess(true)
     } catch (err: unknown) {
       setError(err instanceof ApiError ? err.message : 'Erro ao atualizar perfil')

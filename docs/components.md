@@ -199,6 +199,28 @@ Notas:
 
 ---
 
+### `ShareInviteModal`
+`src/components/molecules/ShareInviteModal.tsx`
+
+Prompt leve pós-confirmação de presença ("Presença confirmada! Convide seus amigos"). Puramente apresentacional: URLs, estado `copied` e tracking vêm de `useShareEvent` via props.
+
+| Prop | Tipo | Descrição |
+|---|---|---|
+| `eventTitle` | `string` | Título exibido na chamada |
+| `shareUrl` | `string` | Link exibido no campo de cópia (`?ref=share&via=copy`) |
+| `copied` | `boolean` | Feedback "Copiado!" no botão |
+| `canNativeShare` | `boolean` | Mostra o botão "Mais" (Web Share API) |
+| `whatsappHref` / `twitterHref` | `string` | Deep links `wa.me` / `twitter.com/intent/tweet` |
+| `onCopy` / `onNativeShare` / `onWhatsApp` / `onTwitter` | `() => void` | Ações; os links externos abrem em nova aba e só disparam tracking |
+| `onClose` | `() => void` | Fecha (Escape, backdrop, X ou "Agora não") |
+
+Notas:
+- Mesmo padrão visual de `FollowListModal` (backdrop blur + `GlassPanel`, `z-[100]` acima dos CTAs fixos)
+- `role="dialog"` + `aria-modal` + `aria-labelledby`
+- Não é gate: a participação já está confirmada quando o modal abre
+
+---
+
 ### `GlassPanel`
 `src/components/molecules/GlassPanel.tsx`
 

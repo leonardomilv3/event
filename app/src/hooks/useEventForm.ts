@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { type CreateEventRequest, type UpdateEventRequest, type EventResponse } from '../types/api'
 import { createEvent, updateEvent, deleteEvent, publishEvent } from '../services/eventService'
 import { ApiError } from '../services/httpClient'
+import posthog from '../lib/posthog'
+import { eventLifecycleLogger } from '../lib/posthogLogs'
 
 export interface EventFormState {
   saving: boolean
@@ -27,6 +29,13 @@ export function useEventForm(): EventFormState {
       if (publishNow) {
         await publishEvent(event.id)
       }
+      const logAttributes = {
+        category: event.category,
+        visibility: event.visibility,
+        status: publishNow ? 'PUBLISHED' : event.status,
+      }
+      posthog.capture('event_created', logAttributes)
+      eventLifecycleLogger.created(logAttributes)
       navigate(`/events/${event.id}`)
     } catch (err: unknown) {
       setError(err instanceof ApiError ? err.message : 'Erro ao criar evento')
@@ -40,6 +49,13 @@ export function useEventForm(): EventFormState {
     setError(null)
     try {
       const event = await updateEvent(id, data)
+      const logAttributes = {
+        category: event.category,
+        visibility: event.visibility,
+        status: event.status,
+      }
+      posthog.capture('event_updated', logAttributes)
+      eventLifecycleLogger.updated(logAttributes)
       navigate(`/events/${id}`)
       return event
     } catch (err: unknown) {
@@ -54,6 +70,8 @@ export function useEventForm(): EventFormState {
     setError(null)
     try {
       await deleteEvent(id)
+      posthog.capture('event_cancelled')
+      eventLifecycleLogger.cancelled()
       navigate('/events')
     } catch (err: unknown) {
       setError(err instanceof ApiError ? err.message : 'Erro ao cancelar evento')

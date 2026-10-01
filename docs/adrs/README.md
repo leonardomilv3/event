@@ -20,6 +20,8 @@ Cada ADR segue a estrutura: **Status → Context → Decision → Consequences �
 | [008](./008-no-styled-components.md) | Proibição de styled-components | Accepted |
 | [009](./009-design-system-tokens.md) | Design System Tokens do Stitch como Fonte Única de Verdade | Accepted |
 | [010](./010-typescript-strict.md) | TypeScript Estrito com verbatimModuleSyntax | Accepted |
+| [011](./011-edge-prerender-og-seo.md) | Vercel Routing Middleware para Open Graph e SEO por evento | Accepted |
+| [012](./012-posthog-funnel-analytics.md) | PostHog para instrumentação do funil de crescimento | Accepted |
 
 ## Como criar um novo ADR
 

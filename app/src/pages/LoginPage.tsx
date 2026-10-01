@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import CinematicAuthLayout from '../components/organisms/CinematicAuthLayout'
 import AuthFormPanel from '../components/molecules/AuthFormPanel'
 import AuthInput from '../components/atoms/AuthInput'
 // import SocialAuthButton from '../components/atoms/SocialAuthButton'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { ApiError } from '../services/httpClient'
+import { buildAuthPath, getSafeRedirect, REDIRECT_PARAM } from '../utils/redirect'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectTo = getSafeRedirect(searchParams.get(REDIRECT_PARAM))
   const { login, isAuthenticated, loading: authLoading } = useAuthContext()
 
   const [email, setEmail] = useState('')
@@ -17,7 +20,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
 
   if (authLoading) return null
-  if (isAuthenticated) return <Navigate to="/" replace />
+  if (isAuthenticated) return <Navigate to={redirectTo} replace />
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -25,7 +28,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       await login(email, password)
-      navigate('/')
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message)
@@ -45,7 +48,7 @@ export default function LoginPage() {
         footer={
           <p className="font-body-md text-body-md text-on-surface-variant">
             Don't have an account?{' '}
-            <Link to="/register" className="text-primary-fixed-dim font-bold ml-1 hover:underline">
+            <Link to={buildAuthPath(redirectTo, '/register')} className="text-primary-fixed-dim font-bold ml-1 hover:underline">
               Sign up
             </Link>
           </p>

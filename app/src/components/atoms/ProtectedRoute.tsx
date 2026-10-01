@@ -1,6 +1,7 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../hooks/useAuthContext'
 import Icon from './Icon'
+import { buildAuthPath } from '../../utils/redirect'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -8,6 +9,7 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { loading, isAuthenticated } = useAuthContext()
+  const location = useLocation()
 
   if (loading) {
     return (
@@ -18,7 +20,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to={buildAuthPath(location.pathname + location.search)} replace />
   }
 
   return <>{children}</>

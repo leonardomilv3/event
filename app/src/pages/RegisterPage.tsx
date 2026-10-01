@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import CinematicAuthLayout from '../components/organisms/CinematicAuthLayout'
 import AuthFormPanel from '../components/molecules/AuthFormPanel'
 import AuthInput from '../components/atoms/AuthInput'
 import SocialAuthButton from '../components/atoms/SocialAuthButton'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { ApiError } from '../services/httpClient'
+import { buildAuthPath, getSafeRedirect, REDIRECT_PARAM } from '../utils/redirect'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectTo = getSafeRedirect(searchParams.get(REDIRECT_PARAM))
   const { register, isAuthenticated, loading: authLoading } = useAuthContext()
 
   const [email, setEmail] = useState('')
@@ -19,7 +22,7 @@ export default function RegisterPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
 
   if (authLoading) return null
-  if (isAuthenticated) return <Navigate to="/" replace />
+  if (isAuthenticated) return <Navigate to={redirectTo} replace />
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -44,7 +47,7 @@ export default function RegisterPage() {
 
     try {
       await register(email, username, password)
-      navigate('/')
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message)
@@ -64,7 +67,7 @@ export default function RegisterPage() {
         footer={
           <p className="font-body-md text-body-md text-on-surface-variant">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary-fixed-dim font-bold ml-1 hover:underline">
+            <Link to={buildAuthPath(redirectTo, '/login')} className="text-primary-fixed-dim font-bold ml-1 hover:underline">
               Sign in
             </Link>
           </p>

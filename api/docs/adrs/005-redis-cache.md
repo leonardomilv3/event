@@ -20,6 +20,7 @@ Usamos **Redis** como cache em memória para os resultados paginados de `findNea
   - Feed: `events:feed:{lat:.2f}:{lon:.2f}`
   - Lat/lon arredondados para 2 casas decimais para coalescer requests próximas
 - Invalidação: padrão `KEYS events:nearby:*` + `KEYS events:feed:*` + `DEL` nos eventos de escrita (criar, publicar, cancelar evento)
+- Sitemap (`GET /sitemap.xml`, `com.eventing.seo.SitemapService`): XML completo em `seo:sitemap`, TTL **3600s**, sem invalidação ativa. Um evento recém-publicado aparece em até 1h, o que é aceitável para crawlers (ver ADR-011 do frontend)
 - **Degradação graciosa**: todos os acessos Redis em `try-catch`; falha silenciosa faz fallback para o banco
 
 ### Configuração

@@ -22,7 +22,8 @@ export async function login(email: string, password: string): Promise<AuthRespon
 }
 
 export async function me(): Promise<UserProfile> {
-  return http.get<UserProfile>('/api/auth/me');
+  // Sem redirect: sessão vencida em página pública só vira visitante anônimo.
+  return http.get<UserProfile>('/api/auth/me', { redirectOnUnauthorized: false });
 }
 
 export function logout(): void {

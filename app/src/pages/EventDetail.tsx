@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import Footer from '../components/organisms/Footer'
 import GlassPanel from '../components/molecules/GlassPanel'
@@ -13,6 +13,10 @@ import { useAuthContext } from '../hooks/useAuthContext'
 import { usePublicProfile } from '../hooks/usePublicProfile'
 import { formatEventDate } from '../utils/date'
 import FollowButton from '../components/atoms/FollowButton'
+import ShareInviteModal from '../components/molecules/ShareInviteModal'
+import { buildShareUrl, useShareEvent } from '../hooks/useShareEvent'
+import posthog from '../lib/posthog'
+import { markShareEntry, track } from '../lib/analytics'
 
 const FALLBACK_HERO = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1600&q=80'
 
@@ -24,16 +28,14 @@ export default function EventDetail() {
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-
-  const handleShare = () => {
-    void navigator.clipboard.writeText(window.location.href).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  };
+  const [showSharePrompt, setShowSharePrompt] = useState(false)
+  const [searchParams] = useSearchParams()
+  const refParam = searchParams.get('ref')
+  const viaParam = searchParams.get('via')
+  const viewTrackedFor = useRef<string | null>(null)
 
   const { event, participants, loading: eventLoading, error } = useEvent(id)
+  const share = useShareEvent(event)
   const {
     isParticipating,
     countDelta,
@@ -65,13 +67,38 @@ export default function EventDetail() {
       ? Math.min(Math.round((displayCount / event.maxParticipants) * 100), 100)
       : 0
 
-  const handleParticipation = () => {
+  const handleParticipation = async () => {
     if (isParticipating) {
-      void leave(id)
-    } else {
-      void join(id)
+      await leave(id)
+      return
+    }
+    const confirmed = await join(id)
+    if (confirmed) {
+      track('share_prompt_shown', { event_id: id })
+      setShowSharePrompt(true)
     }
   }
+
+  const closeSharePrompt = useCallback(() => {
+    track('share_prompt_dismissed', { event_id: id })
+    setShowSharePrompt(false)
+  }, [id])
+
+  // Funil: dispara uma vez por evento, só depois do auth resolver (para `authenticated` ser confiável)
+  useEffect(() => {
+    if (stillLoading || !event || viewTrackedFor.current === event.id) return
+    viewTrackedFor.current = event.id
+    const fromShare = refParam === 'share'
+    if (fromShare) markShareEntry(event.id, viaParam)
+    track('event_viewed', {
+      event_id: event.id,
+      source: fromShare ? 'share' : 'internal',
+      ref: refParam,
+      share_channel: viaParam,
+      category: event.category,
+      authenticated: user !== null,
+    })
+  }, [stillLoading, event, refParam, viaParam, user])
 
   const handleDelete = async () => {
     if (!event) return;
@@ -85,6 +112,7 @@ export default function EventDetail() {
     setDeleteError(null);
     try {
       await deleteEvent(event.id); // DELETE /api/events/{id}
+      posthog.capture('event_cancelled')
       navigate('/my-events');
     } catch {
       setDeleteError('Não foi possível cancelar o evento. Tente novamente.');
@@ -236,16 +264,16 @@ export default function EventDetail() {
 
                     {/* Share button */}
                     <button
-                      onClick={handleShare}
+                      onClick={() => void share.copyLink('event_hero')}
                       className="flex items-center gap-2 px-stack-md py-2 rounded-full border border-outline-variant/50 hover:border-primary-container/50 hover:bg-white/5 transition-all"
                     >
                       <Icon
-                        name={copied ? 'check_circle' : 'share'}
-                        className={copied ? 'text-primary-container' : 'text-on-surface-variant'}
+                        name={share.copied ? 'check_circle' : 'share'}
+                        className={share.copied ? 'text-primary-container' : 'text-on-surface-variant'}
                         size={18}
                       />
                       <span className="font-label-md text-label-md text-on-surface-variant">
-                        {copied ? 'Link copiado!' : 'Compartilhar'}
+                        {share.copied ? 'Link copiado!' : 'Compartilhar'}
                       </span>
                     </button>
                   </div>
@@ -418,7 +446,7 @@ export default function EventDetail() {
                         </span>
                         <div className="p-3 bg-white rounded-xl">
                           <QRCodeSVG
-                            value={window.location.href}
+                            value={buildShareUrl(event.id, 'qr')}
                             size={140}
                             bgColor="#ffffff"
                             fgColor="#131618"
@@ -440,11 +468,27 @@ export default function EventDetail() {
 
           <Footer />
 
+          {showSharePrompt && (
+            <ShareInviteModal
+              eventTitle={event.title}
+              shareUrl={share.shareUrl}
+              copied={share.copied}
+              canNativeShare={share.canNativeShare}
+              whatsappHref={share.whatsappHref}
+              twitterHref={share.twitterHref}
+              onCopy={() => void share.copyLink('post_join_prompt')}
+              onNativeShare={() => void share.nativeShare('post_join_prompt')}
+              onWhatsApp={() => share.trackExternal('whatsapp', 'post_join_prompt')}
+              onTwitter={() => share.trackExternal('twitter', 'post_join_prompt')}
+              onClose={closeSharePrompt}
+            />
+          )}
+
           {/* ── Persistent CTA — mobile ── */}
           {!isCreator && (
             <div className="fixed bottom-0 left-0 w-full z-40 px-margin-mobile py-stack-md bg-background/80 backdrop-blur-md border-t border-outline-variant/30 md:hidden">
               <button
-                onClick={handleParticipation}
+                onClick={() => void handleParticipation()}
                 disabled={participationLoading}
                 className={[
                   'w-full font-bold py-stack-md rounded-xl transition-all font-label-caps text-label-caps uppercase tracking-widest',
@@ -484,7 +528,7 @@ export default function EventDetail() {
                 </span>
               </GlassPanel>
               <button
-                onClick={handleParticipation}
+                onClick={() => void handleParticipation()}
                 disabled={participationLoading}
                 className={[
                   'h-20 px-stack-xl font-bold rounded-full transition-all flex items-center gap-4 font-serif text-headline-md uppercase tracking-widest',

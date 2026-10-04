@@ -18,6 +18,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,7 +68,7 @@ public class ParticipantService {
             // Registro existe (ex: fez leave antes) — atualiza status e timestamp
             participant = existing.get();
             participant.status = targetStatus;
-            participant.joinedAt = LocalDateTime.now();
+            participant.joinedAt = LocalDateTime.now(ZoneOffset.UTC);
             // Entidade já gerenciada pelo Hibernate — o flush persiste automaticamente
         } else {
             // Novo participante
@@ -77,7 +78,7 @@ public class ParticipantService {
             participant.event = event;
             participant.user = user;
             participant.status = targetStatus;
-            participant.joinedAt = LocalDateTime.now();
+            participant.joinedAt = LocalDateTime.now(ZoneOffset.UTC);
             participantRepository.persist(participant);
         }
 

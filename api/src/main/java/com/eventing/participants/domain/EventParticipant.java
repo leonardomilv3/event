@@ -4,6 +4,7 @@ import com.eventing.events.domain.Event;
 import com.eventing.users.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
@@ -36,12 +37,12 @@ public class EventParticipant {
 
     @PrePersist
     void prePersist() {
-        joinedAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        joinedAt = LocalDateTime.now(ZoneOffset.UTC);
+        updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 
     @PreUpdate
     void preUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 }

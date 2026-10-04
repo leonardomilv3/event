@@ -10,6 +10,7 @@ import SearchInput from '../components/molecules/SearchInput'
 import Icon from '../components/atoms/Icon'
 import { useCreatedEvents } from '../hooks/useCreatedEvents'
 import { type EventResponse } from '../types/api'
+import { parseApiDate } from '../utils/date'
 
 const FILTER_TABS = [
   { label: 'Todos', value: 'all' },
@@ -20,7 +21,7 @@ const FILTER_TABS = [
 ]
 
 function StatusBadge({ status, visibility, startsAt }: Pick<EventResponse, 'status' | 'visibility' | 'startsAt'>) {
-  const isLive = status === 'PUBLISHED' && new Date(startsAt) <= new Date()
+  const isLive = status === 'PUBLISHED' && parseApiDate(startsAt) <= new Date()
 
   if (isLive) {
     return (
@@ -69,7 +70,7 @@ export default function EventManagement() {
     if (activeFilter === 'draft') return ev.status === 'DRAFT'
     if (activeFilter === 'public') return ev.visibility === 'PUBLIC'
     if (activeFilter === 'private') return ev.visibility === 'INVITE_ONLY'
-    if (activeFilter === 'live') return ev.status === 'PUBLISHED' && new Date(ev.startsAt) <= new Date()
+    if (activeFilter === 'live') return ev.status === 'PUBLISHED' && parseApiDate(ev.startsAt) <= new Date()
     return true
   })
 
@@ -190,7 +191,7 @@ export default function EventManagement() {
                       )}
                     </span>
                     <span className="font-label-caps text-label-caps text-primary-container">
-                      {new Date(ev.startsAt).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }).toUpperCase()}
+                      {parseApiDate(ev.startsAt).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }).toUpperCase()}
                     </span>
                   </div>
                 </div>

@@ -3,6 +3,7 @@ package com.eventing.users.domain;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Entity
@@ -34,6 +35,6 @@ public class Profile extends PanacheEntityBase {
     @PrePersist
     @PreUpdate
     void onPersist() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 }

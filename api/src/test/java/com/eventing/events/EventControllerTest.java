@@ -79,6 +79,28 @@ class EventControllerTest {
     }
 
     @Test
+    void datesShouldBeSerializedAsUtcWithOffset() {
+        String token = registerAndLogin();
+        // Início enviado em -03:00 deve voltar como o mesmo instante em UTC, com "Z"
+        OffsetDateTime startsAt = OffsetDateTime.now(ZoneOffset.ofHours(-3)).plusDays(2).withNano(0).withSecond(0);
+        var body = new java.util.HashMap<>(buildCreateBody(startsAt));
+
+        String returned = given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(body)
+        .when()
+            .post("/api/events")
+        .then()
+            .statusCode(201)
+            .body("data.startsAt", endsWith("Z"))
+            .body("data.createdAt", endsWith("Z"))
+            .extract().path("data.startsAt");
+
+        org.junit.jupiter.api.Assertions.assertEquals(startsAt.toInstant(), OffsetDateTime.parse(returned).toInstant());
+    }
+
+    @Test
     void createShouldReturn400WithoutEndsAt() {
         String token = registerAndLogin();
         var body = new java.util.HashMap<>(buildCreateBody(OffsetDateTime.now(ZoneOffset.UTC).plusDays(1)));

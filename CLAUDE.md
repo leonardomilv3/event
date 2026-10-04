@@ -133,6 +133,7 @@ Documentação completa: [`docs/design-system.md`](docs/design-system.md)
 | [006](api/docs/adrs/006-ddd-modular.md) | DDD leve por módulo de domínio |
 | [007](api/docs/adrs/007-native-queries-postgis.md) | Native queries + records tipados para operações PostGIS |
 | [008](api/docs/adrs/008-managed-infrastructure-mvp.md) | Infraestrutura managed no MVP (Vercel, Render, Supabase, Upstash) |
+| [009](api/docs/adrs/009-utc-datetimes.md) | Datas em UTC de ponta a ponta; JSON com `Z`; front usa `parseApiDate` |
 
 ---
 

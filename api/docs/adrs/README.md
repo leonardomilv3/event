@@ -11,3 +11,5 @@ Decisões arquiteturais do backend (`api/`). Cada ADR documenta uma escolha téc
 | [005](005-redis-cache.md) | Redis para cache de feed |
 | [006](006-ddd-modular.md) | DDD leve por módulo de domínio |
 | [007](007-native-queries-postgis.md) | Native queries + records tipados para operações PostGIS |
+| [008](008-managed-infrastructure-mvp.md) | Infraestrutura managed no MVP (Vercel, Render, Supabase, Upstash) |
+| [009](009-utc-datetimes.md) | Datas em UTC de ponta a ponta; JSON com `Z`; front usa `parseApiDate` |

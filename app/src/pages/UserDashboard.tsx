@@ -14,6 +14,7 @@ import { PulseDot } from '../components/atoms/ActivityPulse'
 import { useProfile } from '../hooks/useProfile'
 import { useMyEvents } from '../hooks/useMyEvents'
 import { useCreatedEvents } from '../hooks/useCreatedEvents'
+import { parseApiDate } from '../utils/date'
 
 const INPUT_CLASS = [
   'w-full bg-surface-container-low border border-outline-variant rounded-lg',
@@ -71,7 +72,7 @@ export default function UserDashboard() {
     { label: 'Conexões', value: '—', accent: false },
     {
       label: 'Eventos Futuros',
-      value: createdEvents.filter(e => new Date(e.startsAt) > new Date()).length,
+      value: createdEvents.filter(e => parseApiDate(e.startsAt) > new Date()).length,
       accent: true,
     },
   ]
@@ -81,7 +82,7 @@ export default function UserDashboard() {
     ...createdEvents.map(e => ({ ...e, activityType: 'CRIADO' })),
     ...myEvents.map(e => ({ ...e, activityType: 'PARTICIPANDO' })),
   ]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort((a, b) => parseApiDate(b.createdAt).getTime() - parseApiDate(a.createdAt).getTime())
     .slice(0, 3)
 
   // Primeiro rascunho do usuário
@@ -184,8 +185,8 @@ export default function UserDashboard() {
                     <TimelineItem
                       key={ev.id}
                       type={ev.activityType}
-                      time={new Date(ev.createdAt).toLocaleDateString('pt-BR')}
-                      isActive={ev.status === 'PUBLISHED' && new Date(ev.startsAt) <= new Date()}
+                      time={parseApiDate(ev.createdAt).toLocaleDateString('pt-BR')}
+                      isActive={ev.status === 'PUBLISHED' && parseApiDate(ev.startsAt) <= new Date()}
                       content={
                         <p>
                           <Link to={`/events/${ev.id}`} className="text-primary-container font-bold hover:underline">

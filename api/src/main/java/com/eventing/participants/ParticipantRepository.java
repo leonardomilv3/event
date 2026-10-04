@@ -75,7 +75,9 @@ public class ParticipantRepository implements PanacheRepositoryBase<EventPartici
 
     private static OffsetDateTime asOffsetDateTime(Object o) {
         if (o == null) return null;
-        if (o instanceof OffsetDateTime odt) return odt;
+        // Normaliza para UTC: o driver pode devolver o offset da JVM e o chamador usa toLocalDateTime()
+        if (o instanceof OffsetDateTime odt) return odt.withOffsetSameInstant(ZoneOffset.UTC);
+        if (o instanceof java.time.Instant instant) return instant.atOffset(ZoneOffset.UTC);
         if (o instanceof Timestamp ts) return ts.toInstant().atOffset(ZoneOffset.UTC);
         return null;
     }

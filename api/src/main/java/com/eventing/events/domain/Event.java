@@ -7,6 +7,7 @@ import org.hibernate.annotations.JdbcType;
 import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 import org.locationtech.jts.geom.Point;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Entity
@@ -80,13 +81,13 @@ public class Event extends PanacheEntityBase {
 
     @PrePersist
     void onCreate() {
-        createdAt = updatedAt = LocalDateTime.now();
+        createdAt = updatedAt = LocalDateTime.now(ZoneOffset.UTC);
         if (status == null) status = EventStatus.DRAFT;
         if (visibility == null) visibility = EventVisibility.PUBLIC;
     }
 
     @PreUpdate
     void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 }

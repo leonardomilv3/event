@@ -13,7 +13,7 @@ import { useAddressSearch } from '../hooks/useAddressSearch'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { getById } from '../services/eventService'
 import { type EventResponse, type UpdateEventRequest } from '../types/api'
-import { datetimeLocalToIso } from '../utils/date'
+import { apiDateToDatetimeLocal, datetimeLocalToIso } from '../utils/date'
 import { isHttpUrl } from '../utils/url'
 import { formatCoordinate, parseCoordinates } from '../utils/coordinates'
 import { type AddressSuggestion } from '../types/geocoding'
@@ -135,8 +135,8 @@ export default function EditEventPage() {
         address: event.address ?? '',
         latitude: event.latitude != null ? formatCoordinate(event.latitude) : '',
         longitude: event.longitude != null ? formatCoordinate(event.longitude) : '',
-        startsAt: event.startsAt.slice(0, 16),
-        endsAt: event.endsAt ? event.endsAt.slice(0, 16) : '',
+        startsAt: apiDateToDatetimeLocal(event.startsAt),
+        endsAt: event.endsAt ? apiDateToDatetimeLocal(event.endsAt) : '',
         maxParticipants: event.maxParticipants != null ? String(event.maxParticipants) : '',
         sourceUrl: event.sourceUrl ?? '',
       },

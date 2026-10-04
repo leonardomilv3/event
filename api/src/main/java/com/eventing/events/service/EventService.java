@@ -58,12 +58,13 @@ public class EventService {
         event.locationName = request.locationName();
         event.address = request.address();
         event.startsAt = toUtcLocalDateTime(request.startsAt());
-        event.endsAt = request.endsAt() != null ? toUtcLocalDateTime(request.endsAt()) : null;
+        event.endsAt = toUtcLocalDateTime(request.endsAt());
         event.maxParticipants = request.maxParticipants();
         event.sourceUrl = blankToNull(request.sourceUrl());
         if (request.latitude() != null && request.longitude() != null) {
             event.location = toPoint(request.longitude(), request.latitude());
         }
+        requireValidSchedule(event);
         eventRepository.persist(event);
         invalidateCaches();
         return toResponse(event, null);
@@ -109,6 +110,8 @@ public class EventService {
         if (request.latitude() != null && request.longitude() != null) {
             event.location = toPoint(request.longitude(), request.latitude());
         }
+        // Valida o estado resultante: update parcial pode mover só o início para depois do fim
+        requireValidSchedule(event);
         return toResponse(event, null);
     }
 
@@ -281,6 +284,15 @@ public class EventService {
         if (event == null) throw ApiException.notFound("Evento");
         if (!event.creator.id.equals(userId)) throw ApiException.forbidden();
         return event;
+    }
+
+    private static void requireValidSchedule(Event event) {
+        if (event.endsAt == null) {
+            throw ApiException.badRequest("A data de término é obrigatória");
+        }
+        if (!event.endsAt.isAfter(event.startsAt)) {
+            throw ApiException.badRequest("A data de término deve ser posterior à data de início");
+        }
     }
 
     private Point toPoint(double longitude, double latitude) {

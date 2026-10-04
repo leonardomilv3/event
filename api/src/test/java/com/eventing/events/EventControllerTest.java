@@ -79,6 +79,22 @@ class EventControllerTest {
     }
 
     @Test
+    void createShouldReturn400WithoutEndsAt() {
+        String token = registerAndLogin();
+        var body = new java.util.HashMap<>(buildCreateBody(OffsetDateTime.now(ZoneOffset.UTC).plusDays(1)));
+        body.remove("endsAt");
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(body)
+        .when()
+            .post("/api/events")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test
     void createShouldReturn400ForPastStartsAt() {
         String token = registerAndLogin();
 
@@ -755,7 +771,8 @@ class EventControllerTest {
                 "latitude", -15.7942,
                 "longitude", -47.8825,
                 "locationName", "Brasília",
-                "startsAt", OffsetDateTime.now(ZoneOffset.UTC).plusDays(1).toString()
+                "startsAt", OffsetDateTime.now(ZoneOffset.UTC).plusDays(1).toString(),
+                "endsAt", OffsetDateTime.now(ZoneOffset.UTC).plusDays(1).plusHours(2).toString()
             ))
         .when().post("/api/events")
         .then().statusCode(201).extract().path("data.id");
@@ -774,7 +791,8 @@ class EventControllerTest {
             "latitude", -15.7942,
             "longitude", -47.8825,
             "locationName", "Brasília",
-            "startsAt", startsAt.toString()
+            "startsAt", startsAt.toString(),
+            "endsAt", startsAt.plusHours(2).toString()
         );
     }
 }

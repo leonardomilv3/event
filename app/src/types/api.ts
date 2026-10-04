@@ -57,7 +57,7 @@ export interface EventResponse {
   latitude?: number;
   longitude?: number;
   startsAt: string;
-  endsAt?: string;
+  endsAt: string;
   maxParticipants?: number;
   participantCount: number;
   distanceKm?: number;
@@ -87,7 +87,7 @@ export interface CreateEventRequest {
   locationName?: string;
   address?: string;
   startsAt: string;
-  endsAt?: string;
+  endsAt: string;
   maxParticipants?: number;
   sourceUrl?: string;
 }

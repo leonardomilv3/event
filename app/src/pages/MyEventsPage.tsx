@@ -6,7 +6,7 @@ import Footer from '../components/organisms/Footer'
 import EventCard from '../components/molecules/EventCard'
 import Icon from '../components/atoms/Icon'
 import { useMyEvents } from '../hooks/useMyEvents'
-import { formatEventDate } from '../utils/date'
+import { formatEventDateRange } from '../utils/date'
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=900&q=80'
 
@@ -96,7 +96,7 @@ export default function MyEventsPage() {
                   />
                   <div className="mt-stack-sm px-2 space-y-stack-xs">
                     <p className="font-label-caps text-label-caps text-primary-container uppercase">
-                      {formatEventDate(event.startsAt)}
+                      {formatEventDateRange(event.startsAt, event.endsAt)}
                     </p>
                     {event.locationName && (
                       <p className="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">

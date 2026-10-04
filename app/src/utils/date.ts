@@ -25,12 +25,26 @@ export function datetimeLocalToIso(value: string): string {
   return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}${sign}${offsetHours}:${offsetMins}`
 }
 
+const formatDay = (d: Date) => `${pad(d.getDate())} ${MONTHS_PT[d.getMonth()]}`
+const formatTime = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`
+
 export function formatEventDate(iso: string): string {
   const d = new Date(iso)
-  const day = String(d.getDate()).padStart(2, '0')
-  const month = MONTHS_PT[d.getMonth()]
-  const year = d.getFullYear()
-  const hour = String(d.getHours()).padStart(2, '0')
-  const min = String(d.getMinutes()).padStart(2, '0')
-  return `${day} ${month}, ${year} • ${hour}:${min}`
+  return `${formatDay(d)}, ${d.getFullYear()} • ${formatTime(d)}`
+}
+
+/**
+ * "17 Set, 2026 • 22:00 até 23:30" no mesmo dia;
+ * "17 Set, 2026 • 22:00 até 18 Set • 02:00" quando atravessa a meia-noite.
+ * Sem `endsAt` (cache antigo da API), cai para só o início.
+ */
+export function formatEventDateRange(startsAt: string, endsAt?: string | null): string {
+  const start = formatEventDate(startsAt)
+  if (!endsAt) return start
+  const s = new Date(startsAt)
+  const e = new Date(endsAt)
+  const sameDay = s.toDateString() === e.toDateString()
+  if (sameDay) return `${start} até ${formatTime(e)}`
+  const endDay = e.getFullYear() === s.getFullYear() ? formatDay(e) : `${formatDay(e)}, ${e.getFullYear()}`
+  return `${start} até ${endDay} • ${formatTime(e)}`
 }

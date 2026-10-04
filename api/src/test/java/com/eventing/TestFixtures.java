@@ -44,7 +44,7 @@ public class TestFixtures {
             null, null,
             null, null,
             startsAt,
-            null,
+            startsAt.plusHours(2),
             10, null
         );
     }

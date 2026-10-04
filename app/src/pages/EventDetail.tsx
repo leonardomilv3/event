@@ -11,7 +11,7 @@ import { useParticipation } from '../hooks/useParticipation'
 import { useFollow } from '../hooks/useFollow'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { usePublicProfile } from '../hooks/usePublicProfile'
-import { formatEventDate } from '../utils/date'
+import { formatEventDateRange } from '../utils/date'
 import { urlHost } from '../utils/url'
 import FollowButton from '../components/atoms/FollowButton'
 import ShareInviteModal from '../components/molecules/ShareInviteModal'
@@ -230,7 +230,7 @@ export default function EventDetail() {
                   <div className="flex flex-wrap items-center gap-stack-lg text-on-surface-variant">
                     <div className="flex items-center gap-2">
                       <Icon name="calendar_today" className="text-primary-container" size={20} />
-                      <span className="font-sans text-body-lg">{formatEventDate(event.startsAt)}</span>
+                      <span className="font-sans text-body-lg">{formatEventDateRange(event.startsAt, event.endsAt)}</span>
                     </div>
                     {event.locationName && (
                       <div className="flex items-center gap-2">

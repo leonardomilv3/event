@@ -14,7 +14,7 @@ public record CreateEventRequest(
         @Size(max = 200) String locationName,
         String address,
         @NotNull @Future OffsetDateTime startsAt,
-        OffsetDateTime endsAt,
+        @NotNull OffsetDateTime endsAt,
         @Positive Integer maxParticipants,
         @Size(max = 500)
         @Pattern(regexp = "^$|^https?://\\S+$", message = "deve ser uma URL http(s) válida")

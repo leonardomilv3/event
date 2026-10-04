@@ -109,7 +109,7 @@ Página de detalhe de um evento. **Rota pública** (fora de `ProtectedRoute`): u
 **Organismos e ordem de renderização:**
 
 1. **Nav local inline** — usa `useRef` para scroll behavior (glassmorphism + `bg-surface/90` ao rolar); não usa `TopNavBar` para ter controle do `ref` diretamente
-2. **Hero cinematográfico** — `h-[870px]`, imagem full-bleed, `editorial-gradient`, live indicator com `animate-breath` (dot vermelho + ring), título `display-lg`, metadados (data, local, `AvatarStack` social proof)
+2. **Hero cinematográfico** — `h-[870px]`, imagem full-bleed, `editorial-gradient`, live indicator com `animate-breath` (dot vermelho + ring), título `display-lg`, metadados (data/hora de início **até** término via `formatEventDateRange`, local, `AvatarStack` social proof)
 3. **Content Layout** — `lg:grid-cols-12`:
    - **Coluna esquerda** (8 cols):
      - "The Narrative" — dois parágrafos descritivos
@@ -133,7 +133,7 @@ Formulário de criação de evento. Requer autenticação.
 
 1. `TopNavBar` — autenticado, exibe nome do usuário
 2. **`EventFormPanel`** — container glass centrado (`max-w-2xl`), título "Crie seu próximo evento"
-   - Campos: título (`AuthInput`), narrativa (textarea), categoria (grid de `TagChip` clicáveis), visibilidade (`SegmentedControl` PUBLIC/PRIVATE/INVITE_ONLY), local (`AuthInput` com `location_on`), endereço, início + fim (`datetime-local` side-by-side no md), limite de presença
+   - Campos: título (`AuthInput`), narrativa (textarea), categoria (grid de `TagChip` clicáveis), visibilidade (`SegmentedControl` PUBLIC/PRIVATE/INVITE_ONLY), local (`AuthInput` com `location_on`), endereço, início + fim (`datetime-local` side-by-side no md; **ambos obrigatórios**, fim posterior ao início), link da fonte opcional (só `http(s)`), limite de presença
    - Dois botões de submit: "Publicar Evento" (mint fill, `publishNow=true`) + "Salvar como rascunho" (ghost, `publishNow=false`)
    - Link "Cancelar" → `/events`
 3. `Footer`

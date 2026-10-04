@@ -54,7 +54,7 @@ class EventServiceTest {
             "Evento sem local", "desc", "CULTURE",
             EventVisibility.PUBLIC,
             null, null, null, null,
-            startsAt, null, 50, null
+            startsAt, startsAt.plusHours(2), 50, null
         );
         EventResponse event = eventService.create(creator.userId(), req);
 
@@ -72,7 +72,7 @@ class EventServiceTest {
             "Evento", "desc", "MUSIC",
             null, // visibility null → default PUBLIC
             -15.79, -47.88, "Brasília", null,
-            startsAt, null, null, null
+            startsAt, startsAt.plusHours(2), null, null
         );
         EventResponse event = eventService.create(creator.userId(), req);
 
@@ -151,7 +151,7 @@ class EventServiceTest {
         var req = new CreateEventRequest(
             "Evento curado", "desc", "MUSIC", EventVisibility.PUBLIC,
             null, null, null, null,
-            startsAt, null, null, "https://agenda.example.com/evento/42"
+            startsAt, startsAt.plusHours(2), null, "https://agenda.example.com/evento/42"
         );
         EventResponse created = eventService.create(creator.userId(), req);
         assertEquals("https://agenda.example.com/evento/42", created.sourceUrl());
@@ -167,6 +167,38 @@ class EventServiceTest {
             null, null, null, null, null, null, null, ""
         );
         assertNull(eventService.update(creator.userId(), created.id(), clear).sourceUrl());
+    }
+
+    @Test
+    void shouldRejectCreateWhenEndsAtNotAfterStartsAt() {
+        AuthResponse creator = registerUser();
+        OffsetDateTime startsAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(1);
+        var req = new CreateEventRequest(
+            "Evento", "desc", "MUSIC", EventVisibility.PUBLIC,
+            null, null, null, null,
+            startsAt, startsAt.minusMinutes(30), null, null
+        );
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> eventService.create(creator.userId(), req));
+
+        assertEquals(Response.Status.BAD_REQUEST, ex.getStatus());
+    }
+
+    @Test
+    void shouldRejectUpdateMovingStartsAtPastExistingEndsAt() {
+        AuthResponse creator = registerUser();
+        EventResponse original = createDraftEvent(creator);
+
+        var updateReq = new UpdateEventRequest(
+            null, null, null, null,
+            null, null, null, null,
+            OffsetDateTime.now(ZoneOffset.UTC).plusDays(30), null, null, null
+        );
+        ApiException ex = assertThrows(ApiException.class,
+            () -> eventService.update(creator.userId(), original.id(), updateReq));
+
+        assertEquals(Response.Status.BAD_REQUEST, ex.getStatus());
     }
 
     @Test
@@ -325,7 +357,7 @@ class EventServiceTest {
             "Sem local", "desc", "CULTURE",
             EventVisibility.PUBLIC,
             null, null, null, null,
-            startsAt, null, null, null
+            startsAt, startsAt.plusHours(2), null, null
         );
         EventResponse event = eventService.create(creator.userId(), req);
         eventService.publish(creator.userId(), event.id());

@@ -54,7 +54,7 @@ public class Event extends PanacheEntityBase {
     @Column(name = "starts_at", nullable = false)
     public LocalDateTime startsAt;
 
-    @Column(name = "ends_at")
+    @Column(name = "ends_at", nullable = false)
     public LocalDateTime endsAt;
 
     @Column(name = "source_url", length = 500)

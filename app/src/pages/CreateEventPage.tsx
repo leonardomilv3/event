@@ -69,6 +69,10 @@ export default function CreateEventPage() {
       setValidationError('A data de início deve ser pelo menos 1 minuto no futuro')
       return
     }
+    if (new Date(endsAt) <= new Date(startsAt)) {
+      setValidationError('A data de término deve ser posterior à data de início')
+      return
+    }
 
     if (sourceUrl.trim() && !isHttpUrl(sourceUrl.trim())) {
       setValidationError('O link da fonte deve ser uma URL começando com http:// ou https://')
@@ -83,7 +87,7 @@ export default function CreateEventPage() {
       locationName: locationName.trim() || undefined,
       address: address.trim() || undefined,
       startsAt: datetimeLocalToIso(startsAt),
-      endsAt: endsAt ? datetimeLocalToIso(endsAt) : undefined,
+      endsAt: datetimeLocalToIso(endsAt),
       maxParticipants: maxParticipants ? Number(maxParticipants) : undefined,
       sourceUrl: sourceUrl.trim() || undefined,
     }
@@ -202,6 +206,7 @@ export default function CreateEventPage() {
                   type="datetime-local"
                   value={startsAt}
                   onChange={(e) => setStartsAt(e.target.value)}
+                  required
                   disabled={saving}
                   className={[
                     INPUT_CLASS,
@@ -215,7 +220,9 @@ export default function CreateEventPage() {
                   id="event-ends-at"
                   type="datetime-local"
                   value={endsAt}
+                  min={startsAt || undefined}
                   onChange={(e) => setEndsAt(e.target.value)}
+                  required
                   disabled={saving}
                   className={[
                     INPUT_CLASS,

@@ -120,7 +120,7 @@ export interface EventResponse {
   latitude?: number;
   longitude?: number;
   startsAt: string;
-  endsAt?: string;
+  endsAt: string;
   maxParticipants?: number;
   participantCount: number;
   distanceKm?: number;

@@ -184,6 +184,10 @@ export default function EditEventPage() {
       setValidationError('A data de início deve ser pelo menos 1 minuto no futuro')
       return
     }
+    if (new Date(form.endsAt) <= new Date(form.startsAt)) {
+      setValidationError('A data de término deve ser posterior à data de início')
+      return
+    }
 
     if (form.sourceUrl.trim() && !isHttpUrl(form.sourceUrl.trim())) {
       setValidationError('O link da fonte deve ser uma URL começando com http:// ou https://')
@@ -198,7 +202,7 @@ export default function EditEventPage() {
       locationName: form.locationName.trim() || undefined,
       address: form.address.trim() || undefined,
       startsAt: datetimeLocalToIso(form.startsAt),
-      endsAt: form.endsAt ? datetimeLocalToIso(form.endsAt) : undefined,
+      endsAt: datetimeLocalToIso(form.endsAt),
       maxParticipants: form.maxParticipants ? Number(form.maxParticipants) : undefined,
       sourceUrl: form.sourceUrl.trim(),
     }
@@ -333,6 +337,7 @@ export default function EditEventPage() {
                   type="datetime-local"
                   value={form.startsAt}
                   onChange={(e) => formDispatch({ type: 'set', field: 'startsAt', value: e.target.value })}
+                  required
                   disabled={saving}
                   className={[
                     INPUT_CLASS,
@@ -346,7 +351,9 @@ export default function EditEventPage() {
                   id="event-ends-at"
                   type="datetime-local"
                   value={form.endsAt}
+                  min={form.startsAt || undefined}
                   onChange={(e) => formDispatch({ type: 'set', field: 'endsAt', value: e.target.value })}
+                  required
                   disabled={saving}
                   className={[
                     INPUT_CLASS,

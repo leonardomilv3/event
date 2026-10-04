@@ -96,6 +96,10 @@ Página de detalhe de um evento. **Rota pública** (fora de `ProtectedRoute`): u
 - `ProtectedRoute` também passa a anexar `?redirect=` em todas as rotas protegidas
 - Token expirado não expulsa o visitante: `httpClient` repete a chamada sem token em 401 e só redireciona se o endpoint exigir auth; `/api/auth/me` nunca redireciona
 
+**Visibilidade:**
+- `PUBLIC` — aberto a todos, **sem fluxo de participação**: não renderiza social proof de participantes no hero, Capacity card nem Persistent CTAs de "Participar". A página serve para ver data, local, organizador, descrição e compartilhar
+- `PRIVATE` / `INVITE_ONLY` — fluxo completo de participação (join/leave, contagem, CTAs, `ShareInviteModal` pós-join)
+
 **Compartilhamento e funil (ADR-011/012):**
 - Botão "Compartilhar" no hero e QR code do organizador usam `/events/:id?ref=share&via=…` (`useShareEvent`)
 - Após `join` confirmado pela API → `ShareInviteModal` (copiar link, WhatsApp, X, share nativo). Fechar o modal não afeta a participação
@@ -113,11 +117,11 @@ Página de detalhe de um evento. **Rota pública** (fora de `ProtectedRoute`): u
      - "The Venue" — mapa mock grayscale + card com endereço e botão "Navegar"
    - **Coluna direita / Sidebar** (4 cols):
      - Host card (`GlassPanel`) — avatar, nome, role, bio, botões Follow + Mail
-     - Capacity card — label, contagem "14 / 150", `ProgressBar` com mint glow, indicadores de demanda
+     - Capacity card (exceto `PUBLIC`) — label, contagem "14 / 150", `ProgressBar` com mint glow, indicadores de demanda
 4. `Footer`
 5. **`ShareInviteModal`** — renderizado só após participação confirmada
-6. **Persistent CTA mobile** — barra `fixed bottom-0`, botão full-width "Participar"
-7. **Persistent CTA desktop** — floating `glass-panel` pill "Vagas limitadas restantes" + botão pill mint grande
+6. **Persistent CTA mobile** (exceto `PUBLIC`) — barra `fixed bottom-0`, botão full-width "Participar"
+7. **Persistent CTA desktop** (exceto `PUBLIC`) — floating `glass-panel` pill "Vagas limitadas restantes" + botão pill mint grande
 
 ---
 

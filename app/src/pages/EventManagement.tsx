@@ -177,8 +177,17 @@ export default function EventManagement() {
                   </p>
                   <div className="mt-auto pt-4 border-t border-white/5 flex justify-between items-center">
                     <span className="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
-                      <Icon name="groups" size={16} />
-                      {ev.participantCount} participantes
+                      {ev.visibility === 'PUBLIC' ? (
+                        <>
+                          <Icon name="public" size={16} />
+                          Aberto a todos
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="groups" size={16} />
+                          {ev.participantCount} participantes
+                        </>
+                      )}
                     </span>
                     <span className="font-label-caps text-label-caps text-primary-container">
                       {new Date(ev.startsAt).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }).toUpperCase()}

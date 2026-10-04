@@ -62,6 +62,8 @@ export default function EventDetail() {
     user !== null &&
     event !== null &&
     user.id.toLowerCase() === event.creatorId.toLowerCase()
+  // PUBLIC é aberto a todos: sem join nem contagem — a página serve para ver local/horário e compartilhar
+  const hasParticipation = event !== null && event.visibility !== 'PUBLIC'
   const capacityValue =
     event?.maxParticipants != null
       ? Math.min(Math.round((displayCount / event.maxParticipants) * 100), 100)
@@ -236,31 +238,33 @@ export default function EventDetail() {
                       </div>
                     )}
                     {/* Social proof */}
-                    <div className="flex items-center gap-2">
-                      <div className="flex -space-x-3">
-                        {participants.slice(0, 3).map((p) => (
-                          <div key={p.userId} className="w-10 h-10 rounded-full border-2 border-surface overflow-hidden">
-                            <img
-                              src={p.avatarUrl ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1C4532&color=6EE7B7&size=40`}
-                              alt={p.username}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ))}
-                        {displayCount > 3 && (
-                          <div className="w-10 h-10 rounded-full border-2 border-surface bg-surface-variant flex items-center justify-center">
-                            <span className="font-label-md text-label-md text-on-surface">
-                              +{displayCount - 3}
-                            </span>
-                          </div>
+                    {hasParticipation && (
+                      <div className="flex items-center gap-2">
+                        <div className="flex -space-x-3">
+                          {participants.slice(0, 3).map((p) => (
+                            <div key={p.userId} className="w-10 h-10 rounded-full border-2 border-surface overflow-hidden">
+                              <img
+                                src={p.avatarUrl ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1C4532&color=6EE7B7&size=40`}
+                                alt={p.username}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ))}
+                          {displayCount > 3 && (
+                            <div className="w-10 h-10 rounded-full border-2 border-surface bg-surface-variant flex items-center justify-center">
+                              <span className="font-label-md text-label-md text-on-surface">
+                                +{displayCount - 3}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        {displayCount > 0 && (
+                          <span className="font-sans text-label-md text-on-surface-variant italic ml-2">
+                            {displayCount} {displayCount === 1 ? 'participante' : 'participantes'}
+                          </span>
                         )}
                       </div>
-                      {displayCount > 0 && (
-                        <span className="font-sans text-label-md text-on-surface-variant italic ml-2">
-                          {displayCount} {displayCount === 1 ? 'participante' : 'participantes'}
-                        </span>
-                      )}
-                    </div>
+                    )}
 
                     {/* Share button */}
                     <button
@@ -371,40 +375,42 @@ export default function EventDetail() {
                   </GlassPanel>
 
                   {/* Capacity card */}
-                  <div className="bg-surface-container p-stack-lg rounded-xl flex flex-col gap-stack-md">
-                    <h4 className="font-label-caps text-label-caps text-on-surface-variant">
-                      Capacidade &amp; Presença
-                    </h4>
-                    <div className="flex justify-between items-center">
-                      <span className="font-sans text-body-md text-on-surface-variant">Vagas Disponíveis</span>
-                      <span className="font-serif text-headline-md text-on-surface">
-                        {event.maxParticipants != null
-                          ? `${displayCount} / ${event.maxParticipants}`
-                          : `${displayCount} participantes`}
-                      </span>
-                    </div>
-                    <ProgressBar value={capacityValue} />
-
-                    {/* Participation error */}
-                    {participationError && (
-                      <p className="font-sans text-label-md text-error">{participationError}</p>
-                    )}
-
-                    <div className="flex flex-col gap-stack-sm mt-stack-md">
-                      <div className="flex items-center gap-stack-sm">
-                        <Icon name="bolt" className="text-secondary" size={18} />
-                        <span className="font-label-md text-label-md text-on-surface">
-                          Alta demanda: {displayCount} {displayCount === 1 ? 'pessoa' : 'pessoas'}
+                  {hasParticipation && (
+                    <div className="bg-surface-container p-stack-lg rounded-xl flex flex-col gap-stack-md">
+                      <h4 className="font-label-caps text-label-caps text-on-surface-variant">
+                        Capacidade &amp; Presença
+                      </h4>
+                      <div className="flex justify-between items-center">
+                        <span className="font-sans text-body-md text-on-surface-variant">Vagas Disponíveis</span>
+                        <span className="font-serif text-headline-md text-on-surface">
+                          {event.maxParticipants != null
+                            ? `${displayCount} / ${event.maxParticipants}`
+                            : `${displayCount} participantes`}
                         </span>
                       </div>
-                      <div className="flex items-center gap-stack-sm">
-                        <Icon name="verified" className="text-primary-container" size={18} />
-                        <span className="font-label-md text-label-md text-on-surface">
-                          Identidade Verificada Obrigatória
-                        </span>
+                      <ProgressBar value={capacityValue} />
+
+                      {/* Participation error */}
+                      {participationError && (
+                        <p className="font-sans text-label-md text-error">{participationError}</p>
+                      )}
+
+                      <div className="flex flex-col gap-stack-sm mt-stack-md">
+                        <div className="flex items-center gap-stack-sm">
+                          <Icon name="bolt" className="text-secondary" size={18} />
+                          <span className="font-label-md text-label-md text-on-surface">
+                            Alta demanda: {displayCount} {displayCount === 1 ? 'pessoa' : 'pessoas'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-stack-sm">
+                          <Icon name="verified" className="text-primary-container" size={18} />
+                          <span className="font-label-md text-label-md text-on-surface">
+                            Identidade Verificada Obrigatória
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {isCreator && (
                     <div className="bg-surface-container p-stack-lg rounded-xl flex flex-col gap-stack-md">
@@ -485,7 +491,7 @@ export default function EventDetail() {
           )}
 
           {/* ── Persistent CTA — mobile ── */}
-          {!isCreator && (
+          {!isCreator && hasParticipation && (
             <div className="fixed bottom-0 left-0 w-full z-40 px-margin-mobile py-stack-md bg-background/80 backdrop-blur-md border-t border-outline-variant/30 md:hidden">
               <button
                 onClick={() => void handleParticipation()}
@@ -518,7 +524,7 @@ export default function EventDetail() {
           )}
 
           {/* ── Persistent CTA — desktop ── */}
-          {!isCreator && (
+          {!isCreator && hasParticipation && (
             <div className="hidden md:flex fixed bottom-stack-lg right-stack-lg z-50 flex-col items-end gap-stack-sm">
               <GlassPanel className="px-stack-md py-stack-sm rounded-full flex items-center gap-stack-md mb-2">
                 <span className="font-label-md text-label-md text-on-surface">

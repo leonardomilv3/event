@@ -17,9 +17,13 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword
+  const canSubmit = agreedToTerms && password.length > 0 && password === confirmPassword
 
   if (authLoading) return null
   if (isAuthenticated) return <Navigate to={redirectTo} replace />
@@ -36,6 +40,11 @@ export default function RegisterPage() {
     }
     if (/\s/.test(username)) {
       setError('Username não pode conter espaços')
+      setLoading(false)
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('As senhas não coincidem')
       setLoading(false)
       return
     }
@@ -110,6 +119,19 @@ export default function RegisterPage() {
             leftIcon="lock"
           />
 
+          <AuthInput
+            id="confirm-password"
+            label="Confirm Password"
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            autoComplete="new-password"
+            disabled={loading}
+            leftIcon="lock"
+            error={passwordsMismatch ? 'As senhas não coincidem' : undefined}
+          />
+
           {/* Checkbox de termos */}
           <label className="flex items-start gap-3 cursor-pointer group">
             <div className="relative flex-shrink-0 mt-0.5">
@@ -158,11 +180,11 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            disabled={loading || !agreedToTerms}
+            disabled={loading || !canSubmit}
             className={[
               'w-full bg-primary-container text-on-primary font-bold py-4 rounded-lg',
               'mint-glow-primary hover:bg-primary-fixed transition-all active:scale-95 duration-200',
-              (loading || !agreedToTerms) ? 'opacity-50 cursor-not-allowed' : '',
+              (loading || !canSubmit) ? 'opacity-50 cursor-not-allowed' : '',
             ].join(' ')}
           >
             {loading ? 'Criando conta...' : 'Create Account'}

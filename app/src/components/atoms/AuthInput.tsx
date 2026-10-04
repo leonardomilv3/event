@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { type InputHTMLAttributes, type ReactNode } from 'react'
 
 interface AuthInputProps {
   id: string
@@ -13,6 +13,11 @@ interface AuthInputProps {
   disabled?: boolean
   leftIcon?: string
   trailingElement?: ReactNode
+  /** Atributos extras do <input> (ARIA de combobox, handlers de teclado/foco) */
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    'id' | 'type' | 'value' | 'onChange' | 'placeholder' | 'autoComplete' | 'disabled' | 'className'
+  >
 }
 
 export default function AuthInput({
@@ -28,6 +33,7 @@ export default function AuthInput({
   disabled = false,
   leftIcon,
   trailingElement,
+  inputProps,
 }: AuthInputProps) {
   return (
     <div className="space-y-2">
@@ -52,6 +58,7 @@ export default function AuthInput({
         )}
 
         <input
+          {...inputProps}
           id={id}
           type={type}
           placeholder={placeholder}

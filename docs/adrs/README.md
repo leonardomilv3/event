@@ -22,6 +22,7 @@ Cada ADR segue a estrutura: **Status → Context → Decision → Consequences �
 | [010](./010-typescript-strict.md) | TypeScript Estrito com verbatimModuleSyntax | Accepted |
 | [011](./011-edge-prerender-og-seo.md) | Vercel Routing Middleware para Open Graph e SEO por evento | Accepted |
 | [012](./012-posthog-funnel-analytics.md) | PostHog para instrumentação do funil de crescimento | Accepted |
+| [013](./013-photon-geocoding.md) | Photon (OpenStreetMap) para autocomplete de endereço | Accepted |
 
 ## Como criar um novo ADR
 

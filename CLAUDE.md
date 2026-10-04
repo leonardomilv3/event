@@ -31,6 +31,7 @@ A interface reflete a energia da cidade à noite: superfícies escuras, acentos 
 | Animações | Framer Motion | 12 |
 | Ícones | Material Symbols Outlined | Google Fonts |
 | Analytics | PostHog (`posthog-js`) | ver ADR-012 |
+| Geocodificação | Photon (komoot / OpenStreetMap), API pública sem chave | ver ADR-013 |
 | Edge | Vercel Routing Middleware (`@vercel/functions`) | ver ADR-011 |
 | Fontes | Inter + Playfair Display | Google Fonts |
 
@@ -118,6 +119,7 @@ Documentação completa: [`docs/design-system.md`](docs/design-system.md)
 | [010](docs/adrs/010-typescript-strict.md) | TypeScript strict + verbatimModuleSyntax |
 | [011](docs/adrs/011-edge-prerender-og-seo.md) | `app/middleware.ts` serve OG/SEO de `/events/:id` para crawlers + proxy de `/sitemap.xml` |
 | [012](docs/adrs/012-posthog-funnel-analytics.md) | PostHog para funil share → join e retenção; eventos via `track()` tipado |
+| [013](docs/adrs/013-photon-geocoding.md) | Photon/OSM para autocomplete de endereço em criação/edição; só via `services/geocodingService.ts` |
 
 ### Backend — [`api/docs/adrs/`](api/docs/adrs/)
 

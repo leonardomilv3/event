@@ -99,6 +99,7 @@ Input de formulário para as telas de auth — label em `label-caps`, wrapper co
 | `autoComplete` | `string` | — | Atributo `autocomplete` nativo |
 | `disabled` | `boolean` | `false` | Desabilita input com `opacity-50` |
 | `trailingElement` | `ReactNode` | — | Slot dentro do input, à direita (ex: toggle de visibilidade do `PasswordInput`). Adiciona `pr-12` no input. |
+| `inputProps` | `InputHTMLAttributes` (sem `id`/`type`/`value`/`onChange`/...) | — | Atributos extras do `<input>`: ARIA de combobox, `onKeyDown`, `onFocus`/`onBlur` (usado por `AddressAutocomplete`) |
 
 Notas:
 - `.input-focus-effect` aplicado no wrapper `<div>`, não no `<input>` — glow aparece ao redor do grupo
@@ -160,6 +161,26 @@ Botão de seguir/deixar de seguir. Dois estados visuais: outline mint (não segu
 ## Moléculas
 
 Compostos de átomos. Encapsulam um padrão de UI recorrente.
+
+### `AddressAutocomplete`
+`src/components/molecules/AddressAutocomplete.tsx`
+
+Combobox de busca de endereço: `AuthInput` (ícone `search`, spinner no slot direito) + lista de sugestões. Stateless em relação aos dados — sugestões vêm de `useAddressSearch` na página (ADR-013).
+
+| Prop | Tipo | Default | Descrição |
+|---|---|---|---|
+| `id` | `string` | — | Id do input; a lista usa `${id}-listbox` |
+| `label` | `string` | — | Label |
+| `placeholder` | `string` | — | Placeholder |
+| `value` | `string` | — | Texto digitado (controlado) |
+| `onChange` | `(value: string) => void` | — | Digitação — dispara a busca no hook |
+| `suggestions` | `AddressSuggestion[]` | — | Resultados (`types/geocoding.ts`) |
+| `onSelect` | `(s: AddressSuggestion) => void` | — | Escolha de uma sugestão; a página preenche local/endereço/coordenadas |
+| `loading` | `boolean` | `false` | Mostra spinner no input |
+| `error` | `string \| null` | — | Erro exibido abaixo (ex: busca indisponível) |
+| `disabled` | `boolean` | `false` | Desabilita o input |
+
+Estado local só de UI: `open` e `activeIndex`. Teclado: ↑/↓ navegam, Enter seleciona, Esc fecha. Seleção via `onMouseDown` + `preventDefault` (antes do blur fechar a lista). Rodapé com "© OpenStreetMap contributors" (licença ODbL — não remover).
 
 ### `PasswordInput`
 `src/components/molecules/PasswordInput.tsx`

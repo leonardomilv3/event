@@ -14,6 +14,7 @@
 | Ícones | Material Symbols Outlined (Google Fonts) |
 | Fontes | Inter (UI) + Playfair Display (editorial) |
 | QR Code | qrcode.react 4.2 |
+| Geocodificação | Photon (komoot / OSM), chamada direta do browser — ADR-013 |
 
 ### Backend
 

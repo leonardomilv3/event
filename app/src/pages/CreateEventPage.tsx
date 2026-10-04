@@ -4,13 +4,17 @@ import TopNavBar from '../components/organisms/TopNavBar'
 import Footer from '../components/organisms/Footer'
 import EventFormPanel from '../components/molecules/EventFormPanel'
 import AuthInput from '../components/atoms/AuthInput'
+import AddressAutocomplete from '../components/molecules/AddressAutocomplete'
 import TagChip from '../components/atoms/TagChip'
 import SegmentedControl from '../components/atoms/SegmentedControl'
 import Icon from '../components/atoms/Icon'
 import { useEventForm } from '../hooks/useEventForm'
+import { useAddressSearch } from '../hooks/useAddressSearch'
 import { type CreateEventRequest } from '../types/api'
 import { datetimeLocalToIso } from '../utils/date'
 import { isHttpUrl } from '../utils/url'
+import { formatCoordinate, parseCoordinates } from '../utils/coordinates'
+import { type AddressSuggestion } from '../types/geocoding'
 
 const MIN_LEAD_TIME_MS = 60_000
 
@@ -38,6 +42,8 @@ export default function CreateEventPage() {
   const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY'>('PUBLIC')
   const [locationName, setLocationName] = useState('')
   const [address, setAddress] = useState('')
+  const [latitude, setLatitude] = useState('')
+  const [longitude, setLongitude] = useState('')
   const [startsAt, setStartsAt] = useState('')
   const [endsAt, setEndsAt] = useState('')
   const [maxParticipants, setMaxParticipants] = useState('')
@@ -45,6 +51,17 @@ export default function CreateEventPage() {
   const [validationError, setValidationError] = useState<string | null>(null)
 
   const { saving, error, create } = useEventForm()
+  const addressSearch = useAddressSearch()
+
+  const applySuggestion = (s: AddressSuggestion) => {
+    addressSearch.select(s)
+    if (s.venueName) setLocationName(s.venueName)
+    setAddress(s.address)
+    setLatitude(formatCoordinate(s.latitude))
+    setLongitude(formatCoordinate(s.longitude))
+  }
+  const parsedCoords = parseCoordinates(latitude, longitude)
+  const hasCoordinates = parsedCoords !== null && parsedCoords !== 'invalid'
 
   const handleCreate = async (publishNow: boolean) => {
     setValidationError(null)
@@ -79,6 +96,11 @@ export default function CreateEventPage() {
       return
     }
 
+    if (parsedCoords === 'invalid') {
+      setValidationError('Coordenadas inválidas: preencha latitude (-90 a 90) e longitude (-180 a 180), ou deixe ambas vazias')
+      return
+    }
+
     const data: CreateEventRequest = {
       title: title.trim(),
       description: description.trim() || undefined,
@@ -86,6 +108,8 @@ export default function CreateEventPage() {
       visibility,
       locationName: locationName.trim() || undefined,
       address: address.trim() || undefined,
+      latitude: parsedCoords?.latitude,
+      longitude: parsedCoords?.longitude,
       startsAt: datetimeLocalToIso(startsAt),
       endsAt: datetimeLocalToIso(endsAt),
       maxParticipants: maxParticipants ? Number(maxParticipants) : undefined,
@@ -165,6 +189,19 @@ export default function CreateEventPage() {
             </div>
 
             {/* Location */}
+            <AddressAutocomplete
+              id="event-address-search"
+              label="Buscar local ou endereço"
+              placeholder="Ex: MASP, Av. Paulista 1578"
+              value={addressSearch.query}
+              onChange={addressSearch.setQuery}
+              suggestions={addressSearch.suggestions}
+              onSelect={applySuggestion}
+              loading={addressSearch.loading}
+              error={addressSearch.error}
+              disabled={saving}
+            />
+
             <AuthInput
               id="event-location-name"
               label="Local"
@@ -185,6 +222,34 @@ export default function CreateEventPage() {
               onChange={setAddress}
               disabled={saving}
             />
+
+            <div className="grid grid-cols-2 gap-gutter">
+              <AuthInput
+                id="event-latitude"
+                label="Latitude"
+                type="text"
+                placeholder="-23.561496"
+                value={latitude}
+                onChange={setLatitude}
+                disabled={saving}
+              />
+              <AuthInput
+                id="event-longitude"
+                label="Longitude"
+                type="text"
+                placeholder="-46.655968"
+                value={longitude}
+                onChange={setLongitude}
+                disabled={saving}
+              />
+            </div>
+
+            <p className="font-sans text-label-md text-on-surface-variant -mt-stack-sm flex items-center gap-1">
+              <Icon name={hasCoordinates ? 'my_location' : 'location_off'} size={14} />
+              {hasCoordinates
+                ? 'Coordenadas definidas — o evento aparece na busca por proximidade.'
+                : 'Sem coordenadas — selecione um resultado da busca ou preencha manualmente.'}
+            </p>
 
             <AuthInput
               id="event-source-url"

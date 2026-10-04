@@ -4,15 +4,19 @@ import TopNavBar from '../components/organisms/TopNavBar'
 import Footer from '../components/organisms/Footer'
 import EventFormPanel from '../components/molecules/EventFormPanel'
 import AuthInput from '../components/atoms/AuthInput'
+import AddressAutocomplete from '../components/molecules/AddressAutocomplete'
 import TagChip from '../components/atoms/TagChip'
 import SegmentedControl from '../components/atoms/SegmentedControl'
 import Icon from '../components/atoms/Icon'
 import { useEventForm } from '../hooks/useEventForm'
+import { useAddressSearch } from '../hooks/useAddressSearch'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { getById } from '../services/eventService'
 import { type EventResponse, type UpdateEventRequest } from '../types/api'
 import { datetimeLocalToIso } from '../utils/date'
 import { isHttpUrl } from '../utils/url'
+import { formatCoordinate, parseCoordinates } from '../utils/coordinates'
+import { type AddressSuggestion } from '../types/geocoding'
 
 const MIN_LEAD_TIME_MS = 60_000
 
@@ -47,6 +51,8 @@ interface FormState {
   visibility: string
   locationName: string
   address: string
+  latitude: string
+  longitude: string
   startsAt: string
   endsAt: string
   maxParticipants: string
@@ -69,6 +75,8 @@ const EMPTY_FORM: FormState = {
   visibility: 'PUBLIC',
   locationName: '',
   address: '',
+  latitude: '',
+  longitude: '',
   startsAt: '',
   endsAt: '',
   maxParticipants: '',
@@ -88,6 +96,7 @@ export default function EditEventPage() {
   const [confirmingCancel, setConfirmingCancel] = useState(false)
 
   const { saving, deleting, error, update, cancelEvent } = useEventForm()
+  const addressSearch = useAddressSearch()
 
   useEffect(() => {
     if (!id) return
@@ -124,6 +133,8 @@ export default function EditEventPage() {
         visibility: event.visibility,
         locationName: event.locationName ?? '',
         address: event.address ?? '',
+        latitude: event.latitude != null ? formatCoordinate(event.latitude) : '',
+        longitude: event.longitude != null ? formatCoordinate(event.longitude) : '',
         startsAt: event.startsAt.slice(0, 16),
         endsAt: event.endsAt ? event.endsAt.slice(0, 16) : '',
         maxParticipants: event.maxParticipants != null ? String(event.maxParticipants) : '',
@@ -161,6 +172,16 @@ export default function EditEventPage() {
     return <Navigate to={`/events/${id}`} replace />
   }
 
+  const applySuggestion = (s: AddressSuggestion) => {
+    addressSearch.select(s)
+    if (s.venueName) formDispatch({ type: 'set', field: 'locationName', value: s.venueName })
+    formDispatch({ type: 'set', field: 'address', value: s.address })
+    formDispatch({ type: 'set', field: 'latitude', value: formatCoordinate(s.latitude) })
+    formDispatch({ type: 'set', field: 'longitude', value: formatCoordinate(s.longitude) })
+  }
+  const parsedCoords = parseCoordinates(form.latitude, form.longitude)
+  const hasCoordinates = parsedCoords !== null && parsedCoords !== 'invalid'
+
   const handleSave = async () => {
     setValidationError(null)
 
@@ -194,6 +215,11 @@ export default function EditEventPage() {
       return
     }
 
+    if (parsedCoords === 'invalid') {
+      setValidationError('Coordenadas inválidas: preencha latitude (-90 a 90) e longitude (-180 a 180), ou deixe ambas vazias')
+      return
+    }
+
     const data: UpdateEventRequest = {
       title: form.title.trim(),
       description: form.description.trim() || undefined,
@@ -201,6 +227,8 @@ export default function EditEventPage() {
       visibility: form.visibility as 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY',
       locationName: form.locationName.trim() || undefined,
       address: form.address.trim() || undefined,
+      latitude: parsedCoords?.latitude,
+      longitude: parsedCoords?.longitude,
       startsAt: datetimeLocalToIso(form.startsAt),
       endsAt: datetimeLocalToIso(form.endsAt),
       maxParticipants: form.maxParticipants ? Number(form.maxParticipants) : undefined,
@@ -296,6 +324,19 @@ export default function EditEventPage() {
             </div>
 
             {/* Location */}
+            <AddressAutocomplete
+              id="event-address-search"
+              label="Buscar local ou endereço"
+              placeholder="Ex: MASP, Av. Paulista 1578"
+              value={addressSearch.query}
+              onChange={addressSearch.setQuery}
+              suggestions={addressSearch.suggestions}
+              onSelect={applySuggestion}
+              loading={addressSearch.loading}
+              error={addressSearch.error}
+              disabled={saving}
+            />
+
             <AuthInput
               id="event-location-name"
               label="Local"
@@ -316,6 +357,33 @@ export default function EditEventPage() {
               onChange={(v) => formDispatch({ type: 'set', field: 'address', value: v })}
               disabled={saving}
             />
+
+            <div className="grid grid-cols-2 gap-gutter">
+              <AuthInput
+                id="event-latitude"
+                label="Latitude"
+                type="text"
+                placeholder="-23.561496"
+                value={form.latitude}
+                onChange={(v) => formDispatch({ type: 'set', field: 'latitude', value: v })}
+                disabled={saving}
+              />
+              <AuthInput
+                id="event-longitude"
+                label="Longitude"
+                type="text"
+                placeholder="-46.655968"
+                value={form.longitude}
+                onChange={(v) => formDispatch({ type: 'set', field: 'longitude', value: v })}
+                disabled={saving}
+              />
+            </div>
+            <p className="font-sans text-label-md text-on-surface-variant -mt-stack-sm flex items-center gap-1">
+              <Icon name={hasCoordinates ? 'my_location' : 'location_off'} size={14} />
+              {hasCoordinates
+                ? 'Coordenadas definidas — o evento aparece na busca por proximidade.'
+                : 'Sem coordenadas — selecione um resultado da busca ou preencha manualmente.'}
+            </p>
 
             <AuthInput
               id="event-source-url"

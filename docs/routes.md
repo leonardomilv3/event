@@ -133,7 +133,7 @@ Formulário de criação de evento. Requer autenticação.
 
 1. `TopNavBar` — autenticado, exibe nome do usuário
 2. **`EventFormPanel`** — container glass centrado (`max-w-2xl`), título "Crie seu próximo evento"
-   - Campos: título (`AuthInput`), narrativa (textarea), categoria (grid de `TagChip` clicáveis), visibilidade (`SegmentedControl` PUBLIC/PRIVATE/INVITE_ONLY), local (`AuthInput` com `location_on`), endereço, início + fim (`datetime-local` side-by-side no md; **ambos obrigatórios**, fim posterior ao início), link da fonte opcional (só `http(s)`), limite de presença
+   - Campos: título (`AuthInput`), narrativa (textarea), categoria (grid de `TagChip` clicáveis), visibilidade (`SegmentedControl` PUBLIC/PRIVATE/INVITE_ONLY), busca de local/endereço (`AddressAutocomplete` + `useAddressSearch`, ADR-013) que preenche local, endereço e coordenadas, local (`AuthInput` com `location_on`), endereço, latitude + longitude (editáveis — fallback manual; ambas ou nenhuma), início + fim (`datetime-local` side-by-side no md; **ambos obrigatórios**, fim posterior ao início), link da fonte opcional (só `http(s)`), limite de presença
    - Dois botões de submit: "Publicar Evento" (mint fill, `publishNow=true`) + "Salvar como rascunho" (ghost, `publishNow=false`)
    - Link "Cancelar" → `/events`
 3. `Footer`

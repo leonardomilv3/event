@@ -12,6 +12,7 @@ interface AuthInputProps {
   autoComplete?: string
   disabled?: boolean
   leftIcon?: string
+  trailingElement?: ReactNode
 }
 
 export default function AuthInput({
@@ -26,6 +27,7 @@ export default function AuthInput({
   autoComplete,
   disabled = false,
   leftIcon,
+  trailingElement,
 }: AuthInputProps) {
   return (
     <div className="space-y-2">
@@ -59,7 +61,8 @@ export default function AuthInput({
           disabled={disabled}
           className={[
             'w-full bg-surface-container-low rounded-lg py-3',
-            leftIcon ? 'pl-10 pr-4' : 'pl-4 pr-4',
+            leftIcon ? 'pl-10' : 'pl-4',
+            trailingElement ? 'pr-12' : 'pr-4',
             'text-on-surface text-body-md',
             'placeholder:text-on-surface-variant/30',
             'focus:outline-none focus:ring-0',
@@ -67,6 +70,12 @@ export default function AuthInput({
             disabled ? 'opacity-50 cursor-not-allowed' : '',
           ].join(' ')}
         />
+
+        {trailingElement && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
+            {trailingElement}
+          </div>
+        )}
       </div>
 
       {error && (

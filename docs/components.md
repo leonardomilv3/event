@@ -98,6 +98,7 @@ Input de formulário para as telas de auth — label em `label-caps`, wrapper co
 | `leftIcon` | `string` | — | Nome de Material Symbol à esquerda (ex: `'mail'`, `'lock'`). Adiciona `pl-10` no input. |
 | `autoComplete` | `string` | — | Atributo `autocomplete` nativo |
 | `disabled` | `boolean` | `false` | Desabilita input com `opacity-50` |
+| `trailingElement` | `ReactNode` | — | Slot dentro do input, à direita (ex: toggle de visibilidade do `PasswordInput`). Adiciona `pr-12` no input. |
 
 Notas:
 - `.input-focus-effect` aplicado no wrapper `<div>`, não no `<input>` — glow aparece ao redor do grupo
@@ -159,6 +160,26 @@ Botão de seguir/deixar de seguir. Dois estados visuais: outline mint (não segu
 ## Moléculas
 
 Compostos de átomos. Encapsulam um padrão de UI recorrente.
+
+### `PasswordInput`
+`src/components/molecules/PasswordInput.tsx`
+
+`AuthInput` de senha com botão de olho para mostrar/ocultar. Usar em **todo** campo de senha (login, cadastro, confirmação) — nunca `AuthInput type="password"` direto.
+
+| Prop | Tipo | Default | Descrição |
+|---|---|---|---|
+| `id` | `string` | — | Liga label ao input; também usado em `aria-controls` do toggle |
+| `label` | `string` | — | Texto do label |
+| `value` | `string` | — | Valor controlado |
+| `onChange` | `(value: string) => void` | — | Callback com o novo valor |
+| `placeholder` | `string` | `'••••••••'` | Placeholder |
+| `autoComplete` | `'current-password' \| 'new-password'` | — | Login usa `current-password`; cadastro usa `new-password` |
+| `error` | `string` | — | Repassado ao `AuthInput` |
+| `rightElement` | `ReactNode` | — | Slot do label (ex: "Forgot password?") |
+| `leftIcon` | `string` | — | Ícone à esquerda (cadastro usa `'lock'`) |
+| `disabled` | `boolean` | `false` | Desabilita input e toggle |
+
+Estado local `visible`: `visibility_off` = mascarado (`type="password"`, padrão); clique alterna para `type="text"` com ícone `visibility`. Toggle tem `aria-label`/`aria-pressed`.
 
 ### `EventFormPanel`
 `src/components/molecules/EventFormPanel.tsx`

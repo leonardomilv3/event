@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import CinematicAuthLayout from '../components/organisms/CinematicAuthLayout'
 import AuthFormPanel from '../components/molecules/AuthFormPanel'
 import AuthInput from '../components/atoms/AuthInput'
+import PasswordInput from '../components/molecules/PasswordInput'
 // import SocialAuthButton from '../components/atoms/SocialAuthButton'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { ApiError } from '../services/httpClient'
@@ -66,11 +67,9 @@ export default function LoginPage() {
             disabled={loading}
           />
 
-          <AuthInput
+          <PasswordInput
             id="password"
             label="Password"
-            type="password"
-            placeholder="••••••••"
             value={password}
             onChange={setPassword}
             autoComplete="current-password"

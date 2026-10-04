@@ -63,7 +63,7 @@ class SitemapControllerTest {
         EventResponse privateEvent = eventService.create(creator.userId(), new CreateEventRequest(
             base.title(), base.description(), base.category(), EventVisibility.PRIVATE,
             base.latitude(), base.longitude(), base.locationName(), base.address(),
-            base.startsAt(), base.endsAt(), base.maxParticipants()));
+            base.startsAt(), base.endsAt(), base.maxParticipants(), null));
         eventService.publish(creator.userId(), privateEvent.id());
 
         given()

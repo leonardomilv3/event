@@ -54,7 +54,7 @@ class EventServiceTest {
             "Evento sem local", "desc", "CULTURE",
             EventVisibility.PUBLIC,
             null, null, null, null,
-            startsAt, null, 50
+            startsAt, null, 50, null
         );
         EventResponse event = eventService.create(creator.userId(), req);
 
@@ -72,7 +72,7 @@ class EventServiceTest {
             "Evento", "desc", "MUSIC",
             null, // visibility null → default PUBLIC
             -15.79, -47.88, "Brasília", null,
-            startsAt, null, null
+            startsAt, null, null, null
         );
         EventResponse event = eventService.create(creator.userId(), req);
 
@@ -119,7 +119,7 @@ class EventServiceTest {
 
         var updateReq = new UpdateEventRequest(
             "Título Atualizado", null, null, null,
-            null, null, null, null, null, null, null
+            null, null, null, null, null, null, null, null
         );
         EventResponse updated = eventService.update(creator.userId(), original.id(), updateReq);
 
@@ -136,12 +136,37 @@ class EventServiceTest {
         var updateReq = new UpdateEventRequest(
             null, null, null, null,
             -23.5505, -46.6333, // São Paulo
-            null, null, null, null, null
+            null, null, null, null, null, null
         );
         EventResponse updated = eventService.update(creator.userId(), original.id(), updateReq);
 
         assertEquals(-23.5505, updated.latitude(), 0.0001);
         assertEquals(-46.6333, updated.longitude(), 0.0001);
+    }
+
+    @Test
+    void shouldPersistSourceUrlAndClearItWithBlankOnUpdate() {
+        AuthResponse creator = registerUser();
+        OffsetDateTime startsAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(1);
+        var req = new CreateEventRequest(
+            "Evento curado", "desc", "MUSIC", EventVisibility.PUBLIC,
+            null, null, null, null,
+            startsAt, null, null, "https://agenda.example.com/evento/42"
+        );
+        EventResponse created = eventService.create(creator.userId(), req);
+        assertEquals("https://agenda.example.com/evento/42", created.sourceUrl());
+
+        var keep = new UpdateEventRequest(
+            "Novo título", null, null, null,
+            null, null, null, null, null, null, null, null
+        );
+        assertEquals(created.sourceUrl(), eventService.update(creator.userId(), created.id(), keep).sourceUrl());
+
+        var clear = new UpdateEventRequest(
+            null, null, null, null,
+            null, null, null, null, null, null, null, ""
+        );
+        assertNull(eventService.update(creator.userId(), created.id(), clear).sourceUrl());
     }
 
     @Test
@@ -152,7 +177,7 @@ class EventServiceTest {
 
         var updateReq = new UpdateEventRequest(
             "Hackeado", null, null, null,
-            null, null, null, null, null, null, null
+            null, null, null, null, null, null, null, null
         );
         ApiException ex = assertThrows(ApiException.class,
             () -> eventService.update(other.userId(), event.id(), updateReq));
@@ -165,7 +190,7 @@ class EventServiceTest {
         AuthResponse creator = registerUser();
         var updateReq = new UpdateEventRequest(
             "X", null, null, null,
-            null, null, null, null, null, null, null
+            null, null, null, null, null, null, null, null
         );
 
         ApiException ex = assertThrows(ApiException.class,
@@ -300,7 +325,7 @@ class EventServiceTest {
             "Sem local", "desc", "CULTURE",
             EventVisibility.PUBLIC,
             null, null, null, null,
-            startsAt, null, null
+            startsAt, null, null, null
         );
         EventResponse event = eventService.create(creator.userId(), req);
         eventService.publish(creator.userId(), event.id());

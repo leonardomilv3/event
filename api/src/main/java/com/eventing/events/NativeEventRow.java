@@ -23,5 +23,6 @@ public record NativeEventRow(
         Integer participantCount,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt,
-        Double distanceKm
+        Double distanceKm,
+        String sourceUrl
 ) {}

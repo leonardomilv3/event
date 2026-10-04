@@ -63,6 +63,7 @@ export interface EventResponse {
   distanceKm?: number;
   createdAt: string;
   updatedAt: string;
+  sourceUrl?: string;
 }
 
 export interface ParticipantResponse {
@@ -88,6 +89,7 @@ export interface CreateEventRequest {
   startsAt: string;
   endsAt?: string;
   maxParticipants?: number;
+  sourceUrl?: string;
 }
 
 export interface UpdateEventRequest {
@@ -102,6 +104,8 @@ export interface UpdateEventRequest {
   startsAt?: string;
   endsAt?: string;
   maxParticipants?: number;
+  /** '' limpa o campo; ausente mantém o valor atual */
+  sourceUrl?: string;
 }
 
 // ── Social ────────────────────────────────────────────────────────────

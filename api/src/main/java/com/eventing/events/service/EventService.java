@@ -60,6 +60,7 @@ public class EventService {
         event.startsAt = toUtcLocalDateTime(request.startsAt());
         event.endsAt = request.endsAt() != null ? toUtcLocalDateTime(request.endsAt()) : null;
         event.maxParticipants = request.maxParticipants();
+        event.sourceUrl = blankToNull(request.sourceUrl());
         if (request.latitude() != null && request.longitude() != null) {
             event.location = toPoint(request.longitude(), request.latitude());
         }
@@ -104,6 +105,7 @@ public class EventService {
         if (request.startsAt() != null) event.startsAt = toUtcLocalDateTime(request.startsAt());
         if (request.endsAt() != null) event.endsAt = toUtcLocalDateTime(request.endsAt());
         if (request.maxParticipants() != null) event.maxParticipants = request.maxParticipants();
+        if (request.sourceUrl() != null) event.sourceUrl = blankToNull(request.sourceUrl());
         if (request.latitude() != null && request.longitude() != null) {
             event.location = toPoint(request.longitude(), request.latitude());
         }
@@ -267,7 +269,8 @@ public class EventService {
                 r.participantCount() != null ? r.participantCount() : 0,
                 r.distanceKm(),
                 r.createdAt() != null ? r.createdAt().toLocalDateTime() : null,
-                r.updatedAt() != null ? r.updatedAt().toLocalDateTime() : null
+                r.updatedAt() != null ? r.updatedAt().toLocalDateTime() : null,
+                r.sourceUrl()
         );
     }
 
@@ -282,6 +285,10 @@ public class EventService {
 
     private Point toPoint(double longitude, double latitude) {
         return GEO_FACTORY.createPoint(new Coordinate(longitude, latitude));
+    }
+
+    private static String blankToNull(String s) {
+        return s == null || s.isBlank() ? null : s.strip();
     }
 
     private static LocalDateTime toUtcLocalDateTime(OffsetDateTime odt) {
@@ -299,7 +306,8 @@ public class EventService {
                 lat, lon,
                 event.startsAt, event.endsAt,
                 event.maxParticipants, event.participantCount,
-                distanceKm, event.createdAt, event.updatedAt
+                distanceKm, event.createdAt, event.updatedAt,
+                event.sourceUrl
         );
     }
 }

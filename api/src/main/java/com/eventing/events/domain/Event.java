@@ -57,6 +57,9 @@ public class Event extends PanacheEntityBase {
     @Column(name = "ends_at")
     public LocalDateTime endsAt;
 
+    @Column(name = "source_url", length = 500)
+    public String sourceUrl;
+
     @Column(name = "max_participants")
     public Integer maxParticipants;
 

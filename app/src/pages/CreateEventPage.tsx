@@ -10,6 +10,7 @@ import Icon from '../components/atoms/Icon'
 import { useEventForm } from '../hooks/useEventForm'
 import { type CreateEventRequest } from '../types/api'
 import { datetimeLocalToIso } from '../utils/date'
+import { isHttpUrl } from '../utils/url'
 
 const MIN_LEAD_TIME_MS = 60_000
 
@@ -40,6 +41,7 @@ export default function CreateEventPage() {
   const [startsAt, setStartsAt] = useState('')
   const [endsAt, setEndsAt] = useState('')
   const [maxParticipants, setMaxParticipants] = useState('')
+  const [sourceUrl, setSourceUrl] = useState('')
   const [validationError, setValidationError] = useState<string | null>(null)
 
   const { saving, error, create } = useEventForm()
@@ -68,6 +70,11 @@ export default function CreateEventPage() {
       return
     }
 
+    if (sourceUrl.trim() && !isHttpUrl(sourceUrl.trim())) {
+      setValidationError('O link da fonte deve ser uma URL começando com http:// ou https://')
+      return
+    }
+
     const data: CreateEventRequest = {
       title: title.trim(),
       description: description.trim() || undefined,
@@ -78,6 +85,7 @@ export default function CreateEventPage() {
       startsAt: datetimeLocalToIso(startsAt),
       endsAt: endsAt ? datetimeLocalToIso(endsAt) : undefined,
       maxParticipants: maxParticipants ? Number(maxParticipants) : undefined,
+      sourceUrl: sourceUrl.trim() || undefined,
     }
 
     await create(data, publishNow)
@@ -172,6 +180,17 @@ export default function CreateEventPage() {
               value={address}
               onChange={setAddress}
               disabled={saving}
+            />
+
+            <AuthInput
+              id="event-source-url"
+              label="Link da fonte (opcional)"
+              type="text"
+              placeholder="https://agenda-original.com/evento"
+              value={sourceUrl}
+              onChange={setSourceUrl}
+              disabled={saving}
+              leftIcon="link"
             />
 
             {/* Date / Time */}

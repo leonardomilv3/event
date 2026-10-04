@@ -15,5 +15,9 @@ public record UpdateEventRequest(
         String address,
         @Future OffsetDateTime startsAt,
         OffsetDateTime endsAt,
-        @Positive Integer maxParticipants
+        @Positive Integer maxParticipants,
+        // "" limpa o campo; null mantém o valor atual (update parcial)
+        @Size(max = 500)
+        @Pattern(regexp = "^$|^https?://\\S+$", message = "deve ser uma URL http(s) válida")
+        String sourceUrl
 ) {}

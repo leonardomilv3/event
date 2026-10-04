@@ -12,6 +12,7 @@ import { useFollow } from '../hooks/useFollow'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { usePublicProfile } from '../hooks/usePublicProfile'
 import { formatEventDate } from '../utils/date'
+import { urlHost } from '../utils/url'
 import FollowButton from '../components/atoms/FollowButton'
 import ShareInviteModal from '../components/molecules/ShareInviteModal'
 import { buildShareUrl, useShareEvent } from '../hooks/useShareEvent'
@@ -359,6 +360,20 @@ export default function EventDetail() {
                         Organizador
                       </p>
                     </div>
+                    {event.sourceUrl && (
+                      <p className="font-sans text-label-md text-on-surface-variant flex items-center gap-1">
+                        <Icon name="link" size={16} />
+                        Encontrado em:{' '}
+                        <a
+                          href={event.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="text-primary-container hover:underline break-all"
+                        >
+                          {urlHost(event.sourceUrl)}
+                        </a>
+                      </p>
+                    )}
                     <div className="flex gap-stack-sm mt-stack-sm">
                       {!isCreator && (
                         <FollowButton

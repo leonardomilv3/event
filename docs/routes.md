@@ -116,7 +116,7 @@ Página de detalhe de um evento. **Rota pública** (fora de `ProtectedRoute`): u
      - "The Agenda" — 3× `AgendaItem` numerados (01/02/03) com hover opacity
      - "The Venue" — mapa mock grayscale + card com endereço e botão "Navegar"
    - **Coluna direita / Sidebar** (4 cols):
-     - Host card (`GlassPanel`) — avatar, nome, role, bio, botões Follow + Mail
+     - Host card (`GlassPanel`) — avatar, nome, role, bio, botões Follow + Mail; quando `sourceUrl` existe, linha "Encontrado em: <host>" (link externo `noopener noreferrer nofollow`)
      - Capacity card (exceto `PUBLIC`) — label, contagem "14 / 150", `ProgressBar` com mint glow, indicadores de demanda
 4. `Footer`
 5. **`ShareInviteModal`** — renderizado só após participação confirmada

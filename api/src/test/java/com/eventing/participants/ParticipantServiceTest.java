@@ -47,7 +47,7 @@ public class ParticipantServiceTest {
             EventVisibility.PUBLIC,
             -15.7942, -47.8825, "Brasília", null,
             OffsetDateTime.now(ZoneOffset.UTC).plusDays(1),
-            null, null
+            null, null, null
         );
         var event = eventService.create(creator.userId(), req);
         eventService.publish(creator.userId(), event.id());
@@ -132,7 +132,7 @@ public class ParticipantServiceTest {
         OffsetDateTime startsAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(1);
         var req = new CreateEventRequest(
             "Evento Lotado", "desc", "MUSIC", EventVisibility.PUBLIC,
-            -15.79, -47.88, "Brasília", null, startsAt, null, 1
+            -15.79, -47.88, "Brasília", null, startsAt, null, 1, null
         );
         EventResponse event = eventService.create(creator.userId(), req);
         eventService.publish(creator.userId(), event.id());
@@ -155,7 +155,7 @@ public class ParticipantServiceTest {
         OffsetDateTime startsAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(1);
         var req = new CreateEventRequest(
             "Sem Limite", "desc", "MUSIC", EventVisibility.PUBLIC,
-            -15.79, -47.88, "Brasília", null, startsAt, null, null // sem limite
+            -15.79, -47.88, "Brasília", null, startsAt, null, null, null // sem limite
         );
         EventResponse event = eventService.create(creator.userId(), req);
         eventService.publish(creator.userId(), event.id());
@@ -359,7 +359,7 @@ public class ParticipantServiceTest {
         OffsetDateTime startsAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(1);
         var req = new CreateEventRequest(
             "Test Event", "desc", "MUSIC", visibility,
-            -15.79, -47.88, "Brasília", null, startsAt, null, null
+            -15.79, -47.88, "Brasília", null, startsAt, null, null, null
         );
         EventResponse event = eventService.create(creator.userId(), req);
         return eventService.publish(creator.userId(), event.id());

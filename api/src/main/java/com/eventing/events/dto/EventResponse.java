@@ -25,5 +25,6 @@ public record EventResponse(
         int participantCount,
         Double distanceKm,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        String sourceUrl
 ) {}

@@ -63,6 +63,22 @@ class EventControllerTest {
     }
 
     @Test
+    void createShouldReturn400ForNonHttpSourceUrl() {
+        String token = registerAndLogin();
+        var body = new java.util.HashMap<>(buildCreateBody(OffsetDateTime.now(ZoneOffset.UTC).plusDays(1)));
+        body.put("sourceUrl", "javascript:alert(1)");
+
+        given()
+            .header("Authorization", "Bearer " + token)
+            .contentType(ContentType.JSON)
+            .body(body)
+        .when()
+            .post("/api/events")
+        .then()
+            .statusCode(400);
+    }
+
+    @Test
     void createShouldReturn400ForPastStartsAt() {
         String token = registerAndLogin();
 

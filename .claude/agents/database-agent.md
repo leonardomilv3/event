@@ -88,7 +88,12 @@ CREATE TABLE follows (
 );
 ```
 
-## Próxima migration: V6
+### V6–V8 — alterações em events
+- V6: índice composto `idx_events_status_visibility_starts_at (status, visibility, starts_at)`
+- V7: `notified_24h`, `notified_1h` (BOOLEAN NOT NULL DEFAULT FALSE) — lembretes do scheduler
+- V8: `source_url VARCHAR(500)` nullable — link da agenda externa de origem
+
+## Próxima migration: V9
 
 ## Padrões PostGIS
 

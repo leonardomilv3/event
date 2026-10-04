@@ -69,7 +69,8 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                        e.starts_at, e.ends_at,
                        e.max_participants, e.participant_count,
                        e.created_at, e.updated_at,
-                       ST_Distance(e.location, ST_Point(:lon, :lat)::geography) / 1000 AS distance_km
+                       ST_Distance(e.location, ST_Point(:lon, :lat)::geography) / 1000 AS distance_km,
+                       e.source_url
                 FROM events e
                 JOIN users u ON u.id = e.creator_id
                 WHERE e.status = 'PUBLISHED'
@@ -122,7 +123,8 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                            e.starts_at, e.ends_at,
                            e.max_participants, e.participant_count,
                            e.created_at, e.updated_at,
-                           ST_Distance(e.location, ST_Point(:lon, :lat)::geography) AS dist_m
+                           ST_Distance(e.location, ST_Point(:lon, :lat)::geography) AS dist_m,
+                           e.source_url
                     FROM events e
                     JOIN users u ON u.id = e.creator_id
                     WHERE e.status = 'PUBLISHED'
@@ -138,7 +140,8 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                        starts_at, ends_at,
                        max_participants, participant_count,
                        created_at, updated_at,
-                       dist_m / 1000 AS distance_km
+                       dist_m / 1000 AS distance_km,
+                       source_url
                 FROM base
                 ORDER BY (
                     COALESCE(0.4 * (1 - LEAST(dist_m / 50000, 1)), 0) +
@@ -159,6 +162,7 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
     // [6] visibility::text  [7] status::text  [8] cover_image_url  [9] location_name  [10] address
     // [11] latitude  [12] longitude  [13] starts_at  [14] ends_at
     // [15] max_participants  [16] participant_count  [17] created_at  [18] updated_at  [19] distance_km
+    // [20] source_url
     private NativeEventRow mapToNativeRow(Object[] r) {
         return new NativeEventRow(
                 asUuid(r[0]),
@@ -180,7 +184,8 @@ public class EventRepository implements PanacheRepositoryBase<Event, UUID> {
                 asInteger(r[16]),
                 asOffsetDateTime(r[17]),
                 asOffsetDateTime(r[18]),
-                asDouble(r[19])
+                asDouble(r[19]),
+                (String) r[20]
         );
     }
 

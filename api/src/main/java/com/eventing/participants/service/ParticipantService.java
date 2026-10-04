@@ -159,7 +159,8 @@ public class ParticipantService {
                 e.startsAt, e.endsAt,
                 e.maxParticipants, e.participantCount,
                 null,
-                e.createdAt, e.updatedAt
+                e.createdAt, e.updatedAt,
+                e.sourceUrl
         );
     }
 

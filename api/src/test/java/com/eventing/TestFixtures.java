@@ -31,7 +31,7 @@ public class TestFixtures {
             "Brasília", "Endereço de teste",
             startsAt,
             startsAt.plusHours(3),
-            100
+            100, null
         );
     }
 
@@ -45,7 +45,7 @@ public class TestFixtures {
             null, null,
             startsAt,
             null,
-            10
+            10, null
         );
     }
 }

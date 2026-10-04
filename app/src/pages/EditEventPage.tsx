@@ -12,6 +12,7 @@ import { useAuthContext } from '../hooks/useAuthContext'
 import { getById } from '../services/eventService'
 import { type EventResponse, type UpdateEventRequest } from '../types/api'
 import { datetimeLocalToIso } from '../utils/date'
+import { isHttpUrl } from '../utils/url'
 
 const MIN_LEAD_TIME_MS = 60_000
 
@@ -49,6 +50,7 @@ interface FormState {
   startsAt: string
   endsAt: string
   maxParticipants: string
+  sourceUrl: string
 }
 
 type FormAction =
@@ -70,6 +72,7 @@ const EMPTY_FORM: FormState = {
   startsAt: '',
   endsAt: '',
   maxParticipants: '',
+  sourceUrl: '',
 }
 
 export default function EditEventPage() {
@@ -124,6 +127,7 @@ export default function EditEventPage() {
         startsAt: event.startsAt.slice(0, 16),
         endsAt: event.endsAt ? event.endsAt.slice(0, 16) : '',
         maxParticipants: event.maxParticipants != null ? String(event.maxParticipants) : '',
+        sourceUrl: event.sourceUrl ?? '',
       },
     })
   }
@@ -181,6 +185,11 @@ export default function EditEventPage() {
       return
     }
 
+    if (form.sourceUrl.trim() && !isHttpUrl(form.sourceUrl.trim())) {
+      setValidationError('O link da fonte deve ser uma URL começando com http:// ou https://')
+      return
+    }
+
     const data: UpdateEventRequest = {
       title: form.title.trim(),
       description: form.description.trim() || undefined,
@@ -191,6 +200,7 @@ export default function EditEventPage() {
       startsAt: datetimeLocalToIso(form.startsAt),
       endsAt: form.endsAt ? datetimeLocalToIso(form.endsAt) : undefined,
       maxParticipants: form.maxParticipants ? Number(form.maxParticipants) : undefined,
+      sourceUrl: form.sourceUrl.trim(),
     }
 
     await update(id, data)
@@ -301,6 +311,17 @@ export default function EditEventPage() {
               value={form.address}
               onChange={(v) => formDispatch({ type: 'set', field: 'address', value: v })}
               disabled={saving}
+            />
+
+            <AuthInput
+              id="event-source-url"
+              label="Link da fonte (opcional)"
+              type="text"
+              placeholder="https://agenda-original.com/evento"
+              value={form.sourceUrl}
+              onChange={(v) => formDispatch({ type: 'set', field: 'sourceUrl', value: v })}
+              disabled={saving}
+              leftIcon="link"
             />
 
             {/* Date / Time */}

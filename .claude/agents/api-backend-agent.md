@@ -52,7 +52,7 @@ com.eventing
 ### Migrations Flyway
 - Arquivos em `src/main/resources/db/migration/`
 - Nomenclatura: `V{N}__{descricao_com_underscores}.sql`
-- Versão atual: V5 (próxima deve ser V6)
+- Versão atual: V8 (próxima deve ser V9)
 - Habilitar no properties: `quarkus.flyway.migrate-at-start=true`
 - Para enums PostgreSQL, criar tipo ANTES das tabelas:
 ```sql

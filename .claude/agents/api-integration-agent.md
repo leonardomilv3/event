@@ -126,6 +126,7 @@ export interface EventResponse {
   distanceKm?: number;
   createdAt: string;
   updatedAt: string;
+  sourceUrl?: string;
 }
 
 // Participant

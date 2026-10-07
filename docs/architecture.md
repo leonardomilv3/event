@@ -20,7 +20,7 @@
 
 | Camada | Tecnologia |
 |---|---|
-| Framework | Java 21 + Quarkus 3.12.3 |
+| Framework | Java 25 + Quarkus 3.40.1 (LTS) |
 | ORM | Hibernate ORM + Panache |
 | Banco de dados | PostgreSQL 16.4 + PostGIS |
 | Migrations | Flyway |

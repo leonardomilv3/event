@@ -4,7 +4,7 @@ import com.eventing.users.domain.User;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 import org.locationtech.jts.geom.Point;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

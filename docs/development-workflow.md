@@ -85,4 +85,4 @@ npm run build
 - [ ] Responsividade verificada: mobile (375px), tablet (768px), desktop (1440px)
 - [ ] Imports de tipo usam `import { type Foo }`
 - [ ] Nenhum `addEventListener` direto ao DOM sem cleanup no `useEffect`
-- [ ] `IMPLEMENTATION_PLAN.md` e docs relevantes atualizados se houver mudança estrutural
+- [ ] `README.md` e docs relevantes atualizados se houver mudança estrutural

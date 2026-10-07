@@ -3,7 +3,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ─── Stage 1: Build ──────────────────────────────────────────────────────────
-FROM maven:3.9-eclipse-temurin-21 AS builder
+FROM maven:3.9-eclipse-temurin-25 AS builder
 WORKDIR /app
 
 COPY pom.xml ./
@@ -11,8 +11,13 @@ COPY src/ ./src/
 RUN mvn package -DskipTests -q
 
 # ─── Stage 2: Runtime ────────────────────────────────────────────────────────
-FROM eclipse-temurin:21-jre AS runtime
+FROM eclipse-temurin:25-jre AS runtime
 WORKDIR /app
+
+# A imagem eclipse-temurin:25-jre não traz curl; o healthcheck do docker-compose.yml depende dele
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -r eventing && useradd -r -g eventing eventing
 

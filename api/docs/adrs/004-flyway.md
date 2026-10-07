@@ -21,15 +21,16 @@ Usamos **Flyway** com migrations SQL versionadas em `src/main/resources/db/migra
 ### Configuração
 
 ```properties
-# Dev: executa migrations no startup
-%dev.quarkus.flyway.migrate-at-start=true
-%dev.quarkus.flyway.locations=classpath:db/migration
-%dev.quarkus.flyway.baseline-on-migrate=true
+# Executa migrations no startup (só no perfil prod; não existe perfil %dev)
+%prod.quarkus.flyway.migrate-at-start=true
+%prod.quarkus.flyway.locations=classpath:db/migration
+%prod.quarkus.flyway.baseline-on-migrate=true
 
 # Hibernate em modo validate (não gera DDL)
-%dev.quarkus.hibernate-orm.database.generation=validate
-quarkus.hibernate-orm.database.generation=none
+%prod.quarkus.hibernate-orm.schema-management.strategy=validate
 ```
+
+Localmente, a API roda com o perfil prod (JAR ou `./mvnw quarkus:dev -Dquarkus.profile=prod`); ver o README. Os testes usam `src/test/resources/application.properties`, que também liga `migrate-at-start`.
 
 ### Convenção de nomes
 

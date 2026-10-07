@@ -4,7 +4,7 @@ Decisões arquiteturais do backend (`api/`). Cada ADR documenta uma escolha téc
 
 | ADR | Decisão |
 |---|---|
-| [001](001-java-quarkus.md) | Java 21 + Quarkus 3 |
+| [001](001-java-quarkus.md) | Java + Quarkus 3 (versões: ver ADR-010) |
 | [002](002-smallrye-jwt.md) | SmallRye JWT (sem Keycloak no MVP) |
 | [003](003-postgresql-postgis.md) | PostgreSQL + PostGIS (geolocalização nativa) |
 | [004](004-flyway.md) | Flyway para migrations |
@@ -13,3 +13,4 @@ Decisões arquiteturais do backend (`api/`). Cada ADR documenta uma escolha téc
 | [007](007-native-queries-postgis.md) | Native queries + records tipados para operações PostGIS |
 | [008](008-managed-infrastructure-mvp.md) | Infraestrutura managed no MVP (Vercel, Render, Supabase, Upstash) |
 | [009](009-utc-datetimes.md) | Datas em UTC de ponta a ponta; JSON com `Z`; front usa `parseApiDate` |
+| [010](010-java-25-quarkus-3-40.md) | Java 25 + Quarkus 3.40 LTS (substitui as versões do ADR-001) |

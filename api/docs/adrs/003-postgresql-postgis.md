@@ -24,7 +24,7 @@ As alternativas avaliadas:
 Usamos **PostgreSQL** como banco principal com a extensão **PostGIS** ativada.
 
 - Tipo de coluna: `geography(Point,4326)` — usa SRID WGS-84, distâncias em metros
-- ORM: `hibernate-spatial:6.5.2.Final` para bind de `org.locationtech.jts.geom.Point`
+- ORM: `hibernate-spatial` (versão gerenciada pelo Quarkus BOM, ver ADR-010) para bind de `org.locationtech.jts.geom.Point`
 - Queries nativas via `EntityManager` para `ST_DWithin`, `ST_Distance`, `ST_Y`/`ST_X`
 - `GeometryFactory` como constante estática: `new GeometryFactory(new PrecisionModel(), 4326)`
 - Coordenadas: `Point.getX() = longitude`, `Point.getY() = latitude`

@@ -7,10 +7,10 @@
 - Debugar erros de runtime na API
 
 ## Stack e versões obrigatórias
-- Java 21 (NUNCA Java 25 — incompatível com Quarkus 3.x / Byte Buddy)
-- Quarkus 3.12.3
+- Java 25 (ver `api/docs/adrs/010-java-25-quarkus-3-40.md`; JDK 21 não compila mais o projeto)
+- Quarkus 3.40.1 (LTS)
 - Hibernate ORM + Panache
-- Flyway 10.15.0 + flyway-database-postgresql (obrigatório para PG 16)
+- Flyway (versão do Quarkus BOM) + extensão `quarkus-flyway-postgresql` (obrigatória para PG 16)
 - SmallRye JWT (RSA RS256)
 - PostgreSQL 16.4 + PostGIS
 
@@ -83,9 +83,10 @@ com.eventing
 
 | Armadilha | Causa | Solução |
 |---|---|---|
-| `Unsupported class file major version 69` | Java 25 no PATH | Usar Java 21 via SDKMAN: `sdk use java 21.0.x-tem` |
-| `Unsupported Database: PostgreSQL 16` | Flyway 9.x | Flyway 10.15.0 + flyway-database-postgresql |
-| `operator does not exist: event_status = character varying` | Enum sem @JdbcType | Adicionar `@JdbcType(PostgreSQLEnumJdbcType.class)` |
+| `Fatal error compiling: error: release version 25 not supported` | JDK abaixo do 25 no `JAVA_HOME` | Usar Java 25 via SDKMAN: `sdk use java 25-tem` |
+| `Unsupported Database: PostgreSQL 16` | Falta suporte a PostgreSQL no Flyway | Manter a dependência `quarkus-flyway-postgresql` |
+| `operator does not exist: event_status = character varying` | Enum sem @JdbcType | Adicionar `@JdbcType(PostgreSQLEnumJdbcType.class)` (Hibernate 7: `org.hibernate.dialect.type.PostgreSQLEnumJdbcType`) |
+| CORS para de funcionar sem erro | `quarkus.http.cors=true` é ignorado no Quarkus 3.40 | Usar `quarkus.http.cors.enabled=true` |
 | `Schema-validation: missing table` | Hibernate validate sem migration | Criar migration correspondente |
 | `Recurso não encontrado` em endpoint existente | Conflito de @Path entre controllers | Consolidar endpoints no mesmo controller |
 | `data directory initialized by PostgreSQL 16` | Volume com PG16, imagem PG15 | Usar `postgis/postgis:16-3.4` e `docker compose down -v` |

@@ -1,7 +1,7 @@
 # ADR-001: Java 21 + Quarkus 3
 
 ## Status
-Accepted
+Superseded by [ADR-010](010-java-25-quarkus-3-40.md) (versões atualizadas para Java 25 + Quarkus 3.40). A escolha de Java + Quarkus continua valendo.
 
 ## Contexto
 

@@ -89,7 +89,7 @@ Verificar as 4 páginas nos 3 breakpoints (375px / 768px / 1440px):
 - [ ] `docs/routes.md` reflete mudanças de layout ou novas rotas
 - [ ] Novas decisões arquiteturais em `docs/decisions.md` ou novo ADR
 - [ ] `CLAUDE.md` atualizado se mudou stack, princípio ou workflow
-- [ ] `IMPLEMENTATION_PLAN.md` e `docs/adrs/README.md` com novos ADRs adicionados
+- [ ] `docs/adrs/README.md` (ou `api/docs/adrs/README.md`) e `CLAUDE.md` com novos ADRs adicionados
 
 ---
 

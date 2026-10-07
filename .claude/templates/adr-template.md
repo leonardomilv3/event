@@ -49,5 +49,5 @@ Instruções de uso:
 2. Nomear o arquivo: NNN-titulo-kebab-case.md
 3. Adicionar entrada na tabela de docs/adrs/README.md
 4. Adicionar entrada na tabela de ADRs em CLAUDE.md
-5. Atualizar IMPLEMENTATION_PLAN.md se for decisão de alto impacto
+5. Atualizar o `README.md` se for decisão de alto impacto (stack, infraestrutura, como rodar)
 -->

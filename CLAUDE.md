@@ -125,7 +125,7 @@ Documentação completa: [`docs/design-system.md`](docs/design-system.md)
 
 | ADR | Decisão |
 |---|---|
-| [001](api/docs/adrs/001-java-quarkus.md) | Java 21 + Quarkus 3 |
+| [001](api/docs/adrs/001-java-quarkus.md) | Java + Quarkus 3 (versões: ver ADR-010) |
 | [002](api/docs/adrs/002-smallrye-jwt.md) | SmallRye JWT (sem Keycloak no MVP) |
 | [003](api/docs/adrs/003-postgresql-postgis.md) | PostgreSQL + PostGIS (geolocalização nativa) |
 | [004](api/docs/adrs/004-flyway.md) | Flyway para migrations |
@@ -134,6 +134,7 @@ Documentação completa: [`docs/design-system.md`](docs/design-system.md)
 | [007](api/docs/adrs/007-native-queries-postgis.md) | Native queries + records tipados para operações PostGIS |
 | [008](api/docs/adrs/008-managed-infrastructure-mvp.md) | Infraestrutura managed no MVP (Vercel, Render, Supabase, Upstash) |
 | [009](api/docs/adrs/009-utc-datetimes.md) | Datas em UTC de ponta a ponta; JSON com `Z`; front usa `parseApiDate` |
+| [010](api/docs/adrs/010-java-25-quarkus-3-40.md) | Java 25 + Quarkus 3.40 LTS; versões de Hibernate Spatial e Flyway vêm do BOM |
 
 ---
 

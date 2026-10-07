@@ -25,7 +25,6 @@ Toda mudança estrutural no Eventing — novo componente, nova rota, nova decis�
 | Documento | Quando consultar |
 |---|---|
 | `README.md` | Mudanças em instalação, scripts ou rotas públicas |
-| `IMPLEMENTATION_PLAN.md` | Mudanças na estrutura geral de docs |
 | `docs/architecture.md` | Mudanças em stack, estrutura de pastas ou convenções |
 | `docs/design-system.md` | Novos tokens, novas classes CSS, mudanças de comportamento visual |
 | `docs/decisions.md` | Novas decisões implícitas identificadas no código |
@@ -93,7 +92,6 @@ Ao adicionar rota em `docs/routes.md`:
 4. Preencher **todas** as seções — ADR incompleto não é válido
 5. Adicionar na tabela de `docs/adrs/README.md`
 6. Adicionar na tabela de ADRs em `CLAUDE.md`
-7. Avaliar se merece entrada em `IMPLEMENTATION_PLAN.md`
 
 ---
 
@@ -204,7 +202,7 @@ Antes de finalizar qualquer atualização: verificar os 5 pares acima.
 4. **A nova rota foi adicionada em `docs/routes.md` e `README.md`?**
 5. **O novo ADR foi adicionado em `docs/adrs/README.md` E em `CLAUDE.md`?**
 6. **Alguma decisão existente ficou desatualizada pela mudança? Ex: nota no EventDetail sobre nav inline.**
-7. **O `IMPLEMENTATION_PLAN.md` ainda é um índice preciso da documentação existente?**
+7. **O `README.md` ainda é um índice preciso da documentação existente (seção "Documentação adicional")?**
 8. **Algum documento ainda menciona algo que foi removido do código?**
 
 ---

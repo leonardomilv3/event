@@ -28,14 +28,16 @@ eventing/
 
 ## Dockerfile da API (JVM mode)
 ```dockerfile
-FROM maven:3.9-eclipse-temurin-21 AS builder
+FROM maven:3.9-eclipse-temurin-25 AS builder
 WORKDIR /app
 COPY pom.xml ./
 COPY src/ ./src/
 RUN mvn package -DskipTests -q
 
-FROM eclipse-temurin:21-jre AS runtime
+FROM eclipse-temurin:25-jre AS runtime
 WORKDIR /app
+# curl não vem na base 25; o healthcheck do docker-compose.yml depende dele
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 RUN groupadd -r eventing && useradd -r -g eventing eventing
 COPY --from=builder --chown=eventing:eventing /app/target/quarkus-app/lib/ ./lib/
 COPY --from=builder --chown=eventing:eventing /app/target/quarkus-app/*.jar ./
@@ -43,7 +45,7 @@ COPY --from=builder --chown=eventing:eventing /app/target/quarkus-app/app/ ./app
 COPY --from=builder --chown=eventing:eventing /app/target/quarkus-app/quarkus/ ./quarkus/
 USER eventing
 EXPOSE 8080
-ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Duser.timezone=UTC -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 CMD ["sh", "-c", "java $JAVA_OPTS -jar quarkus-run.jar"]
 ```
 
@@ -125,14 +127,14 @@ JWT_PRIVATE_KEY_PATH=/app/keys/privateKey.pem
 ```
 
 ## Java — gerenciamento de versões
-- **SEMPRE usar Java 21** — Java 25 é incompatível com Quarkus 3.x
+- **SEMPRE usar Java 25**: o `pom.xml` usa `release 25` e o Quarkus 3.40 suporta Java 25 (ver `api/docs/adrs/010-java-25-quarkus-3-40.md`)
 - Gerenciar com SDKMAN:
 ```bash
-  sdk use java 21.0.5-tem
-  sdk default java 21.0.5-tem
+  sdk install java 25-tem   # Temurin 25 (confira os identificadores com `sdk list java`)
+  sdk use java 25-tem
 ```
-- Verificar: `java -version` deve mostrar `openjdk version "21.x.x"`
-- `.sdkmanrc` na raiz do projeto com `java=21.0.5-tem`
+- Verificar: `java -version` deve mostrar `openjdk version "25..."`
+- O repositório não tem `.sdkmanrc`; a versão é definida por `maven.compiler.release` no `api/pom.xml`
 
 ## Azure (produção futura)
 - Frontend → Azure Static Web Apps

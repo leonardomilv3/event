@@ -3,3 +3,11 @@
 *.zip
 *.tar.gz
 *stitch*
+# Obsidian (vault em docs/): só a configuração compartilhável é versionada
+docs/.obsidian/*
+!docs/.obsidian/app.json
+!docs/.obsidian/templates.json
+!docs/.obsidian/daily-notes.json
+
+# *.sh é ignorado acima; o verificador do vault é versionado
+!scripts/check-vault.sh

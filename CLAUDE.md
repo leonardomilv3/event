@@ -138,6 +138,20 @@ Documentação completa: [`docs/design-system.md`](docs/design-system.md)
 
 ---
 
+## Vault de conhecimento (docs/)
+
+`docs/` é um vault do Obsidian. Mapa: @docs/index.md · convenções completas: [`docs/vault-guide.md`](docs/vault-guide.md).
+
+- **Onde salvar:** produto → `docs/product/`; ADR → `docs/adrs/`; decisão menor → `docs/decisions.md`; procedimento/postmortem → `docs/runbooks/`; experimento → `docs/experiments/`; prompt-document → `docs/prompts/`; diário → `docs/journal/AAAA-MM-DD.md`. Partir dos modelos em `docs/_templates/`.
+- **Frontmatter obrigatório** (`type`, `status`, `date` AAAA-MM-DD) em toda nota.
+- **Links Markdown relativos**, nunca `[[wikilinks]]`. **Nenhum segredo**: só nomes de variáveis.
+- **ADR aceito é imutável**: criar um novo e marcar o antigo como `superseded`, com links nos dois sentidos.
+- **Antes de propor mudança estrutural**, ler os ADRs relacionados e os últimos registros de `docs/journal/`.
+- **Não carregar o vault inteiro**: partir de `docs/index.md` e buscar (Grep/Glob) só o necessário.
+- **Ao fim de sessões relevantes**, rodar `/log-session`. Antes de commitar mudanças em `docs/`: `bash scripts/check-vault.sh`.
+
+---
+
 ## AI Agents
 
 Agentes especializados disponíveis em `.claude/agents/`. Cada agente lê um subconjunto específico da documentação e tem foco bem delimitado.

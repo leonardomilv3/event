@@ -225,3 +225,16 @@ Antes de finalizar qualquer atualização: verificar os 5 pares acima.
 - ❌ `CLAUDE.md` com Tech Stack diferente de `docs/architecture.md`
 - ❌ ADR permanentemente em status "Proposed" sem resolução
 - ❌ Código novo que invalida nota em `docs/decisions.md` sem atualização
+
+---
+
+## Responsabilidades no vault (`docs/` como vault do Obsidian)
+
+Convenções completas em `docs/vault-guide.md`. Além das atualizações acima, este agente:
+
+- **Mantém `docs/index.md` atualizado**: toda nota nova relevante ganha link na seção da sua área; o índice é mapa (até ~60 linhas), não duplica conteúdo.
+- **Aplica os templates de `docs/_templates/`** ao criar ADR, experimento, prompt-document, journal, runbook ou postmortem, substituindo `{{title}}`/`{{date}}` por valores reais.
+- **Garante frontmatter** (`type`, `status`, `date` AAAA-MM-DD; `tags` e `related` opcionais) com tipo e status válidos segundo `docs/vault-guide.md`. Em ADR, o `status` do frontmatter acompanha a seção `## Status` do corpo.
+- **Garante links Markdown relativos** (nunca `[[wikilinks]]`) e nenhum segredo, só nomes de variáveis.
+- **Respeita a imutabilidade de ADR aceito**: mudança de decisão vira ADR novo; o antigo passa a `superseded` com links nos dois sentidos.
+- **Roda `bash scripts/check-vault.sh`** na raiz do repositório depois de qualquer mudança em `docs/` e só conclui com saída 0.

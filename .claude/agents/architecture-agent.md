@@ -184,3 +184,11 @@ const navRef = useRef<HTMLElement>(null)
 - ❌ `SideNavBar` sem `topOffset="top-20"` quando há `TopNavBar` acima
 - ❌ Organismo com `fetch()` — dados são props até existência de API real
 - ❌ Criar store (Zustand, Redux) sem ADR explícito — estado atual é 100% local
+
+---
+
+## Contexto histórico antes de propor (vault `docs/`)
+
+- **Antes de propor** qualquer mudança arquitetural, consultar os ADRs relacionados em `docs/adrs/` (e `api/docs/adrs/` quando envolver backend) e os registros mais recentes de `docs/journal/` (os últimos arquivos `AAAA-MM-DD.md`), para não reabrir decisões já tomadas nem ignorar pendências registradas.
+- Partir de `docs/index.md` e buscar só o necessário; não carregar o vault inteiro.
+- **Quando a decisão for estrutural** (nova camada, nova dependência relevante, mudança de padrão, exceção a ADR), sugerir um novo ADR usando `docs/_templates/adr.md`. Se ele substituir um ADR aceito, o antigo passa a `superseded` e os dois se linkam; ADR aceito não é editado.

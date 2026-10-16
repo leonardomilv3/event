@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'scripts/check-vault.sh'
+      - '.claude/**'
 
 env:
   IMAGE_NAME: leonardomilv3/eventing-api

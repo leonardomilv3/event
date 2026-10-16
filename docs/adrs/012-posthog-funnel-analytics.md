@@ -1,3 +1,9 @@
+---
+type: adr
+status: accepted
+date: 2026-10-01
+---
+
 # ADR-012: PostHog para instrumentação do funil de crescimento
 
 ## Status

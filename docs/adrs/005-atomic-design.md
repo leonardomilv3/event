@@ -1,3 +1,9 @@
+---
+type: adr
+status: accepted
+date: 2026-06-08
+---
+
 # ADR-005: Atomic Design como Hierarquia de Componentes
 
 ## Status

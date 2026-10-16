@@ -1,3 +1,9 @@
+---
+type: adr
+status: accepted
+date: 2026-10-01
+---
+
 # ADR-011: Vercel Routing Middleware para Open Graph e SEO por evento
 
 ## Status

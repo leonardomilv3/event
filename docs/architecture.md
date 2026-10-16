@@ -1,3 +1,9 @@
+---
+type: architecture
+status: current
+date: 2026-06-08
+---
+
 # Arquitetura
 
 ## Stack

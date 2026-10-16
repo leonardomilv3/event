@@ -1,3 +1,9 @@
+---
+type: architecture
+status: current
+date: 2026-06-08
+---
+
 # Design System
 
 Baseado no tema **Living City Aura** exportado pelo Stitch.

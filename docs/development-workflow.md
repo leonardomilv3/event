@@ -1,3 +1,9 @@
+---
+type: reference
+status: current
+date: 2026-06-08
+---
+
 # Development Workflow
 
 ---

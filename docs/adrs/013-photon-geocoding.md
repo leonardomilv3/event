@@ -1,3 +1,9 @@
+---
+type: adr
+status: accepted
+date: 2026-10-04
+---
+
 # ADR-013: Photon (OpenStreetMap) para autocomplete de endereço
 
 ## Status

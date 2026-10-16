@@ -1,3 +1,9 @@
+---
+type: decision-log
+status: current
+date: 2026-06-08
+---
+
 # Decisões Arquiteturais
 
 Registro de decisões tomadas durante o desenvolvimento — tanto as explícitas quanto as implícitas no código.

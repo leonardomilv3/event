@@ -1,3 +1,9 @@
+---
+type: index
+status: current
+date: 2026-06-08
+---
+
 # Architecture Decision Records
 
 Registro de decisões arquiteturais do projeto Eventing.

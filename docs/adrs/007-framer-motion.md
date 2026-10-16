@@ -1,3 +1,9 @@
+---
+type: adr
+status: accepted
+date: 2026-06-08
+---
+
 # ADR-007: Framer Motion para Micro-interações
 
 ## Status

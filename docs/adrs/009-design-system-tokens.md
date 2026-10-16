@@ -1,3 +1,9 @@
+---
+type: adr
+status: accepted
+date: 2026-06-08
+---
+
 # ADR-009: Design System Tokens do Stitch como Fonte Única de Verdade
 
 ## Status

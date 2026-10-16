@@ -1,3 +1,9 @@
+---
+type: architecture
+status: current
+date: 2026-06-08
+---
+
 # Rotas e Páginas
 
 Roteamento client-side via React Router v6, configurado em `app/src/App.tsx`.

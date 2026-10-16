@@ -1,3 +1,9 @@
+---
+type: architecture
+status: current
+date: 2026-06-08
+---
+
 # Componentes
 
 Hierarquia Atomic Design em três níveis. Ver [`architecture.md`](./architecture.md) para a regra de dependência entre níveis.

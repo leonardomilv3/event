@@ -485,4 +485,10 @@ Tabela de "qual agente para qual tarefa" e regras do que os agentes não podem f
 | [`docs/adrs/`](docs/adrs/README.md) | ADRs do frontend (001–013) |
 | [`api/docs/adrs/`](api/docs/adrs/README.md) | ADRs do backend (001–010) |
 
+**Vault do Obsidian.** `docs/` também é um vault do [Obsidian](https://obsidian.md): notas Markdown com frontmatter e links relativos, que funcionam igual no Obsidian, no GitHub e no Claude Code. Comece por [`docs/index.md`](docs/index.md); as convenções estão em [`docs/vault-guide.md`](docs/vault-guide.md).
+
+- Para abrir: no Obsidian, *Open folder as vault* → selecione `docs/`. Só `app.json`, `templates.json` e `daily-notes.json` de `docs/.obsidian/` são versionados.
+- Plugins sugeridos: **Dataview** (consultas por `type`/`status`) e **Obsidian Git**. Use o Obsidian Git com cautela: auto-commit/auto-pull pode concorrer com commits feitos pelo Claude Code no mesmo repositório.
+- Verificação (frontmatter, links quebrados, wikilinks, segredos, numeração de ADR): `bash scripts/check-vault.sh`.
+
 Licença: [MIT](LICENSE).

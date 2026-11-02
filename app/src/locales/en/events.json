@@ -1,0 +1,13 @@
+{
+  "form": {
+    "title": "Título do evento",
+    "tags": "Tags",
+    "tagsPlaceholder": "Escolha até {{max}} tags",
+    "capacity": "Capacidade: {{count}} pessoa",
+    "capacity_plural": "Capacidade: {{count}} pessoas"
+  },
+  "feed": {
+    "empty": "Nenhum evento por perto",
+    "distance": "A {{km}} km"
+  }
+}

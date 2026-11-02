@@ -1,0 +1,34 @@
+{
+  "app": { "name": "Eventing" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "events": "Eventos",
+    "myEvents": "Meus Eventos",
+    "messages": "Mensagens",
+    "insights": "Insights",
+    "settings": "Configurações",
+    "explore": "Explore",
+    "calendar": "Calendário",
+    "venues": "Espaços",
+    "collective": "Coletivo",
+    "support": "Suporte",
+    "logout": "Sair",
+    "notifications": "Notificações",
+    "profile": "Perfil"
+  },
+  "user": { "organizer": "Organizador" },
+  "footer": {
+    "copyright": "© 2026 Eventing",
+    "privacy": "Privacidade",
+    "terms": "Termos"
+  },
+  "actions": {
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "more": "Mais",
+    "notNow": "Agora não"
+  },
+  "language": { "label": "Idioma" }
+}

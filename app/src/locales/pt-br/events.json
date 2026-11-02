@@ -1,0 +1,59 @@
+{
+  "form": {
+    "createTitle": "Crie seu próximo evento",
+    "createSubtitle": "Preencha os detalhes para iluminar a noite.",
+    "titleLabel": "Nome do Evento",
+    "titlePlaceholder": "Ex: Festival da Cidade",
+    "descriptionLabel": "A Narrativa",
+    "descriptionPlaceholder": "Descreva a atmosfera e o propósito...",
+    "categoryLabel": "Categoria",
+    "visibilityLabel": "Visibilidade",
+    "addressSearchLabel": "Buscar local ou endereço",
+    "addressSearchPlaceholder": "Ex: MASP, Av. Paulista 1578",
+    "locationNameLabel": "Local",
+    "locationNamePlaceholder": "Nome do local (ex: The Grid Factory)",
+    "addressLabel": "Endereço",
+    "addressPlaceholder": "Rua, número, bairro",
+    "latitudeLabel": "Latitude",
+    "longitudeLabel": "Longitude",
+    "coordinatesSet": "Coordenadas definidas — o evento aparece na busca por proximidade.",
+    "coordinatesMissing": "Sem coordenadas — selecione um resultado da busca ou preencha manualmente.",
+    "sourceUrlLabel": "Link da fonte (opcional)",
+    "sourceUrlPlaceholder": "https://agenda-original.com/evento",
+    "startsAtLabel": "Início",
+    "endsAtLabel": "Fim",
+    "maxParticipantsLabel": "Limite de Presença",
+    "maxParticipantsPlaceholder": "Sem limite",
+    "publish": "Publicar Evento",
+    "publishing": "Publicando...",
+    "saveDraft": "Salvar como rascunho",
+    "cancel": "Cancelar"
+  },
+  "visibility": {
+    "public": "Público",
+    "private": "Privado",
+    "inviteOnly": "Somente convite"
+  },
+  "categories": {
+    "music": "Música",
+    "art": "Arte",
+    "food": "Gastronomia",
+    "sports": "Esporte",
+    "networking": "Networking",
+    "nightlife": "Vida Noturna"
+  },
+  "errors": {
+    "titleRequired": "O nome do evento é obrigatório",
+    "categoryRequired": "Selecione uma categoria",
+    "startRequired": "A data de início é obrigatória",
+    "endRequired": "A data de término é obrigatória",
+    "startInPast": "A data de início deve ser pelo menos 1 minuto no futuro",
+    "endBeforeStart": "A data de término deve ser posterior à data de início",
+    "invalidSourceUrl": "O link da fonte deve ser uma URL começando com http:// ou https://",
+    "invalidCoordinates": "Coordenadas inválidas: preencha latitude (-90 a 90) e longitude (-180 a 180), ou deixe ambas vazias"
+  },
+  "share": {
+    "title": "Presença confirmada!",
+    "message": "Convide seus amigos para <title>{{eventTitle}}</title> — evento bom é evento cheio."
+  }
+}

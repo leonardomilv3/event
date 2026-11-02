@@ -1,3 +1,4 @@
+import './lib/i18n'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import { AuthProvider } from './hooks/AuthContext'

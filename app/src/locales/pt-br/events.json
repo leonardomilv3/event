@@ -69,7 +69,8 @@
   },
   "share": {
     "title": "Presença confirmada!",
-    "message": "Convide seus amigos para <title>{{eventTitle}}</title> — evento bom é evento cheio."
+    "message": "Convide seus amigos para <title>{{eventTitle}}</title> — evento bom é evento cheio.",
+    "messageShort": "Bora comigo? {{title}}"
   },
   "detail": {
     "status": {

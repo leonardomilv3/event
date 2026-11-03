@@ -69,7 +69,8 @@
   },
   "share": {
     "title": "Attendance confirmed!",
-    "message": "Invite your friends to <title>{{eventTitle}}</title> — a good event is a full event."
+    "message": "Invite your friends to <title>{{eventTitle}}</title> — a good event is a full event.",
+    "messageShort": "Join me — {{title}}"
   },
   "detail": {
     "status": {

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import Icon from './Icon'
 
 interface FollowButtonProps {
@@ -7,16 +8,28 @@ interface FollowButtonProps {
   size?: 'sm' | 'md'
 }
 
-export default function FollowButton({ isFollowing, onClick, loading = false, size = 'md' }: FollowButtonProps) {
+export default function FollowButton({
+  isFollowing,
+  onClick,
+  loading = false,
+  size = 'md',
+}: FollowButtonProps) {
+  const { t } = useTranslation('social')
   const padding = size === 'sm' ? 'px-4 py-1.5' : 'px-8 py-2.5'
   const text = size === 'sm' ? 'text-label-md font-label-md' : 'font-bold'
+
+  const ariaLabel = loading
+    ? isFollowing
+      ? t('follow.unfollowLoading')
+      : t('follow.followLoading')
+    : undefined
 
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={loading}
-      aria-label={loading ? (isFollowing ? 'Deixando de seguir...' : 'Seguindo...') : undefined}
+      aria-label={ariaLabel}
       className={[
         'flex items-center justify-center gap-2 rounded-full border-2 transition-all active:scale-95',
         padding,
@@ -32,7 +45,7 @@ export default function FollowButton({ isFollowing, onClick, loading = false, si
       ) : (
         <>
           {isFollowing && <Icon name="check" size={size === 'sm' ? 14 : 16} />}
-          {isFollowing ? 'Seguindo' : 'Seguir'}
+          {isFollowing ? t('follow.following') : t('follow.follow')}
         </>
       )}
     </button>

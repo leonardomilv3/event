@@ -1,0 +1,53 @@
+{
+  "app": { "name": "Eventing" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "events": "Eventos",
+    "myEvents": "Meus Eventos",
+    "messages": "Mensagens",
+    "insights": "Insights",
+    "settings": "Configurações",
+    "explore": "Explore",
+    "calendar": "Calendário",
+    "venues": "Espaços",
+    "collective": "Coletivo",
+    "support": "Suporte",
+    "logout": "Sair",
+    "notifications": "Notificações",
+    "profile": "Perfil"
+  },
+  "user": { "organizer": "Organizador" },
+  "footer": {
+    "copyright": "© 2026 Eventing",
+    "copyrightFull": "© 2026 Eventing. Nocturnal Culture Collective.",
+    "privacy": "Privacidade",
+    "terms": "Termos",
+    "editorial": "Diretrizes Editoriais",
+    "contact": "Contato",
+    "languageLabel": "Mudar idioma",
+    "shareLabel": "Compartilhar"
+  },
+  "actions": {
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "more": "Mais",
+    "notNow": "Agora não",
+    "back": "Voltar",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "loading": "Carregando...",
+    "retry": "Tentar novamente",
+    "seeAll": "Ver Tudo"
+  },
+  "errors": {
+    "generic": "Erro inesperado. Tente novamente.",
+    "notFound": "Não encontrado",
+    "network": "Não foi possível conectar ao servidor."
+  },
+  "date": {
+    "until": "até"
+  },
+  "language": { "label": "Idioma" }
+}

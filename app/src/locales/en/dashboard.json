@@ -1,0 +1,35 @@
+{
+  "stats": {
+    "eventsCreated": "Events Created",
+    "participations": "Participations",
+    "connections": "Connections",
+    "futureEvents": "Upcoming Events"
+  },
+  "activity": {
+    "title": "Recent Activity",
+    "empty": "Your activity will appear here as you create and join events.",
+    "created": "CREATED",
+    "participating": "ATTENDING"
+  },
+  "editProfile": {
+    "title": "Edit Profile",
+    "displayNameLabel": "Display name",
+    "displayNamePlaceholder": "How you want to appear",
+    "bioLabel": "Bio",
+    "bioPlaceholder": "Tell us a bit about yourself...",
+    "cityLabel": "City",
+    "cityPlaceholder": "São Paulo, BR",
+    "submit": "Save changes",
+    "success": "Profile updated successfully",
+    "avatarAlt": "City"
+  },
+  "growthPulse": {
+    "title": "Growth Pulse",
+    "comingSoon": "Analytics coming soon"
+  },
+  "draft": {
+    "title": "Draft",
+    "editing": "Editing"
+  },
+  "logout": "Sign out"
+}

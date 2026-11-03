@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import GlassPanel from './GlassPanel'
 import Icon from '../atoms/Icon'
 
@@ -35,8 +36,13 @@ export default function ShareInviteModal({
   onTwitter,
   onClose,
 }: ShareInviteModalProps) {
+  const { t: tEvents } = useTranslation('events')
+  const { t: tCommon } = useTranslation()
+
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
@@ -55,14 +61,14 @@ export default function ShareInviteModal({
           <div className="flex items-center gap-stack-sm">
             <Icon name="check_circle" fill={1} className="text-primary-container" size={28} />
             <h2 id="share-invite-title" className="font-serif text-headline-md text-on-surface">
-              Presença confirmada!
+              {tEvents('share.title')}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-            aria-label="Fechar"
+            aria-label={tCommon('actions.close')}
           >
             <Icon name="close" size={20} className="text-on-surface-variant" />
           </button>
@@ -70,12 +76,19 @@ export default function ShareInviteModal({
 
         <div className="flex flex-col gap-stack-md px-gutter py-stack-lg">
           <p className="font-sans text-body-md text-on-surface-variant">
-            Convide seus amigos para <span className="text-on-surface font-semibold">{eventTitle}</span> —
-            evento bom é evento cheio.
+            <Trans
+              i18nKey="share.message"
+              ns="events"
+              values={{ eventTitle }}
+              components={{ title: <span className="text-on-surface font-semibold" /> }}
+            />
           </p>
 
           <div className="flex items-center gap-stack-sm p-1 pl-stack-md rounded-lg bg-surface-container border border-outline-variant/50">
-            <span className="flex-1 truncate font-sans text-label-md text-on-surface-variant" title={shareUrl}>
+            <span
+              className="flex-1 truncate font-sans text-label-md text-on-surface-variant"
+              title={shareUrl}
+            >
               {shareUrl}
             </span>
             <button
@@ -84,7 +97,7 @@ export default function ShareInviteModal({
               className="flex items-center gap-2 px-stack-md py-2 rounded-md bg-primary-container text-on-primary-fixed font-label-md text-label-md shadow-mint-glow active:scale-95 transition-all"
             >
               <Icon name={copied ? 'check' : 'content_copy'} size={18} />
-              {copied ? 'Copiado!' : 'Copiar'}
+              {copied ? tCommon('actions.copied') : tCommon('actions.copy')}
             </button>
           </div>
 
@@ -100,7 +113,7 @@ export default function ShareInviteModal({
             {canNativeShare && (
               <button type="button" onClick={onNativeShare} className={channelClass}>
                 <Icon name="ios_share" size={18} />
-                Mais
+                {tCommon('actions.more')}
               </button>
             )}
           </div>
@@ -110,7 +123,7 @@ export default function ShareInviteModal({
             onClick={onClose}
             className="self-center font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors"
           >
-            Agora não
+            {tCommon('actions.notNow')}
           </button>
         </div>
       </GlassPanel>

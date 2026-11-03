@@ -1,0 +1,51 @@
+{
+  "app": { "name": "Eventing" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "events": "Events",
+    "myEvents": "My Events",
+    "messages": "Messages",
+    "insights": "Insights",
+    "settings": "Settings",
+    "explore": "Explore",
+    "calendar": "Calendar",
+    "venues": "Venues",
+    "collective": "Collective",
+    "support": "Support",
+    "logout": "Sign out",
+    "notifications": "Notifications",
+    "profile": "Profile"
+  },
+  "user": { "organizer": "Organizer" },
+  "footer": {
+    "copyright": "© 2026 Eventing",
+    "copyrightFull": "© 2026 Eventing. Nocturnal Culture Collective.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "editorial": "Editorial Guidelines",
+    "contact": "Contact",
+    "languageLabel": "Change language",
+    "shareLabel": "Share"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "more": "More",
+    "notNow": "Not now",
+    "back": "Back",
+    "save": "Save",
+    "saving": "Saving...",
+    "loading": "Loading...",
+    "retry": "Try again",
+    "seeAll": "See all"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notFound": "Not found",
+    "network": "Could not connect to the server."
+  },
+  "date": { "until": "until" },
+  "language": { "label": "Language" }
+}

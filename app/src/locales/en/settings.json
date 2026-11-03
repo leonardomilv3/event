@@ -1,0 +1,20 @@
+{
+  "title": "Settings",
+  "subtitle": "Customize your Eventing experience",
+  "sections": {
+    "language": {
+      "title": "Language",
+      "description": "Choose the interface language. Changes apply immediately."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize the theme and visual identity of the app.",
+      "badge": "Coming soon"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Control how you receive event reminders and updates.",
+      "badge": "Coming soon"
+    }
+  }
+}

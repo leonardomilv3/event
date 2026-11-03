@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import TopNavBar from '../components/organisms/TopNavBar'
 import Footer from '../components/organisms/Footer'
 import EventFormPanel from '../components/molecules/EventFormPanel'
@@ -18,13 +19,26 @@ import { type AddressSuggestion } from '../types/geocoding'
 
 const MIN_LEAD_TIME_MS = 60_000
 
-const CATEGORIES = ['MUSIC', 'ART', 'FOOD', 'SPORTS', 'NETWORKING', 'NIGHTLIFE']
+const CATEGORY_VALUES = ['MUSIC', 'ART', 'FOOD', 'SPORTS', 'NETWORKING', 'NIGHTLIFE'] as const
+type CategoryValue = (typeof CATEGORY_VALUES)[number]
 
-const VISIBILITY_OPTIONS = [
-  { label: 'PUBLIC', value: 'PUBLIC' },
-  { label: 'PRIVATE', value: 'PRIVATE' },
-  { label: 'INVITE_ONLY', value: 'INVITE_ONLY' },
-]
+const CATEGORY_LABEL_KEYS = {
+  MUSIC: 'categories.music',
+  ART: 'categories.art',
+  FOOD: 'categories.food',
+  SPORTS: 'categories.sports',
+  NETWORKING: 'categories.networking',
+  NIGHTLIFE: 'categories.nightlife',
+} as const satisfies Record<CategoryValue, string>
+
+const VISIBILITY_VALUES = ['PUBLIC', 'PRIVATE', 'INVITE_ONLY'] as const
+type VisibilityValue = (typeof VISIBILITY_VALUES)[number]
+
+const VISIBILITY_LABEL_KEYS = {
+  PUBLIC: 'visibility.public',
+  PRIVATE: 'visibility.private',
+  INVITE_ONLY: 'visibility.inviteOnly',
+} as const satisfies Record<VisibilityValue, string>
 
 const INPUT_CLASS = [
   'w-full bg-surface-container-lowest border border-outline-variant rounded-lg',
@@ -33,13 +47,15 @@ const INPUT_CLASS = [
   'transition-all duration-300',
 ].join(' ')
 
-const LABEL_CLASS = 'font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider'
+const LABEL_CLASS =
+  'font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider'
 
 export default function CreateEventPage() {
+  const { t } = useTranslation('events')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
-  const [visibility, setVisibility] = useState<'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY'>('PUBLIC')
+  const [visibility, setVisibility] = useState<VisibilityValue>('PUBLIC')
   const [locationName, setLocationName] = useState('')
   const [address, setAddress] = useState('')
   const [latitude, setLatitude] = useState('')
@@ -65,41 +81,17 @@ export default function CreateEventPage() {
 
   const handleCreate = async (publishNow: boolean) => {
     setValidationError(null)
-
-    if (!title.trim()) {
-      setValidationError('O nome do evento é obrigatório')
-      return
-    }
-    if (!category) {
-      setValidationError('Selecione uma categoria')
-      return
-    }
-    if (!startsAt) {
-      setValidationError('A data de início é obrigatória')
-      return
-    }
-    if (!endsAt){
-      setValidationError('A data de término é obrigatória')
-      return
-    }
-    if (new Date(startsAt) <= new Date(Date.now() + MIN_LEAD_TIME_MS)) {
-      setValidationError('A data de início deve ser pelo menos 1 minuto no futuro')
-      return
-    }
-    if (new Date(endsAt) <= new Date(startsAt)) {
-      setValidationError('A data de término deve ser posterior à data de início')
-      return
-    }
-
-    if (sourceUrl.trim() && !isHttpUrl(sourceUrl.trim())) {
-      setValidationError('O link da fonte deve ser uma URL começando com http:// ou https://')
-      return
-    }
-
-    if (parsedCoords === 'invalid') {
-      setValidationError('Coordenadas inválidas: preencha latitude (-90 a 90) e longitude (-180 a 180), ou deixe ambas vazias')
-      return
-    }
+    if (!title.trim()) return setValidationError(t('errors.titleRequired'))
+    if (!category) return setValidationError(t('errors.categoryRequired'))
+    if (!startsAt) return setValidationError(t('errors.startRequired'))
+    if (!endsAt) return setValidationError(t('errors.endRequired'))
+    if (new Date(startsAt) <= new Date(Date.now() + MIN_LEAD_TIME_MS))
+      return setValidationError(t('errors.startInPast'))
+    if (new Date(endsAt) <= new Date(startsAt))
+      return setValidationError(t('errors.endBeforeStart'))
+    if (sourceUrl.trim() && !isHttpUrl(sourceUrl.trim()))
+      return setValidationError(t('errors.invalidSourceUrl'))
+    if (parsedCoords === 'invalid') return setValidationError(t('errors.invalidCoordinates'))
 
     const data: CreateEventRequest = {
       title: title.trim(),
@@ -115,7 +107,6 @@ export default function CreateEventPage() {
       maxParticipants: maxParticipants ? Number(maxParticipants) : undefined,
       sourceUrl: sourceUrl.trim() || undefined,
     }
-
     await create(data, publishNow)
   }
 
@@ -124,53 +115,41 @@ export default function CreateEventPage() {
   return (
     <div className="min-h-screen bg-background text-on-surface">
       <TopNavBar />
-
       <main className="pt-32 pb-stack-xl px-margin-mobile md:px-0">
-        <EventFormPanel
-          title="Crie seu próximo evento"
-          subtitle="Preencha os detalhes para iluminar a noite."
-        >
+        <EventFormPanel title={t('form.createTitle')} subtitle={t('form.subtitle')}>
           <div className="flex flex-col gap-gutter">
-
-            {/* Title */}
             <AuthInput
               id="event-title"
-              label="Nome do Evento"
+              label={t('form.titleLabel')}
               type="text"
-              placeholder="Ex: Festival da Cidade"
+              placeholder={t('form.titlePlaceholder')}
               value={title}
               onChange={setTitle}
               disabled={saving}
             />
 
-            {/* Description */}
             <div className="flex flex-col gap-stack-xs">
               <label htmlFor="event-description" className={LABEL_CLASS}>
-                A Narrativa
+                {t('form.descriptionLabel')}
               </label>
               <textarea
                 id="event-description"
                 rows={4}
-                placeholder="Descreva a atmosfera e o propósito..."
+                placeholder={t('form.descriptionPlaceholder')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={saving}
-                className={[
-                  INPUT_CLASS,
-                  'resize-none',
-                  saving ? 'opacity-50 cursor-not-allowed' : '',
-                ].join(' ')}
+                className={[INPUT_CLASS, 'resize-none', saving ? 'opacity-50 cursor-not-allowed' : ''].join(' ')}
               />
             </div>
 
-            {/* Category */}
             <div className="flex flex-col gap-stack-xs">
-              <span className={LABEL_CLASS}>Categoria</span>
+              <span className={LABEL_CLASS}>{t('form.categoryLabel')}</span>
               <div className="flex flex-wrap gap-stack-sm mt-stack-xs">
-                {CATEGORIES.map((cat) => (
+                {CATEGORY_VALUES.map((cat) => (
                   <TagChip
                     key={cat}
-                    label={cat}
+                    label={t(CATEGORY_LABEL_KEYS[cat])}
                     active={category === cat}
                     onClick={() => setCategory(cat)}
                   />
@@ -178,21 +157,19 @@ export default function CreateEventPage() {
               </div>
             </div>
 
-            {/* Visibility */}
             <div className="flex flex-col gap-stack-xs">
-              <span className={LABEL_CLASS}>Visibilidade</span>
+              <span className={LABEL_CLASS}>{t('form.visibilityLabel')}</span>
               <SegmentedControl
-                options={VISIBILITY_OPTIONS}
+                options={VISIBILITY_VALUES.map((v) => ({ value: v, label: t(VISIBILITY_LABEL_KEYS[v]) }))}
                 value={visibility}
-                onChange={(v) => setVisibility(v as 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY')}
+                onChange={(v) => setVisibility(v as VisibilityValue)}
               />
             </div>
 
-            {/* Location */}
             <AddressAutocomplete
               id="event-address-search"
-              label="Buscar local ou endereço"
-              placeholder="Ex: MASP, Av. Paulista 1578"
+              label={t('form.addressSearchLabel')}
+              placeholder={t('form.addressSearchPlaceholder')}
               value={addressSearch.query}
               onChange={addressSearch.setQuery}
               suggestions={addressSearch.suggestions}
@@ -202,116 +179,34 @@ export default function CreateEventPage() {
               disabled={saving}
             />
 
-            <AuthInput
-              id="event-location-name"
-              label="Local"
-              type="text"
-              placeholder="Nome do local (ex: The Grid Factory)"
-              value={locationName}
-              onChange={setLocationName}
-              disabled={saving}
-              leftIcon="location_on"
-            />
-
-            <AuthInput
-              id="event-address"
-              label="Endereço"
-              type="text"
-              placeholder="Rua, número, bairro"
-              value={address}
-              onChange={setAddress}
-              disabled={saving}
-            />
+            <AuthInput id="event-location-name" label={t('form.locationNameLabel')} type="text" placeholder={t('form.locationNamePlaceholder')} value={locationName} onChange={setLocationName} disabled={saving} leftIcon="location_on" />
+            <AuthInput id="event-address" label={t('form.addressLabel')} type="text" placeholder={t('form.addressPlaceholder')} value={address} onChange={setAddress} disabled={saving} />
 
             <div className="grid grid-cols-2 gap-gutter">
-              <AuthInput
-                id="event-latitude"
-                label="Latitude"
-                type="text"
-                placeholder="-23.561496"
-                value={latitude}
-                onChange={setLatitude}
-                disabled={saving}
-              />
-              <AuthInput
-                id="event-longitude"
-                label="Longitude"
-                type="text"
-                placeholder="-46.655968"
-                value={longitude}
-                onChange={setLongitude}
-                disabled={saving}
-              />
+              <AuthInput id="event-latitude" label={t('form.latitudeLabel')} type="text" placeholder="-23.561496" value={latitude} onChange={setLatitude} disabled={saving} />
+              <AuthInput id="event-longitude" label={t('form.longitudeLabel')} type="text" placeholder="-46.655968" value={longitude} onChange={setLongitude} disabled={saving} />
             </div>
 
             <p className="font-sans text-label-md text-on-surface-variant -mt-stack-sm flex items-center gap-1">
               <Icon name={hasCoordinates ? 'my_location' : 'location_off'} size={14} />
-              {hasCoordinates
-                ? 'Coordenadas definidas — o evento aparece na busca por proximidade.'
-                : 'Sem coordenadas — selecione um resultado da busca ou preencha manualmente.'}
+              {hasCoordinates ? t('form.coordinatesSet') : t('form.coordinatesMissing')}
             </p>
 
-            <AuthInput
-              id="event-source-url"
-              label="Link da fonte (opcional)"
-              type="text"
-              placeholder="https://agenda-original.com/evento"
-              value={sourceUrl}
-              onChange={setSourceUrl}
-              disabled={saving}
-              leftIcon="link"
-            />
+            <AuthInput id="event-source-url" label={t('form.sourceUrlLabel')} type="text" placeholder={t('form.sourceUrlPlaceholder')} value={sourceUrl} onChange={setSourceUrl} disabled={saving} leftIcon="link" />
 
-            {/* Date / Time */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
               <div className="flex flex-col gap-stack-xs">
-                <label htmlFor="event-starts-at" className={LABEL_CLASS}>Início</label>
-                <input
-                  id="event-starts-at"
-                  type="datetime-local"
-                  value={startsAt}
-                  onChange={(e) => setStartsAt(e.target.value)}
-                  required
-                  disabled={saving}
-                  className={[
-                    INPUT_CLASS,
-                    saving ? 'opacity-50 cursor-not-allowed' : '',
-                  ].join(' ')}
-                />
+                <label htmlFor="event-starts-at" className={LABEL_CLASS}>{t('form.startsAtLabel')}</label>
+                <input id="event-starts-at" type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} required disabled={saving} className={[INPUT_CLASS, saving ? 'opacity-50 cursor-not-allowed' : ''].join(' ')} />
               </div>
               <div className="flex flex-col gap-stack-xs">
-                <label htmlFor="event-ends-at" className={LABEL_CLASS}>Fim</label>
-                <input
-                  id="event-ends-at"
-                  type="datetime-local"
-                  value={endsAt}
-                  min={startsAt || undefined}
-                  onChange={(e) => setEndsAt(e.target.value)}
-                  required
-                  disabled={saving}
-                  className={[
-                    INPUT_CLASS,
-                    saving ? 'opacity-50 cursor-not-allowed' : '',
-                  ].join(' ')}
-                />
+                <label htmlFor="event-ends-at" className={LABEL_CLASS}>{t('form.endsAtLabel')}</label>
+                <input id="event-ends-at" type="datetime-local" value={endsAt} min={startsAt || undefined} onChange={(e) => setEndsAt(e.target.value)} required disabled={saving} className={[INPUT_CLASS, saving ? 'opacity-50 cursor-not-allowed' : ''].join(' ')} />
               </div>
             </div>
 
-            {/* Max participants */}
-            <AuthInput
-              id="event-max-participants"
-              label="Limite de Presença"
-              type="text"
-              placeholder="Sem limite"
-              value={maxParticipants}
-              onChange={(v) => {
-                if (v === '' || /^\d+$/.test(v)) setMaxParticipants(v)
-              }}
-              disabled={saving}
-              leftIcon="group"
-            />
+            <AuthInput id="event-max-participants" label={t('form.maxParticipantsLabel')} type="text" placeholder={t('form.maxParticipantsPlaceholder')} value={maxParticipants} onChange={(v) => { if (v === '' || /^\d+$/.test(v)) setMaxParticipants(v) }} disabled={saving} leftIcon="group" />
 
-            {/* Error */}
             {displayError && (
               <p className="font-label-md text-label-md text-error flex items-center gap-2" role="alert">
                 <Icon name="error" size={16} />
@@ -319,55 +214,23 @@ export default function CreateEventPage() {
               </p>
             )}
 
-            {/* Actions */}
             <div className="flex flex-col gap-stack-sm mt-stack-md">
-              <button
-                type="button"
-                onClick={() => void handleCreate(true)}
-                disabled={saving}
-                className={[
-                  'w-full bg-primary-container text-on-primary font-bold py-stack-sm rounded-lg',
-                  'mint-glow-primary hover:bg-primary-fixed transition-all active:scale-95 duration-200',
-                  'uppercase tracking-widest font-label-md flex items-center justify-center gap-2',
-                  saving ? 'opacity-70 cursor-not-allowed' : '',
-                ].join(' ')}
-              >
-                {saving ? (
-                  <>
-                    <Icon name="progress_activity" size={18} className="animate-spin" />
-                    Publicando...
-                  </>
-                ) : 'Publicar Evento'}
+              <button type="button" onClick={() => void handleCreate(true)} disabled={saving} className={['w-full bg-primary-container text-on-primary font-bold py-stack-sm rounded-lg','mint-glow-primary hover:bg-primary-fixed transition-all active:scale-95 duration-200','uppercase tracking-widest font-label-md flex items-center justify-center gap-2', saving ? 'opacity-70 cursor-not-allowed' : ''].join(' ')}>
+                {saving ? (<><Icon name="progress_activity" size={18} className="animate-spin" />{t('form.publishing')}</>) : t('form.publish')}
               </button>
-
-              <button
-                type="button"
-                onClick={() => void handleCreate(false)}
-                disabled={saving}
-                className={[
-                  'w-full bg-transparent text-on-surface font-medium py-stack-sm rounded-lg',
-                  'hover:bg-white/5 transition-all duration-300 font-label-md',
-                  saving ? 'opacity-50 cursor-not-allowed' : '',
-                ].join(' ')}
-              >
-                Salvar como rascunho
+              <button type="button" onClick={() => void handleCreate(false)} disabled={saving} className={['w-full bg-transparent text-on-surface font-medium py-stack-sm rounded-lg','hover:bg-white/5 transition-all duration-300 font-label-md', saving ? 'opacity-50 cursor-not-allowed' : ''].join(' ')}>
+                {t('form.saveDraft')}
               </button>
             </div>
 
-            {/* Cancel */}
             <div className="text-center">
-              <Link
-                to="/events"
-                className="text-outline hover:text-primary-container transition-colors font-label-md uppercase tracking-widest"
-              >
-                Cancelar
+              <Link to="/events" className="text-outline hover:text-primary-container transition-colors font-label-md uppercase tracking-widest">
+                {t('form.cancel')}
               </Link>
             </div>
-
           </div>
         </EventFormPanel>
       </main>
-
       <Footer />
     </div>
   )

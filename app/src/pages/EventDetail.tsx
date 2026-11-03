@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { QRCodeSVG } from 'qrcode.react'
 import Footer from '../components/organisms/Footer'
 import GlassPanel from '../components/molecules/GlassPanel'
 import ProgressBar from '../components/atoms/ProgressBar'
 import Icon from '../components/atoms/Icon'
 import { useEvent } from '../hooks/useEvent'
-import { deleteEvent } from '../services/eventService';
+import { deleteEvent } from '../services/eventService'
 import { useParticipation } from '../hooks/useParticipation'
 import { useFollow } from '../hooks/useFollow'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { usePublicProfile } from '../hooks/usePublicProfile'
-import { formatEventDateRange } from '../utils/date'
+import { formatEventDateRange, parseApiDate } from '../utils/date'
 import { urlHost } from '../utils/url'
 import FollowButton from '../components/atoms/FollowButton'
 import ShareInviteModal from '../components/molecules/ShareInviteModal'
@@ -21,19 +22,21 @@ import { markShareEntry, track } from '../lib/analytics'
 
 const FALLBACK_HERO = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1600&q=80'
 
-
 export default function EventDetail() {
   const { id = '' } = useParams<{ id: string }>()
   const { user, loading: authLoading } = useAuthContext()
   const navRef = useRef<HTMLElement>(null)
-  const navigate = useNavigate();
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const navigate = useNavigate()
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [showSharePrompt, setShowSharePrompt] = useState(false)
   const [searchParams] = useSearchParams()
   const refParam = searchParams.get('ref')
   const viaParam = searchParams.get('via')
   const viewTrackedFor = useRef<string | null>(null)
+
+  const { t, i18n } = useTranslation('events')
+  const { t: tCommon } = useTranslation()
 
   const { event, participants, loading: eventLoading, error } = useEvent(id)
   const share = useShareEvent(event)
@@ -55,15 +58,11 @@ export default function EventDetail() {
   const { profile: creatorProfile } = usePublicProfile(event?.creatorId ?? '')
 
   const displayCount = (event?.participantCount ?? 0) + countDelta
-  // authLoading garante que isCreator não computa com user=null enquanto /api/auth/me ainda está em voo.
-  // toLowerCase: defensive normalization — Jackson serializa UUIDs em minúsculas em ambas as fontes,
-  // mas o JWT sub pode divergir de case em ambientes de terceiros.
   const stillLoading = authLoading || eventLoading
   const isCreator =
     user !== null &&
     event !== null &&
     user.id.toLowerCase() === event.creatorId.toLowerCase()
-  // PUBLIC é aberto a todos: sem join nem contagem — a página serve para ver local/horário e compartilhar
   const hasParticipation = event !== null && event.visibility !== 'PUBLIC'
   const capacityValue =
     event?.maxParticipants != null
@@ -87,7 +86,6 @@ export default function EventDetail() {
     setShowSharePrompt(false)
   }, [id])
 
-  // Funil: dispara uma vez por evento, só depois do auth resolver (para `authenticated` ser confiável)
   useEffect(() => {
     if (stillLoading || !event || viewTrackedFor.current === event.id) return
     viewTrackedFor.current = event.id
@@ -104,26 +102,25 @@ export default function EventDetail() {
   }, [stillLoading, event, refParam, viaParam, user])
 
   const handleDelete = async () => {
-    if (!event) return;
+    if (!event) return
 
     const confirmed = window.confirm(
-      `Tem certeza que deseja cancelar "${event.title}"? Essa ação não pode ser desfeita.`
-    );
-    if (!confirmed) return;
+      t('form.dangerZone.confirmPrompt', { title: event.title }),
+    )
+    if (!confirmed) return
 
-    setDeleting(true);
-    setDeleteError(null);
+    setDeleting(true)
+    setDeleteError(null)
     try {
-      await deleteEvent(event.id); // DELETE /api/events/{id}
+      await deleteEvent(event.id)
       posthog.capture('event_cancelled')
-      navigate('/my-events');
+      navigate('/my-events')
     } catch {
-      setDeleteError('Não foi possível cancelar o evento. Tente novamente.');
-      setDeleting(false);
+      setDeleteError(t('form.dangerZone.error'))
+      setDeleting(false)
     }
-  };
+  }
 
-  // Scroll-based nav opacity
   useEffect(() => {
     const handleScroll = () => {
       if (!navRef.current) return
@@ -137,6 +134,13 @@ export default function EventDetail() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const navItems = [
+    { labelKey: 'nav.explore', href: '/' },
+    { labelKey: 'nav.calendar', href: '/' },
+    { labelKey: 'nav.venues', href: '/' },
+    { labelKey: 'nav.collective', href: '/' },
+  ] as const
+
   return (
     <div className="min-h-screen bg-background text-on-surface">
       <nav
@@ -148,13 +152,13 @@ export default function EventDetail() {
             to="/"
             className="font-serif text-display-lg-mobile md:text-display-lg text-primary-container tracking-tighter leading-none"
           >
-            Eventing
+            {tCommon('app.name')}
           </Link>
           <div className="hidden md:flex gap-stack-lg items-center">
-            {(['Explore', 'Calendar', 'Venues', 'Collective'] as const).map((label, i) => (
+            {navItems.map((item, i) => (
               <Link
-                key={label}
-                to="/"
+                key={item.labelKey}
+                to={item.href}
                 className={[
                   'font-sans text-body-md transition-colors',
                   i === 2
@@ -162,7 +166,7 @@ export default function EventDetail() {
                     : 'text-on-surface-variant hover:text-on-surface',
                 ].join(' ')}
               >
-                {label}
+                {tCommon(item.labelKey)}
               </Link>
             ))}
           </div>
@@ -177,29 +181,24 @@ export default function EventDetail() {
         </div>
       </nav>
 
-      {/* ── Loading ── */}
       {stillLoading && (
         <div className="min-h-screen pt-20 flex items-center justify-center">
           <Icon name="progress_activity" className="text-primary-container animate-spin" size={40} />
         </div>
       )}
 
-      {/* ── Error ── */}
       {!stillLoading && (error || !event) && (
         <div className="min-h-screen pt-20 flex flex-col items-center justify-center gap-stack-md">
           <Icon name="event_busy" className="text-on-surface-variant" size={48} />
           <p className="font-sans text-body-lg text-on-surface-variant">
-            {error ?? 'Evento não encontrado'}
+            {error ?? t('detail.notFound')}
           </p>
         </div>
       )}
 
-      {/* ── Content ── */}
       {!stillLoading && !error && event && (
         <>
           <main className="pt-0">
-
-            {/* ── Cinematic Hero ── */}
             <section className="relative h-[870px] w-full overflow-hidden flex items-end">
               <img
                 src={event.coverImageUrl ?? FALLBACK_HERO}
@@ -210,15 +209,22 @@ export default function EventDetail() {
 
               <div className="relative z-10 w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto pb-stack-xl">
                 <div className="flex flex-col gap-stack-md max-w-4xl">
-
-                  {/* Status indicator */}
                   <div className="flex items-center gap-stack-sm mb-stack-xs">
                     <div className="relative flex h-3 w-3">
                       <span className="animate-breath absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
                       <span className="relative inline-flex h-3 w-3 rounded-full bg-secondary" />
                     </div>
                     <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
-                      {event.status === 'PUBLISHED' ? 'Live Now' : event.status}
+                      {(() => {
+                        if (event.status === 'PUBLISHED') {
+                          return parseApiDate(event.startsAt) <= new Date()
+                            ? t('detail.status.live')
+                            : t('detail.status.published')
+                        }
+                        if (event.status === 'DRAFT') return t('detail.status.draft')
+                        if (event.status === 'CANCELLED') return t('detail.status.cancelled')
+                        return t('detail.status.finished')
+                      })()}
                     </span>
                   </div>
 
@@ -226,11 +232,17 @@ export default function EventDetail() {
                     {event.title}
                   </h1>
 
-                  {/* Meta */}
                   <div className="flex flex-wrap items-center gap-stack-lg text-on-surface-variant">
                     <div className="flex items-center gap-2">
                       <Icon name="calendar_today" className="text-primary-container" size={20} />
-                      <span className="font-sans text-body-lg">{formatEventDateRange(event.startsAt, event.endsAt)}</span>
+                      <span className="font-sans text-body-lg">
+                        {formatEventDateRange(
+                          event.startsAt,
+                          event.endsAt,
+                          i18n.language,
+                          tCommon('date.until'),
+                        )}
+                      </span>
                     </div>
                     {event.locationName && (
                       <div className="flex items-center gap-2">
@@ -238,14 +250,19 @@ export default function EventDetail() {
                         <span className="font-sans text-body-lg">{event.locationName}</span>
                       </div>
                     )}
-                    {/* Social proof */}
                     {hasParticipation && (
                       <div className="flex items-center gap-2">
                         <div className="flex -space-x-3">
                           {participants.slice(0, 3).map((p) => (
-                            <div key={p.userId} className="w-10 h-10 rounded-full border-2 border-surface overflow-hidden">
+                            <div
+                              key={p.userId}
+                              className="w-10 h-10 rounded-full border-2 border-surface overflow-hidden"
+                            >
                               <img
-                                src={p.avatarUrl ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1C4532&color=6EE7B7&size=40`}
+                                src={
+                                  p.avatarUrl ??
+                                  `https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1C4532&color=6EE7B7&size=40`
+                                }
                                 alt={p.username}
                                 className="w-full h-full object-cover"
                               />
@@ -261,13 +278,12 @@ export default function EventDetail() {
                         </div>
                         {displayCount > 0 && (
                           <span className="font-sans text-label-md text-on-surface-variant italic ml-2">
-                            {displayCount} {displayCount === 1 ? 'participante' : 'participantes'}
+                            {t('detail.participantsCount', { count: displayCount })}
                           </span>
                         )}
                       </div>
                     )}
 
-                    {/* Share button */}
                     <button
                       onClick={() => void share.copyLink('event_hero')}
                       className="flex items-center gap-2 px-stack-md py-2 rounded-full border border-outline-variant/50 hover:border-primary-container/50 hover:bg-white/5 transition-all"
@@ -278,7 +294,7 @@ export default function EventDetail() {
                         size={18}
                       />
                       <span className="font-label-md text-label-md text-on-surface-variant">
-                        {share.copied ? 'Link copiado!' : 'Compartilhar'}
+                        {share.copied ? t('detail.linkCopied') : t('detail.share')}
                       </span>
                     </button>
                   </div>
@@ -286,33 +302,34 @@ export default function EventDetail() {
               </div>
             </section>
 
-            {/* ── Content Layout ── */}
             <section className="bg-background py-stack-xl px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-
-                {/* ── Left column: details ── */}
                 <div className="lg:col-span-8 flex flex-col gap-stack-xl">
-
-                  {/* Narrative */}
                   {event.description && (
                     <article className="flex flex-col gap-stack-md">
-                      <h2 className="font-serif text-headline-lg text-primary-container">The Narrative</h2>
+                      <h2 className="font-serif text-headline-lg text-primary-container">
+                        {t('detail.narrative')}
+                      </h2>
                       <div className="font-sans text-body-lg text-on-surface-variant max-w-3xl leading-relaxed space-y-stack-md">
-                        {event.description.split('\n').filter(Boolean).map((para, i) => (
-                          <p key={i}>{para}</p>
-                        ))}
+                        {event.description
+                          .split('\n')
+                          .filter(Boolean)
+                          .map((para, i) => (
+                            <p key={i}>{para}</p>
+                          ))}
                       </div>
                     </article>
                   )}
 
-                  {/* Venue */}
                   <div className="flex flex-col gap-stack-md">
-                    <h2 className="font-serif text-headline-lg text-primary-container">The Venue</h2>
+                    <h2 className="font-serif text-headline-lg text-primary-container">
+                      {t('detail.venue')}
+                    </h2>
                     {event.coverImageUrl && (
                       <div className="h-[400px] rounded-xl overflow-hidden grayscale contrast-125 border border-outline-variant">
                         <img
                           src={event.coverImageUrl}
-                          alt={event.locationName ?? 'Local do evento'}
+                          alt={event.locationName ?? event.title}
                           className="w-full h-full object-cover opacity-60"
                         />
                       </div>
@@ -321,30 +338,35 @@ export default function EventDetail() {
                       <div className="flex justify-between items-center p-stack-md bg-surface-container rounded-xl">
                         <div>
                           {event.locationName && (
-                            <h4 className="font-serif text-headline-md text-on-surface">{event.locationName}</h4>
+                            <h4 className="font-serif text-headline-md text-on-surface">
+                              {event.locationName}
+                            </h4>
                           )}
                           {event.address && (
-                            <p className="font-sans text-body-md text-on-surface-variant">{event.address}</p>
+                            <p className="font-sans text-body-md text-on-surface-variant">
+                              {event.address}
+                            </p>
                           )}
                         </div>
                         <button className="bg-surface-variant text-on-surface p-stack-sm rounded-lg flex items-center gap-2 hover:bg-white/10 transition-all">
                           <Icon name="directions" size={20} />
-                          <span className="font-label-md text-label-md">Navegar</span>
+                          <span className="font-label-md text-label-md">
+                            {t('detail.navigate')}
+                          </span>
                         </button>
                       </div>
                     )}
                   </div>
-
                 </div>
 
-                {/* ── Right column: sidebar ── */}
                 <div className="lg:col-span-4 flex flex-col gap-stack-lg">
-
-                  {/* Host card */}
                   <GlassPanel className="p-stack-lg flex flex-col gap-stack-md items-center text-center">
                     <div className="w-24 h-24 rounded-full border-4 border-primary-container/20 p-1">
                       <img
-                        src={creatorProfile?.avatarUrl ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(event.creatorUsername)}&background=1C4532&color=6EE7B7&size=160`}
+                        src={
+                          creatorProfile?.avatarUrl ??
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(event.creatorUsername)}&background=1C4532&color=6EE7B7&size=160`
+                        }
                         alt={event.creatorUsername}
                         className="w-full h-full rounded-full object-cover"
                       />
@@ -357,13 +379,13 @@ export default function EventDetail() {
                         {event.creatorUsername}
                       </Link>
                       <p className="font-label-md text-label-md text-primary-container uppercase tracking-widest">
-                        Organizador
+                        {tCommon('user.organizer')}
                       </p>
                     </div>
                     {event.sourceUrl && (
                       <p className="font-sans text-label-md text-on-surface-variant flex items-center gap-1">
                         <Icon name="link" size={16} />
-                        Encontrado em:{' '}
+                        {t('detail.foundAt')}{' '}
                         <a
                           href={event.sourceUrl}
                           target="_blank"
@@ -389,23 +411,23 @@ export default function EventDetail() {
                     </div>
                   </GlassPanel>
 
-                  {/* Capacity card */}
                   {hasParticipation && (
                     <div className="bg-surface-container p-stack-lg rounded-xl flex flex-col gap-stack-md">
                       <h4 className="font-label-caps text-label-caps text-on-surface-variant">
-                        Capacidade &amp; Presença
+                        {t('detail.capacityPresence')}
                       </h4>
                       <div className="flex justify-between items-center">
-                        <span className="font-sans text-body-md text-on-surface-variant">Vagas Disponíveis</span>
+                        <span className="font-sans text-body-md text-on-surface-variant">
+                          {t('detail.availableSpots')}
+                        </span>
                         <span className="font-serif text-headline-md text-on-surface">
                           {event.maxParticipants != null
                             ? `${displayCount} / ${event.maxParticipants}`
-                            : `${displayCount} participantes`}
+                            : t('detail.participantsCount', { count: displayCount })}
                         </span>
                       </div>
                       <ProgressBar value={capacityValue} />
 
-                      {/* Participation error */}
                       {participationError && (
                         <p className="font-sans text-label-md text-error">{participationError}</p>
                       )}
@@ -414,13 +436,13 @@ export default function EventDetail() {
                         <div className="flex items-center gap-stack-sm">
                           <Icon name="bolt" className="text-secondary" size={18} />
                           <span className="font-label-md text-label-md text-on-surface">
-                            Alta demanda: {displayCount} {displayCount === 1 ? 'pessoa' : 'pessoas'}
+                            {t('detail.highDemand', { count: displayCount })}
                           </span>
                         </div>
                         <div className="flex items-center gap-stack-sm">
                           <Icon name="verified" className="text-primary-container" size={18} />
                           <span className="font-label-md text-label-md text-on-surface">
-                            Identidade Verificada Obrigatória
+                            {t('detail.verifiedRequired')}
                           </span>
                         </div>
                       </div>
@@ -430,7 +452,7 @@ export default function EventDetail() {
                   {isCreator && (
                     <div className="bg-surface-container p-stack-lg rounded-xl flex flex-col gap-stack-md">
                       <h4 className="font-label-caps text-label-caps text-on-surface-variant">
-                        Ações do Organizador
+                        {t('detail.organizerActions')}
                       </h4>
 
                       {deleteError && (
@@ -443,7 +465,7 @@ export default function EventDetail() {
                           className="flex-1 flex items-center justify-center gap-2 bg-surface-variant text-on-surface p-stack-sm rounded-lg hover:bg-white/10 transition-all font-label-md text-label-md"
                         >
                           <Icon name="edit" size={18} />
-                          Editar
+                          {t('detail.edit')}
                         </Link>
 
                         <button
@@ -456,14 +478,13 @@ export default function EventDetail() {
                           ) : (
                             <Icon name="delete" size={18} />
                           )}
-                          {deleting ? 'Cancelando...' : 'Cancelar Evento'}
+                          {deleting ? t('detail.cancelling') : t('detail.cancelEvent')}
                         </button>
                       </div>
 
-                      {/* QR Code para divulgação do evento */}
                       <div className="flex flex-col items-center gap-stack-sm pt-stack-sm border-t border-outline-variant/30">
                         <span className="font-label-caps text-label-caps text-on-surface-variant">
-                          QR Code do Evento
+                          {t('detail.qrCode')}
                         </span>
                         <div className="p-3 bg-white rounded-xl">
                           <QRCodeSVG
@@ -475,16 +496,14 @@ export default function EventDetail() {
                           />
                         </div>
                         <span className="font-label-md text-label-md text-on-surface-variant text-center">
-                          Escaneie para acessar o evento
+                          {t('detail.qrHint')}
                         </span>
                       </div>
                     </div>
                   )}
-
                 </div>
               </div>
             </section>
-
           </main>
 
           <Footer />
@@ -505,7 +524,6 @@ export default function EventDetail() {
             />
           )}
 
-          {/* ── Persistent CTA — mobile ── */}
           {!isCreator && hasParticipation && (
             <div className="fixed bottom-0 left-0 w-full z-40 px-margin-mobile py-stack-md bg-background/80 backdrop-blur-md border-t border-outline-variant/30 md:hidden">
               <button
@@ -523,7 +541,7 @@ export default function EventDetail() {
                 {participationLoading && (
                   <Icon name="progress_activity" className="animate-spin" size={18} />
                 )}
-                {isParticipating ? 'Sair do evento' : 'Participar'}
+                {isParticipating ? t('detail.leave') : t('detail.join')}
               </button>
             </div>
           )}
@@ -532,20 +550,21 @@ export default function EventDetail() {
               <div className="w-full flex items-center justify-center gap-2 py-stack-md rounded-xl bg-surface-container-low border border-primary-container/30">
                 <Icon name="verified" className="text-primary-container" size={18} />
                 <span className="font-label-caps text-label-caps text-primary-container uppercase tracking-widest">
-                  Você é o organizador
+                  {t('detail.youAreOrganizer')}
                 </span>
               </div>
             </div>
           )}
 
-          {/* ── Persistent CTA — desktop ── */}
           {!isCreator && hasParticipation && (
             <div className="hidden md:flex fixed bottom-stack-lg right-stack-lg z-50 flex-col items-end gap-stack-sm">
               <GlassPanel className="px-stack-md py-stack-sm rounded-full flex items-center gap-stack-md mb-2">
                 <span className="font-label-md text-label-md text-on-surface">
                   {event.maxParticipants != null && event.maxParticipants - displayCount > 0
-                    ? `${event.maxParticipants - displayCount} vagas restantes`
-                    : 'Vagas limitadas'}
+                    ? t('detail.remainingSpots', {
+                        count: event.maxParticipants - displayCount,
+                      })
+                    : t('detail.limitedSpots')}
                 </span>
               </GlassPanel>
               <button
@@ -559,11 +578,12 @@ export default function EventDetail() {
                   participationLoading ? 'opacity-70 cursor-not-allowed' : '',
                 ].join(' ')}
               >
-                {participationLoading
-                  ? <Icon name="progress_activity" className="animate-spin" size={24} />
-                  : <Icon name={isParticipating ? 'logout' : 'arrow_forward'} size={24} />
-                }
-                {isParticipating ? 'Sair' : 'Participar'}
+                {participationLoading ? (
+                  <Icon name="progress_activity" className="animate-spin" size={24} />
+                ) : (
+                  <Icon name={isParticipating ? 'logout' : 'arrow_forward'} size={24} />
+                )}
+                {isParticipating ? t('detail.leave') : t('detail.join')}
               </button>
             </div>
           )}
@@ -572,7 +592,7 @@ export default function EventDetail() {
               <GlassPanel className="px-stack-lg py-stack-md rounded-full flex items-center gap-stack-sm">
                 <Icon name="verified" className="text-primary-container" size={20} />
                 <span className="font-label-caps text-label-caps text-primary-container uppercase tracking-widest">
-                  Você é o organizador
+                  {t('detail.youAreOrganizer')}
                 </span>
               </GlassPanel>
             </div>

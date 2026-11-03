@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import AuthInput from '../atoms/AuthInput'
 
 interface PasswordInputProps {
@@ -20,6 +21,7 @@ export default function PasswordInput({
   disabled = false,
   ...props
 }: PasswordInputProps) {
+  const { t } = useTranslation('auth')
   const [visible, setVisible] = useState(false)
 
   return (
@@ -34,7 +36,7 @@ export default function PasswordInput({
           type="button"
           onClick={() => setVisible((v) => !v)}
           disabled={disabled}
-          aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}
+          aria-label={visible ? t('password.hide') : t('password.show')}
           aria-pressed={visible}
           aria-controls={props.id}
           className="p-1 rounded text-on-surface-variant hover:text-primary-container focus-visible:outline-none focus-visible:text-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

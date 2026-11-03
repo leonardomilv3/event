@@ -1,0 +1,20 @@
+{
+  "follow": {
+    "follow": "Follow",
+    "following": "Following",
+    "followLoading": "Following...",
+    "unfollowLoading": "Unfollowing...",
+    "empty": "No users found.",
+    "followersCount_one": "{{count}} follower",
+    "followersCount_other": "{{count}} followers",
+    "followingCount_one": "{{count}} following",
+    "followingCount_other": "{{count}} following"
+  },
+  "profile": {
+    "notFound": "Profile not found",
+    "followers": "Followers",
+    "following": "Following",
+    "bio": "Bio",
+    "bannerAlt": "Profile banner"
+  }
+}

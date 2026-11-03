@@ -1,0 +1,39 @@
+{
+  "hero": {
+    "line1": "Find the",
+    "line2": "events",
+    "line3": "happening",
+    "line4": "now",
+    "ctaPrimary": "Discover the Pulse",
+    "ctaSecondary": "See Agenda"
+  },
+  "carousel": {
+    "sectionLabel": "Current Pulse",
+    "sectionTitle": "What's happening",
+    "loading": "Loading events...",
+    "empty": "No events found in your region"
+  },
+  "map": {
+    "label": "Live Heatmap",
+    "title": "The density of the night",
+    "description": "Browse the interactive map to find where the energy is highest right now. From underground clubs to exclusive rooftops.",
+    "highActivity": "High Activity (Downtown)",
+    "premiumEvents": "Premium Events (Gardens)",
+    "imageAlt": "City map"
+  },
+  "howItWorks": {
+    "title": "How Eventing works",
+    "discover": {
+      "title": "Discover",
+      "description": "Curated algorithms from the Nocturnal Collective suggest events based on your style and real-time location."
+    },
+    "connect": {
+      "title": "Connect",
+      "description": "Interact with other attendees, see who's going, and join exclusive lists through our social network."
+    },
+    "participate": {
+      "title": "Participate",
+      "description": "Instant digital tickets and QR code access. Your entry into the city's pulse without friction or waiting."
+    }
+  }
+}

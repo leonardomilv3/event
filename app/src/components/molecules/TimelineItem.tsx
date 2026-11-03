@@ -1,14 +1,16 @@
+import type { ReactNode } from 'react'
 import GlassPanel from './GlassPanel'
 
 interface TimelineItemProps {
   type: string
+  label?: string
   time: string
-  content: React.ReactNode
+  content: ReactNode
   isActive?: boolean
   className?: string
 }
 
-export default function TimelineItem({ type, time, content, isActive = false, className = '' }: TimelineItemProps) {
+export default function TimelineItem({ type, label, time, content, isActive = false, className = '' }: TimelineItemProps) {
   return (
     <div className={['relative group', className].join(' ')}>
       {/* Timeline dot */}
@@ -23,7 +25,7 @@ export default function TimelineItem({ type, time, content, isActive = false, cl
       ].join(' ')}>
         <div className="flex items-center gap-3 mb-2">
           <span className={`font-label-caps text-label-caps ${isActive ? 'text-primary-container' : 'text-on-surface-variant'}`}>
-            {type}
+            {label ?? type}
           </span>
           <span className="text-on-surface-variant text-[12px]">{time}</span>
         </div>

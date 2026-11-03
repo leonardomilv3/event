@@ -1,28 +1,48 @@
 import { useTranslation } from 'react-i18next'
-import { type SupportedLanguage } from '../../lib/i18n'
+import {
+  LANGUAGE_LABELS,
+  SUPPORTED_LANGUAGES,
+  type SupportedLanguage,
+} from '../../lib/i18n'
 
-const LANGUAGES: { code: SupportedLanguage; nativeName: string }[] = [
-  { code: 'pt-BR', nativeName: 'Português' },
-]
+interface LanguageSwitcherProps {
+  className?: string
+}
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   const { i18n, t } = useTranslation()
-  const current = (i18n.resolvedLanguage ?? 'pt-BR') as SupportedLanguage
-
-  if (LANGUAGES.length < 2) return null
+  const current = (i18n.resolvedLanguage ?? i18n.language) as SupportedLanguage
 
   return (
-    <select
-      aria-label={t('language.label')}
-      value={current}
-      onChange={(e) => void i18n.changeLanguage(e.target.value)}
-      className="bg-surface-variant text-on-surface font-label-md text-label-md rounded-full px-3 py-1.5 border border-white/5"
-    >
-      {LANGUAGES.map((l) => (
-        <option key={l.code} value={l.code}>
-          {l.nativeName}
-        </option>
-      ))}
-    </select>
+    <div className={className}>
+      <div className="relative">
+        <select
+          aria-label={t('language.label')}
+          value={current}
+          onChange={(e) => void i18n.changeLanguage(e.target.value)}
+          className={[
+            'w-full appearance-none cursor-pointer',
+            'bg-surface-container-lowest border border-outline-variant rounded-lg',
+            'px-stack-sm pr-10 py-stack-sm text-on-surface text-body-md font-label-md',
+            'focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container/30',
+            'hover:border-primary-container/40 transition-all',
+          ].join(' ')}
+        >
+          {SUPPORTED_LANGUAGES.map((code) => (
+            <option key={code} value={code} className="bg-surface-container text-on-surface">
+              {LANGUAGE_LABELS[code]}
+            </option>
+          ))}
+        </select>
+        <span
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+          aria-hidden="true"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </div>
+    </div>
   )
 }

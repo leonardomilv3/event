@@ -1,0 +1,39 @@
+{
+  "hero": {
+    "line1": "Encontre os",
+    "line2": "eventos",
+    "line3": "que estão acontecendo",
+    "line4": "agora",
+    "ctaPrimary": "Descubra o Pulso",
+    "ctaSecondary": "Ver Agenda"
+  },
+  "carousel": {
+    "sectionLabel": "Pulso Atual",
+    "sectionTitle": "O que está acontecendo",
+    "loading": "Carregando eventos...",
+    "empty": "Nenhum evento encontrado na sua região"
+  },
+  "map": {
+    "label": "Mapa de Calor",
+    "title": "A densidade da noite",
+    "description": "Navegue pelo mapa interativo para encontrar onde a energia está mais alta agora. Dos clubes subterrâneos às coberturas exclusivas.",
+    "highActivity": "Alta Atividade (Centro)",
+    "premiumEvents": "Eventos Premium (Jardins)",
+    "imageAlt": "Mapa da cidade"
+  },
+  "howItWorks": {
+    "title": "Como o Eventing funciona",
+    "discover": {
+      "title": "Descubra",
+      "description": "Algoritmos curados pelo Nocturnal Collective sugerem eventos baseados no seu estilo e localização em tempo real."
+    },
+    "connect": {
+      "title": "Conecte-se",
+      "description": "Interaja com outros participantes, veja quem está indo e entre em listas exclusivas através da nossa rede social."
+    },
+    "participate": {
+      "title": "Participe",
+      "description": "Tickets digitais instantâneos e acesso via QR code. Sua entrada no pulso da cidade sem atritos ou esperas."
+    }
+  }
+}

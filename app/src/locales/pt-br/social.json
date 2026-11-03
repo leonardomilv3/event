@@ -9,5 +9,12 @@
     "followersCount_other": "{{count}} seguidores",
     "followingCount_one": "{{count}} seguindo",
     "followingCount_other": "{{count}} seguindo"
+  },
+  "profile": {
+    "notFound": "Perfil não encontrado",
+    "followers": "Seguidores",
+    "following": "Seguindo",
+    "bio": "Biografia",
+    "bannerAlt": "Banner do perfil"
   }
 }

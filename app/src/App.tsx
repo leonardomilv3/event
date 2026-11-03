@@ -14,6 +14,7 @@ import CreateEventPage from './pages/CreateEventPage'
 import EditEventPage from './pages/EditEventPage'
 import MyEventsPage from './pages/MyEventsPage'
 import PublicProfilePage from './pages/PublicProfilePage'
+import SettingsPage from './pages/SettingsPage'
 
 export default function App() {
   return (
@@ -62,6 +63,14 @@ export default function App() {
                 <CreateEventPage />
               </ProtectedRoute>
             }
+          />
+          <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
+                </ProtectedRoute>
+              }
           />
           <Route path="/users/:userId" element={<PublicProfilePage />} />
           <Route

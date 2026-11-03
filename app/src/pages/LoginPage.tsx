@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Trans, useTranslation } from 'react-i18next'
 import CinematicAuthLayout from '../components/organisms/CinematicAuthLayout'
 import AuthFormPanel from '../components/molecules/AuthFormPanel'
 import AuthInput from '../components/atoms/AuthInput'
 import PasswordInput from '../components/molecules/PasswordInput'
-// import SocialAuthButton from '../components/atoms/SocialAuthButton'
 import { useAuthContext } from '../hooks/useAuthContext'
 import { ApiError } from '../services/httpClient'
 import { buildAuthPath, getSafeRedirect, REDIRECT_PARAM } from '../utils/redirect'
@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams()
   const redirectTo = getSafeRedirect(searchParams.get(REDIRECT_PARAM))
   const { login, isAuthenticated, loading: authLoading } = useAuthContext()
+  const { t } = useTranslation('auth')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,11 +32,7 @@ export default function LoginPage() {
       await login(email, password)
       navigate(redirectTo, { replace: true })
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message)
-      } else {
-        setError('Erro inesperado. Tente novamente.')
-      }
+      setError(err instanceof ApiError ? err.message : t('errors.generic', { ns: 'common' }))
     } finally {
       setLoading(false)
     }
@@ -44,45 +41,21 @@ export default function LoginPage() {
   return (
     <CinematicAuthLayout>
       <AuthFormPanel
-        title="Welcome back"
-        subtitle="Enter your credentials to access the pulse."
+        title={t('login.title')}
+        subtitle={t('login.subtitle')}
         footer={
           <p className="font-body-md text-body-md text-on-surface-variant">
-            Don't have an account?{' '}
-            <Link to={buildAuthPath(redirectTo, '/register')} className="text-primary-fixed-dim font-bold ml-1 hover:underline">
-              Sign up
-            </Link>
+            <Trans
+              i18nKey="login.noAccount"
+              ns="auth"
+              components={{ link: <Link to={buildAuthPath(redirectTo, '/register')} className="text-primary-fixed-dim font-bold ml-1 hover:underline" /> }}
+            />
           </p>
         }
       >
         <form onSubmit={handleSubmit} className="space-y-stack-md" noValidate>
-          <AuthInput
-            id="email"
-            label="Email Address"
-            type="email"
-            placeholder="name@exclusive.com"
-            value={email}
-            onChange={setEmail}
-            autoComplete="email"
-            disabled={loading}
-          />
-
-          <PasswordInput
-            id="password"
-            label="Password"
-            value={password}
-            onChange={setPassword}
-            autoComplete="current-password"
-            disabled={loading}
-            rightElement={
-              <Link
-                to="/forgot-password"
-                className="font-label-md text-label-md text-primary-fixed-dim hover:text-primary transition-colors"
-              >
-                Forgot password?
-              </Link>
-            }
-          />
+          <AuthInput id="email" label={t('login.emailLabel')} type="email" placeholder={t('login.emailPlaceholder')} value={email} onChange={setEmail} autoComplete="email" disabled={loading} />
+          <PasswordInput id="password" label={t('login.passwordLabel')} value={password} onChange={setPassword} autoComplete="current-password" disabled={loading} rightElement={<Link to="/forgot-password" className="font-label-md text-label-md text-primary-fixed-dim hover:text-primary transition-colors">{t('password.forgot')}</Link>} />
 
           {error && (
             <p className="font-label-md text-label-md text-error flex items-center gap-2" role="alert">
@@ -91,41 +64,10 @@ export default function LoginPage() {
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={[
-              'w-full bg-primary-container text-on-primary font-bold py-4 rounded-lg',
-              'mint-glow-primary hover:bg-primary-fixed transition-all active:scale-95 duration-200',
-              loading ? 'opacity-70 cursor-not-allowed' : '',
-            ].join(' ')}
-          >
-            {loading ? 'Entrando...' : 'Entrar'}
+          <button type="submit" disabled={loading} className={['w-full bg-primary-container text-on-primary font-bold py-4 rounded-lg','mint-glow-primary hover:bg-primary-fixed transition-all active:scale-95 duration-200', loading ? 'opacity-70 cursor-not-allowed' : ''].join(' ')}>
+            {loading ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
-
-        {/* <div className="mt-stack-lg">
-          <div className="relative flex items-center mb-stack-md">
-            <div className="flex-grow border-t border-surface-container-highest" />
-            <span className="flex-shrink mx-4 font-label-caps text-on-surface-variant/50">
-              Or continue with
-            </span>
-            <div className="flex-grow border-t border-surface-container-highest" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-stack-sm">
-            <SocialAuthButton
-              provider="apple"
-              onClick={() => alert('Em breve')}
-              disabled={loading}
-            />
-            <SocialAuthButton
-              provider="google"
-              onClick={() => alert('Em breve')}
-              disabled={loading}
-            />
-          </div>
-        </div> */}
       </AuthFormPanel>
     </CinematicAuthLayout>
   )

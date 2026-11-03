@@ -1,13 +1,145 @@
 {
   "form": {
-    "title": "Título do evento",
-    "tags": "Tags",
-    "tagsPlaceholder": "Escolha até {{max}} tags",
-    "capacity": "Capacidade: {{count}} pessoa",
-    "capacity_plural": "Capacidade: {{count}} pessoas"
+    "createTitle": "Create your next event",
+    "editTitle": "Edit Event",
+    "subtitle": "Fill in the details to light up the night.",
+    "titleLabel": "Event Name",
+    "titlePlaceholder": "Ex: City Festival",
+    "descriptionLabel": "The Narrative",
+    "descriptionPlaceholder": "Describe the atmosphere and the purpose...",
+    "categoryLabel": "Category",
+    "visibilityLabel": "Visibility",
+    "addressSearchLabel": "Search place or address",
+    "addressSearchPlaceholder": "Ex: MASP, Av. Paulista 1578",
+    "locationNameLabel": "Location",
+    "locationNamePlaceholder": "Venue name (ex: The Grid Factory)",
+    "addressLabel": "Address",
+    "addressPlaceholder": "Street, number, neighborhood",
+    "latitudeLabel": "Latitude",
+    "longitudeLabel": "Longitude",
+    "coordinatesSet": "Coordinates set — the event will appear in nearby search.",
+    "coordinatesMissing": "No coordinates — pick a search result or fill in manually.",
+    "sourceUrlLabel": "Source link (optional)",
+    "sourceUrlPlaceholder": "https://original-agenda.com/event",
+    "startsAtLabel": "Start",
+    "endsAtLabel": "End",
+    "maxParticipantsLabel": "Attendance Limit",
+    "maxParticipantsPlaceholder": "No limit",
+    "publish": "Publish Event",
+    "publishing": "Publishing...",
+    "saveDraft": "Save as draft",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "backToEvent": "Back to Event",
+    "notFound": "Event not found.",
+    "dangerZone": {
+      "warning": "Cancelling this event will notify all confirmed participants. This action cannot be undone.",
+      "cancel": "Cancel Event",
+      "keep": "Keep Event",
+      "confirm": "Yes, cancel",
+      "cancelling": "Cancelling...",
+      "confirmPrompt": "Are you sure you want to cancel \"{{title}}\"? This action cannot be undone.",
+      "error": "Could not cancel the event. Please try again."
+    }
   },
-  "feed": {
-    "empty": "Nenhum evento por perto",
-    "distance": "A {{km}} km"
+  "visibility": {
+    "public": "Public",
+    "private": "Private",
+    "inviteOnly": "Invite only"
+  },
+  "categories": {
+    "music": "Music",
+    "art": "Art",
+    "food": "Food",
+    "sports": "Sports",
+    "networking": "Networking",
+    "nightlife": "Nightlife"
+  },
+  "errors": {
+    "titleRequired": "Event name is required",
+    "categoryRequired": "Please select a category",
+    "startRequired": "Start date is required",
+    "endRequired": "End date is required",
+    "startInPast": "Start date must be at least 1 minute in the future",
+    "endBeforeStart": "End date must be after the start date",
+    "invalidSourceUrl": "Source link must be a URL starting with http:// or https://",
+    "invalidCoordinates": "Invalid coordinates: fill latitude (-90 to 90) and longitude (-180 to 180), or leave both empty",
+    "notFound": "Event not found."
+  },
+  "share": {
+    "title": "Attendance confirmed!",
+    "message": "Invite your friends to <title>{{eventTitle}}</title> — a good event is a full event."
+  },
+  "detail": {
+    "status": {
+      "live": "Live now",
+      "published": "Published",
+      "draft": "Draft",
+      "cancelled": "Cancelled",
+      "finished": "Finished"
+    },
+    "share": "Share",
+    "linkCopied": "Link copied!",
+    "narrative": "The Narrative",
+    "venue": "The Venue",
+    "navigate": "Navigate",
+    "foundAt": "Found at:",
+    "capacityPresence": "Capacity & Attendance",
+    "availableSpots": "Available Spots",
+    "participantsCount_one": "{{count}} participant",
+    "participantsCount_other": "{{count}} participants",
+    "highDemand_one": "High demand: {{count}} person",
+    "highDemand_other": "High demand: {{count}} people",
+    "verifiedRequired": "Verified Identity Required",
+    "organizerActions": "Organizer Actions",
+    "edit": "Edit",
+    "cancelEvent": "Cancel Event",
+    "cancelling": "Cancelling...",
+    "qrCode": "Event QR Code",
+    "qrHint": "Scan to access the event",
+    "join": "Join",
+    "leave": "Leave event",
+    "remainingSpots_one": "{{count}} spot left",
+    "remainingSpots_other": "{{count}} spots left",
+    "limitedSpots": "Limited spots",
+    "youAreOrganizer": "You are the organizer",
+    "notFound": "Event not found",
+    "backToEvents": "Back to Events"
+  },
+  "management": {
+    "title": "Event Hub",
+    "subtitle": "Curate your night experiences. Manage, scale and promote your collective's next move.",
+    "createButton": "Create Event",
+    "searchPlaceholder": "Filter events...",
+    "filters": {
+      "all": "All",
+      "draft": "Draft",
+      "public": "Public",
+      "private": "Private",
+      "live": "Live"
+    },
+    "status": {
+      "live": "LIVE",
+      "draft": "DRAFT",
+      "cancelled": "CANCELLED",
+      "private": "PRIVATE",
+      "public": "PUBLIC"
+    },
+    "emptyAll": "You haven't created any events yet.",
+    "emptyFilter": "No events found.",
+    "location": "Location TBD",
+    "openToAll": "Open to all",
+    "participantsCount_one": "{{count}} participant",
+    "participantsCount_other": "{{count}} participants",
+    "newConceptTitle": "New Concept",
+    "newConceptDescription": "Duplicate a previous hit or start a new vision from scratch."
+  },
+  "myEvents": {
+    "title": "My Events",
+    "subtitle": "Confirmed events you're attending",
+    "emptyTitle": "You haven't confirmed attendance at any event yet",
+    "emptyBody": "The heart of the city never stops. Discover the next gatherings, collectives and parties that define Eventing.",
+    "exploreButton": "Explore Events"
   }
 }

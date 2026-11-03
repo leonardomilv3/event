@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Icon from '../atoms/Icon'
 import { useAuthContext } from '../../hooks/useAuthContext'
-
-const NAV_LINKS = [
-  { label: 'Explore', href: '/' },
-  { label: 'Calendar', href: '/calendar' },
-  { label: 'Venues', href: '/venues' },
-  { label: 'Collective', href: '/collective' },
-]
 
 export default function TopNavBar() {
   const { pathname } = useLocation()
   const { user, isAuthenticated } = useAuthContext()
+  const { t } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
+
+  const NAV_LINKS = [
+    { label: t('nav.explore'), href: '/' },
+    { label: t('nav.calendar'), href: '/calendar' },
+    { label: t('nav.venues'), href: '/venues' },
+    { label: t('nav.collective'), href: '/collective' },
+  ]
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50)
@@ -24,22 +26,21 @@ export default function TopNavBar() {
   const displayName = user?.displayName ?? user?.username
 
   return (
-    <nav className={[
-      'fixed top-0 w-full z-50 glass-nav shadow-nav-glow transition-colors duration-300',
-      scrolled ? 'bg-surface/90' : '',
-    ].join(' ')}>
+    <nav
+      className={[
+        'fixed top-0 w-full z-50 glass-nav shadow-nav-glow transition-colors duration-300',
+        scrolled ? 'bg-surface/90' : '',
+      ].join(' ')}
+    >
       <div className="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-
-        {/* Logo */}
         <Link to="/" className="flex-shrink-0">
           <span className="font-serif text-display-lg-mobile md:text-display-lg text-primary-container tracking-tighter leading-none">
-            Eventing
+            {t('app.name')}
           </span>
         </Link>
 
-        {/* Desktop links */}
         <div className="hidden md:flex gap-8 items-center">
-          {NAV_LINKS.map(link => {
+          {NAV_LINKS.map((link) => {
             const active = pathname === link.href
             return (
               <Link
@@ -58,9 +59,11 @@ export default function TopNavBar() {
           })}
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3 items-center">
-          <button className="p-2 rounded-full hover:bg-white/5 transition-all" aria-label="Notificações">
+          <button
+            className="p-2 rounded-full hover:bg-white/5 transition-all"
+            aria-label={t('nav.notifications')}
+          >
             <Icon name="notifications" className="text-on-surface" size={24} />
           </button>
 
@@ -70,10 +73,16 @@ export default function TopNavBar() {
               className="flex items-center gap-2 px-3 py-1.5 bg-surface-variant/30 rounded-full border border-white/5 hover:border-primary-container/40 transition-colors"
             >
               <Icon name="account_circle" className="text-primary-container" size={20} />
-              <span className="hidden md:inline font-label-md text-label-md text-on-surface">{displayName}</span>
+              <span className="hidden md:inline font-label-md text-label-md text-on-surface">
+                {displayName}
+              </span>
             </Link>
           ) : (
-            <Link to="/login" className="p-2 rounded-full hover:bg-white/5 transition-all" aria-label="Perfil">
+            <Link
+              to="/login"
+              className="p-2 rounded-full hover:bg-white/5 transition-all"
+              aria-label={t('nav.profile')}
+            >
               <Icon name="account_circle" className="text-on-surface" size={24} />
             </Link>
           )}

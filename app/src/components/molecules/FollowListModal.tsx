@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import GlassPanel from './GlassPanel'
 import Icon from '../atoms/Icon'
 import { type FollowDto, type UserDto } from '../../types/api'
@@ -27,40 +28,43 @@ export default function FollowListModal({
   mode,
   onClose,
 }: FollowListModalProps) {
+  const { t: tSocial } = useTranslation('social')
+  const { t: tCommon } = useTranslation()
+
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  const countLabel =
+    mode === 'followers'
+      ? tSocial('follow.followersCount', { count: users.length })
+      : tSocial('follow.followingCount', { count: users.length })
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-stack-md">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Panel */}
       <GlassPanel className="relative w-full max-w-md rounded-xl overflow-hidden shadow-2xl">
-        {/* Header */}
         <div className="flex justify-between items-center px-gutter py-stack-md border-b border-white/5">
           <h2 className="font-serif text-headline-md text-on-surface">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-            aria-label="Fechar"
+            aria-label={tCommon('actions.close')}
           >
             <Icon name="close" size={20} className="text-on-surface-variant" />
           </button>
         </div>
 
-        {/* List */}
         <ul className="max-h-[480px] overflow-y-auto divide-y divide-white/5">
           {users.length === 0 && (
             <li className="flex items-center justify-center py-stack-xl text-on-surface-variant font-label-md text-label-md">
-              Nenhum usuário encontrado.
+              {tSocial('follow.empty')}
             </li>
           )}
           {users.map((dto) => {
@@ -72,7 +76,9 @@ export default function FollowListModal({
               >
                 <UserAvatar user={userToShow} />
                 <div className="overflow-hidden">
-                  <p className="font-bold font-sans text-on-surface truncate">{userToShow.username}</p>
+                  <p className="font-bold font-sans text-on-surface truncate">
+                    {userToShow.username}
+                  </p>
                   <p className="font-sans text-body-md text-on-surface-variant truncate lowercase">
                     @{userToShow.username}
                   </p>
@@ -82,12 +88,9 @@ export default function FollowListModal({
           })}
         </ul>
 
-        {/* Footer */}
         {users.length > 0 && (
           <div className="px-gutter py-stack-sm border-t border-white/5 text-center">
-            <p className="font-label-caps text-label-caps text-on-surface-variant">
-              {users.length} {mode === 'followers' ? 'seguidores' : 'seguindo'}
-            </p>
+            <p className="font-label-caps text-label-caps text-on-surface-variant">{countLabel}</p>
           </div>
         )}
       </GlassPanel>

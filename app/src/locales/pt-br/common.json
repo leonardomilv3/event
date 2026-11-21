@@ -44,7 +44,9 @@
   "errors": {
     "generic": "Erro inesperado. Tente novamente.",
     "notFound": "Não encontrado",
-    "network": "Não foi possível conectar ao servidor."
+    "network": "Não foi possível conectar ao servidor.",
+    "httpError": "Erro HTTP {{status}}",
+    "sessionExpired": "Sessão expirada. Entre novamente."
   },
   "date": {
     "until": "até"

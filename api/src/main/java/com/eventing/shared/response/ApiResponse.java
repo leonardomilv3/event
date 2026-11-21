@@ -20,7 +20,13 @@ public record ApiResponse<T>(T data, String message, boolean success, List<Strin
         return new ApiResponse<>(null, message, false, null, errorCode);
     }
 
+    /** Mantido para compatibilidade; a mensagem de validação agora vem traduzida do mapper. */
+    public static ApiResponse<Void> validationErrors(String message, List<String> errors) {
+        return new ApiResponse<>(null, message, false, errors, "VALIDATION_ERROR");
+    }
+
+    @Deprecated
     public static ApiResponse<Void> validationErrors(List<String> errors) {
-        return new ApiResponse<>(null, "Erro de validação", false, errors, null);
+        return validationErrors("Validation error", errors);
     }
 }

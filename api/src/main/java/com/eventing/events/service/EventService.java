@@ -35,19 +35,25 @@ public class EventService {
 
     private static final GeometryFactory GEO_FACTORY = new GeometryFactory(new PrecisionModel(), 4326);
     private static final int CACHE_TTL_SECONDS = 300; // 5 minutos
-    private static final TypeReference<PageResponse<EventResponse>> PAGE_TYPE = new TypeReference<>() {};
+    private static final TypeReference<PageResponse<EventResponse>> PAGE_TYPE = new TypeReference<>() {
+    };
 
-    @Inject EventRepository eventRepository;
-    @Inject UserRepository userRepository;
-    @Inject RedisDataSource redis;
-    @Inject ObjectMapper objectMapper;
+    @Inject
+    EventRepository eventRepository;
+    @Inject
+    UserRepository userRepository;
+    @Inject
+    RedisDataSource redis;
+    @Inject
+    ObjectMapper objectMapper;
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
 
     @Transactional
     public EventResponse create(UUID creatorId, CreateEventRequest request) {
         User creator = userRepository.findById(creatorId);
-        if (creator == null) throw ApiException.notFound("Usuário");
+        if (creator == null)
+            throw ApiException.notFound("user");
 
         Event event = new Event();
         event.creator = creator;
@@ -80,37 +86,53 @@ public class EventService {
     }
 
     /**
-     * O criador sempre vê. Rascunhos só o criador. PUBLIC é aberto; PRIVATE/INVITE_ONLY
-     * só para participantes confirmados. Sem acesso → 404 (não 403) para não revelar
+     * O criador sempre vê. Rascunhos só o criador. PUBLIC é aberto;
+     * PRIVATE/INVITE_ONLY
+     * só para participantes confirmados. Sem acesso → 404 (não 403) para não
+     * revelar
      * que o evento existe.
      */
     public Event requireViewable(UUID eventId, UUID viewerId) {
         Event event = eventRepository.findById(eventId);
-        if (event == null) throw ApiException.notFound("Evento");
-        if (viewerId != null && event.creator.id.equals(viewerId)) return event;
-        if (event.status == EventStatus.DRAFT) throw ApiException.notFound("Evento");
-        if (event.visibility == EventVisibility.PUBLIC) return event;
-        if (viewerId != null && eventRepository.isConfirmedParticipant(eventId, viewerId)) return event;
-        throw ApiException.notFound("Evento");
+        if (event == null)
+            throw ApiException.notFound("event");
+        if (viewerId != null && event.creator.id.equals(viewerId))
+            return event;
+        if (event.status == EventStatus.DRAFT)
+            throw ApiException.notFound("event");
+        if (event.visibility == EventVisibility.PUBLIC)
+            return event;
+        if (viewerId != null && eventRepository.isConfirmedParticipant(eventId, viewerId))
+            return event;
+        throw ApiException.notFound("event");
     }
 
     @Transactional
     public EventResponse update(UUID currentUserId, UUID eventId, UpdateEventRequest request) {
         Event event = requireOwnership(currentUserId, eventId);
-        if (request.title() != null) event.title = request.title();
-        if (request.description() != null) event.description = request.description();
-        if (request.category() != null) event.category = request.category();
-        if (request.visibility() != null) event.visibility = request.visibility();
-        if (request.locationName() != null) event.locationName = request.locationName();
-        if (request.address() != null) event.address = request.address();
-        if (request.startsAt() != null) event.startsAt = toUtcLocalDateTime(request.startsAt());
-        if (request.endsAt() != null) event.endsAt = toUtcLocalDateTime(request.endsAt());
-        if (request.maxParticipants() != null) event.maxParticipants = request.maxParticipants();
-        if (request.sourceUrl() != null) event.sourceUrl = blankToNull(request.sourceUrl());
+        if (request.title() != null)
+            event.title = request.title();
+        if (request.description() != null)
+            event.description = request.description();
+        if (request.category() != null)
+            event.category = request.category();
+        if (request.visibility() != null)
+            event.visibility = request.visibility();
+        if (request.locationName() != null)
+            event.locationName = request.locationName();
+        if (request.address() != null)
+            event.address = request.address();
+        if (request.startsAt() != null)
+            event.startsAt = toUtcLocalDateTime(request.startsAt());
+        if (request.endsAt() != null)
+            event.endsAt = toUtcLocalDateTime(request.endsAt());
+        if (request.maxParticipants() != null)
+            event.maxParticipants = request.maxParticipants();
+        if (request.sourceUrl() != null)
+            event.sourceUrl = blankToNull(request.sourceUrl());
         if (request.latitude() != null && request.longitude() != null) {
             event.location = toPoint(request.longitude(), request.latitude());
         }
-        // Valida o estado resultante: update parcial pode mover só o início para depois do fim
         requireValidSchedule(event);
         return toResponse(event, null);
     }
@@ -127,7 +149,9 @@ public class EventService {
     public EventResponse publish(UUID currentUserId, UUID eventId) {
         Event event = requireOwnership(currentUserId, eventId);
         if (event.status != EventStatus.DRAFT) {
-            throw ApiException.badRequest("Somente eventos em DRAFT podem ser publicados");
+            throw ApiException.badRequest(
+                    "error.event.notDraft",
+                    "Only DRAFT events can be published");
         }
         event.status = EventStatus.PUBLISHED;
         invalidateCaches();
@@ -158,7 +182,10 @@ public class EventService {
         return getByCreatorId(creatorId, null, page, size);
     }
 
-    /** O próprio criador vê todos os seus eventos (rascunhos e não públicos inclusive). */
+    /**
+     * O próprio criador vê todos os seus eventos (rascunhos e não públicos
+     * inclusive).
+     */
     @Transactional
     public PageResponse<EventResponse> getByCreatorId(UUID creatorId, UUID viewerId, int page, int size) {
         boolean isOwner = creatorId.equals(viewerId);
@@ -177,7 +204,8 @@ public class EventService {
     public PageResponse<EventResponse> findNearby(double lat, double lon, double radiusKm, int page, int size) {
         String key = nearbyKey(lat, lon, radiusKm);
         PageResponse<EventResponse> cached = fromCache(key);
-        if (cached != null) return cached;
+        if (cached != null)
+            return cached;
 
         List<EventResponse> content = eventRepository.findNearby(lat, lon, radiusKm, page, size)
                 .stream().map(this::fromNativeRow).toList();
@@ -191,7 +219,8 @@ public class EventService {
     public PageResponse<EventResponse> findFeed(double lat, double lon, int page, int size) {
         String key = feedKey(lat, lon);
         PageResponse<EventResponse> cached = fromCache(key);
-        if (cached != null) return cached;
+        if (cached != null)
+            return cached;
 
         List<EventResponse> content = eventRepository.findFeed(lat, lon, page, size)
                 .stream().map(this::fromNativeRow).toList();
@@ -207,7 +236,8 @@ public class EventService {
     private PageResponse<EventResponse> fromCache(String key) {
         try {
             String json = redis.value(String.class).get(key);
-            if (json != null) return objectMapper.readValue(json, PAGE_TYPE);
+            if (json != null)
+                return objectMapper.readValue(json, PAGE_TYPE);
         } catch (Exception ignored) {
             // Redis indisponível ou JSON inválido: fallback para DB
         }
@@ -228,16 +258,16 @@ public class EventService {
             var keyCmd = redis.key(String.class);
             List<String> nearbyKeys = keyCmd.keys("events:nearby:*");
             List<String> feedKeys = keyCmd.keys("events:feed:*");
-            if (!nearbyKeys.isEmpty()) keyCmd.del(nearbyKeys.toArray(new String[0]));
-            if (!feedKeys.isEmpty()) keyCmd.del(feedKeys.toArray(new String[0]));
+            if (!nearbyKeys.isEmpty())
+                keyCmd.del(nearbyKeys.toArray(new String[0]));
+            if (!feedKeys.isEmpty())
+                keyCmd.del(feedKeys.toArray(new String[0]));
         } catch (Exception ignored) {
             // Redis indisponível: TTL já garante expiração
         }
     }
 
     private static String nearbyKey(double lat, double lon, double radiusKm) {
-        // Arredonda para 1 casa decimal (~11 km de granularidade) para maximizar
-        // reuso de cache entre usuários próximos sem prejudicar relevância percebida.
         double la = Math.round(lat * 10.0) / 10.0;
         double lo = Math.round(lon * 10.0) / 10.0;
         return String.format("events:nearby:%.1f:%.1f:%.0f", la, lo, radiusKm);
@@ -273,25 +303,30 @@ public class EventService {
                 r.distanceKm(),
                 r.createdAt() != null ? r.createdAt().toLocalDateTime() : null,
                 r.updatedAt() != null ? r.updatedAt().toLocalDateTime() : null,
-                r.sourceUrl()
-        );
+                r.sourceUrl());
     }
 
     // ── Helpers internos ──────────────────────────────────────────────────────
 
     private Event requireOwnership(UUID userId, UUID eventId) {
         Event event = eventRepository.findById(eventId);
-        if (event == null) throw ApiException.notFound("Evento");
-        if (!event.creator.id.equals(userId)) throw ApiException.forbidden();
+        if (event == null)
+            throw ApiException.notFound("event");
+        if (!event.creator.id.equals(userId))
+            throw ApiException.forbidden();
         return event;
     }
 
     private static void requireValidSchedule(Event event) {
         if (event.endsAt == null) {
-            throw ApiException.badRequest("A data de término é obrigatória");
+            throw ApiException.badRequest(
+                    "error.event.endsAtRequired",
+                    "End date is required");
         }
         if (!event.endsAt.isAfter(event.startsAt)) {
-            throw ApiException.badRequest("A data de término deve ser posterior à data de início");
+            throw ApiException.badRequest(
+                    "error.event.endBeforeStart",
+                    "End date must be after start date");
         }
     }
 
@@ -319,7 +354,6 @@ public class EventService {
                 event.startsAt, event.endsAt,
                 event.maxParticipants, event.participantCount,
                 distanceKm, event.createdAt, event.updatedAt,
-                event.sourceUrl
-        );
+                event.sourceUrl);
     }
 }

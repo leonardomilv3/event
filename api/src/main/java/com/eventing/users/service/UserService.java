@@ -22,29 +22,30 @@ public class UserService {
 
     @Inject
     UserRepository userRepository;
-
     @Inject
     ProfileRepository profileRepository;
-
     @Inject
     UserMapper userMapper;
 
     public UserDto findById(UUID id) {
         User user = userRepository.findById(id);
-        if (user == null) throw ApiException.notFound("Usuário");
+        if (user == null)
+            throw ApiException.notFound("user");
         return userMapper.toDto(user);
     }
 
     public UserProfileResponse getProfile(UUID userId) {
         User user = userRepository.findById(userId);
-        if (user == null) throw ApiException.notFound("Usuário");
+        if (user == null)
+            throw ApiException.notFound("user");
         Profile profile = profileRepository.findById(userId);
         return toResponse(user, profile);
     }
 
     public UserPublicProfileResponse getPublicProfile(UUID userId) {
         User user = userRepository.findById(userId);
-        if (user == null) throw ApiException.notFound("Usuário");
+        if (user == null)
+            throw ApiException.notFound("user");
         Profile profile = profileRepository.findById(userId);
         return toPublicResponse(user, profile);
     }
@@ -55,17 +56,22 @@ public class UserService {
             throw ApiException.forbidden();
         }
         User user = userRepository.findById(currentUserId);
-        if (user == null) throw ApiException.notFound("Usuário");
+        if (user == null)
+            throw ApiException.notFound("user");
 
         Profile profile = profileRepository.findById(currentUserId);
         if (profile == null) {
             profile = new Profile();
             profile.userId = currentUserId;
         }
-        if (request.displayName() != null) profile.displayName = request.displayName();
-        if (request.bio() != null) profile.bio = request.bio();
-        if (request.city() != null) profile.city = request.city();
-        if (request.interests() != null) profile.interests = request.interests().toArray(String[]::new);
+        if (request.displayName() != null)
+            profile.displayName = request.displayName();
+        if (request.bio() != null)
+            profile.bio = request.bio();
+        if (request.city() != null)
+            profile.city = request.city();
+        if (request.interests() != null)
+            profile.interests = request.interests().toArray(String[]::new);
 
         profileRepository.persist(profile);
         return toResponse(user, profile);
@@ -84,8 +90,7 @@ public class UserService {
                 profile != null ? profile.bio : null,
                 profile != null ? profile.city : null,
                 interests,
-                user.createdAt
-        );
+                user.createdAt);
     }
 
     private UserPublicProfileResponse toPublicResponse(User user, Profile profile) {
@@ -100,7 +105,6 @@ public class UserService {
                 profile != null ? profile.bio : null,
                 profile != null ? profile.city : null,
                 interests,
-                user.createdAt
-        );
+                user.createdAt);
     }
 }

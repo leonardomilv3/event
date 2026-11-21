@@ -9,21 +9,25 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApiExceptionTest {
 
     @Test
-    void notFoundShouldReturn404WithCorrectMessage() {
-        ApiException ex = ApiException.notFound("Evento");
+    void notFoundShouldCarryKeyFallbackAndErrorCode() {
+        ApiException ex = ApiException.notFound("event");
 
         assertEquals(Response.Status.NOT_FOUND, ex.getStatus());
-        assertEquals("Evento não encontrado(a)", ex.getMessage());
-        assertNull(ex.getErrorCode());
+        assertEquals("error.event.notFound", ex.getMessageKey());
+        assertEquals("Not found", ex.getMessage()); // fallback EN
+        assertEquals("NOT_FOUND", ex.getErrorCode());
     }
 
     @Test
-    void badRequestShouldReturn400() {
-        ApiException ex = ApiException.badRequest("campo inválido");
+    void badRequestShouldCarryMessageKeyAndFallback() {
+        ApiException ex = ApiException.badRequest(
+                "error.test.invalidField",
+                "Invalid field");
 
         assertEquals(Response.Status.BAD_REQUEST, ex.getStatus());
-        assertEquals("campo inválido", ex.getMessage());
-        assertNull(ex.getErrorCode());
+        assertEquals("error.test.invalidField", ex.getMessageKey());
+        assertEquals("Invalid field", ex.getMessage());
+        assertEquals("BAD_REQUEST", ex.getErrorCode());
     }
 
     @Test
@@ -31,7 +35,9 @@ class ApiExceptionTest {
         ApiException ex = ApiException.unauthorized();
 
         assertEquals(Response.Status.UNAUTHORIZED, ex.getStatus());
-        assertNotNull(ex.getMessage());
+        assertEquals("error.unauthorized", ex.getMessageKey());
+        assertEquals("Unauthorized", ex.getMessage());
+        assertEquals("UNAUTHORIZED", ex.getErrorCode());
     }
 
     @Test
@@ -39,16 +45,21 @@ class ApiExceptionTest {
         ApiException ex = ApiException.forbidden();
 
         assertEquals(Response.Status.FORBIDDEN, ex.getStatus());
-        assertNotNull(ex.getMessage());
+        assertEquals("error.forbidden", ex.getMessageKey());
+        assertEquals("Access denied", ex.getMessage());
+        assertEquals("FORBIDDEN", ex.getErrorCode());
     }
 
     @Test
-    void conflictShouldReturn409() {
-        ApiException ex = ApiException.conflict("recurso duplicado");
+    void conflictShouldCarryMessageKeyAndFallback() {
+        ApiException ex = ApiException.conflict(
+                "error.test.duplicate",
+                "Duplicate resource");
 
         assertEquals(Response.Status.CONFLICT, ex.getStatus());
-        assertEquals("recurso duplicado", ex.getMessage());
-        assertNull(ex.getErrorCode());
+        assertEquals("error.test.duplicate", ex.getMessageKey());
+        assertEquals("Duplicate resource", ex.getMessage());
+        assertEquals("CONFLICT", ex.getErrorCode());
     }
 
     @Test
@@ -57,21 +68,40 @@ class ApiExceptionTest {
 
         assertEquals(Response.Status.CONFLICT, ex.getStatus());
         assertEquals("ALREADY_PARTICIPANT", ex.getErrorCode());
-        assertNotNull(ex.getMessage());
+        assertEquals("error.participant.alreadyJoined", ex.getMessageKey());
+        assertEquals("User is already a participant of this event", ex.getMessage());
     }
 
     @Test
-    void constructorWithErrorCodeShouldPreserveAllFields() {
+    void legacyConstructorWithErrorCodeShouldPreserveFallbackAndCode() {
+        // Mantido para callers antigos que ainda usam (fallback, status, errorCode).
         ApiException ex = new ApiException("msg", Response.Status.BAD_REQUEST, "CUSTOM_CODE");
 
         assertEquals(Response.Status.BAD_REQUEST, ex.getStatus());
         assertEquals("msg", ex.getMessage());
         assertEquals("CUSTOM_CODE", ex.getErrorCode());
+        assertNull(ex.getMessageKey()); // sem i18n key: usa fallback cru
+    }
+
+    @Test
+    void fullConstructorShouldExposeAllFields() {
+        ApiException ex = new ApiException(
+                "error.test.key",
+                new Object[] { "arg" },
+                "Fallback",
+                Response.Status.INTERNAL_SERVER_ERROR,
+                "TEST_CODE");
+
+        assertEquals(Response.Status.INTERNAL_SERVER_ERROR, ex.getStatus());
+        assertEquals("error.test.key", ex.getMessageKey());
+        assertArrayEquals(new Object[] { "arg" }, ex.getMessageArgs());
+        assertEquals("Fallback", ex.getMessage());
+        assertEquals("TEST_CODE", ex.getErrorCode());
     }
 
     @Test
     void exceptionShouldExtendRuntimeException() {
-        ApiException ex = ApiException.notFound("X");
+        ApiException ex = ApiException.notFound("event");
         assertInstanceOf(RuntimeException.class, ex);
     }
 }

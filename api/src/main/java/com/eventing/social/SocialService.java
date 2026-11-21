@@ -16,10 +16,8 @@ public class SocialService {
 
     @Inject
     SocialRepository socialRepository;
-
     @Inject
     UserRepository userRepository;
-
     @Inject
     UserMapper userMapper;
 
@@ -37,12 +35,21 @@ public class SocialService {
 
     @Transactional
     public FollowDto follow(UUID followerId, UUID followingId) {
-        if (followerId.equals(followingId)) throw ApiException.badRequest("Não é possível seguir a si mesmo");
-        if (socialRepository.isFollowing(followerId, followingId)) throw ApiException.conflict("Já segue este usuário");
+        if (followerId.equals(followingId)) {
+            throw ApiException.badRequest(
+                    "error.social.cannotFollowSelf",
+                    "You cannot follow yourself");
+        }
+        if (socialRepository.isFollowing(followerId, followingId)) {
+            throw ApiException.conflict(
+                    "error.social.alreadyFollowing",
+                    "You are already following this user");
+        }
 
         var follower = userRepository.findById(followerId);
         var following = userRepository.findById(followingId);
-        if (follower == null || following == null) throw ApiException.notFound("Usuário");
+        if (follower == null || following == null)
+            throw ApiException.notFound("user");
 
         Follow follow = new Follow();
         follow.follower = follower;
@@ -56,7 +63,8 @@ public class SocialService {
         socialRepository.findFollow(followerId, followingId)
                 .ifPresentOrElse(
                         socialRepository::delete,
-                        () -> { throw ApiException.notFound("Follow"); }
-                );
+                        () -> {
+                            throw ApiException.notFound("follow");
+                        });
     }
 }

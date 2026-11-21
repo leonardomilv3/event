@@ -26,26 +26,34 @@ import java.util.UUID;
 @ApplicationScoped
 public class ParticipantService {
 
-    @Inject ParticipantRepository participantRepository;
-    @Inject EventRepository eventRepository;
-    @Inject UserRepository userRepository;
+    @Inject
+    ParticipantRepository participantRepository;
+    @Inject
+    EventRepository eventRepository;
+    @Inject
+    UserRepository userRepository;
 
     @Transactional
     public ParticipantResponse join(UUID userId, UUID eventId) {
         Event event = eventRepository.findById(eventId);
-        if (event == null) throw ApiException.notFound("Evento");
+        if (event == null)
+            throw ApiException.notFound("event");
         boolean isCreator = event.creator.id.equals(userId);
         Optional<EventParticipant> existing = participantRepository.findByEventAndUser(eventId, userId);
 
         // Rascunho de terceiro e PRIVATE sem admissão prévia: 404, igual ao GET /{id}.
-        // PRIVATE não tem fluxo de pedido — só quem já foi admitido (inclusive quem saiu) pode (re)entrar.
-        if (!isCreator && event.status == EventStatus.DRAFT) throw ApiException.notFound("Evento");
+        // PRIVATE não tem fluxo de pedido — só quem já foi admitido (inclusive quem
+        // saiu) pode (re)entrar.
+        if (!isCreator && event.status == EventStatus.DRAFT)
+            throw ApiException.notFound("event");
         if (!isCreator && event.visibility == EventVisibility.PRIVATE
                 && existing.filter(p -> p.status != ParticipantStatus.REQUESTED).isEmpty()) {
-            throw ApiException.notFound("Evento");
+            throw ApiException.notFound("event");
         }
         if (event.status != EventStatus.PUBLISHED) {
-            throw ApiException.badRequest("Evento não está publicado");
+            throw ApiException.badRequest(
+                    "error.event.notPublished",
+                    "Event is not published");
         }
 
         if (participantRepository.hasActiveParticipation(eventId, userId)) {
@@ -57,7 +65,9 @@ public class ParticipantService {
             targetStatus = ParticipantStatus.REQUESTED;
         } else {
             if (event.maxParticipants != null && event.participantCount >= event.maxParticipants) {
-                throw ApiException.badRequest("Evento já atingiu a capacidade máxima");
+                throw ApiException.badRequest(
+                        "error.event.full",
+                        "Event has reached its maximum capacity");
             }
             targetStatus = ParticipantStatus.APPROVED;
         }
@@ -65,15 +75,13 @@ public class ParticipantService {
         EventParticipant participant;
 
         if (existing.isPresent()) {
-            // Registro existe (ex: fez leave antes) — atualiza status e timestamp
             participant = existing.get();
             participant.status = targetStatus;
             participant.joinedAt = LocalDateTime.now(ZoneOffset.UTC);
-            // Entidade já gerenciada pelo Hibernate — o flush persiste automaticamente
         } else {
-            // Novo participante
             var user = userRepository.findById(userId);
-            if (user == null) throw ApiException.notFound("Usuário");
+            if (user == null)
+                throw ApiException.notFound("user");
             participant = new EventParticipant();
             participant.event = event;
             participant.user = user;
@@ -92,15 +100,14 @@ public class ParticipantService {
                 null,
                 null,
                 participant.status,
-                participant.joinedAt
-        );
+                participant.joinedAt);
     }
 
     @Transactional
     public void leave(UUID userId, UUID eventId) {
         EventParticipant participant = participantRepository.findByEventAndUser(eventId, userId)
                 .filter(ep -> ep.status != ParticipantStatus.DECLINED)
-                .orElseThrow(() -> ApiException.notFound("Participante"));
+                .orElseThrow(() -> ApiException.notFound("participant"));
 
         boolean wasApproved = participant.status == ParticipantStatus.APPROVED;
         participant.status = ParticipantStatus.DECLINED;
@@ -108,14 +115,14 @@ public class ParticipantService {
         if (wasApproved) {
             eventRepository.update(
                     "participantCount = participantCount - 1 where id = ?1 and participantCount > 0",
-                    eventId
-            );
+                    eventId);
         }
     }
 
     @Transactional
     public PageResponse<ParticipantResponse> listParticipants(UUID eventId, int page, int size) {
-        if (eventRepository.findById(eventId) == null) throw ApiException.notFound("Evento");
+        if (eventRepository.findById(eventId) == null)
+            throw ApiException.notFound("event");
 
         List<ApprovedParticipantRow> rows = participantRepository.findApprovedByEvent(eventId, page, size);
         long total = participantRepository.countApprovedByEvent(eventId);
@@ -144,8 +151,7 @@ public class ParticipantService {
                 r.displayName(),
                 r.avatarUrl(),
                 r.status() != null ? ParticipantStatus.valueOf(r.status()) : null,
-                r.joinedAt() != null ? r.joinedAt().toLocalDateTime() : null
-        );
+                r.joinedAt() != null ? r.joinedAt().toLocalDateTime() : null);
     }
 
     private EventResponse toEventResponse(Event e) {
@@ -161,8 +167,7 @@ public class ParticipantService {
                 e.maxParticipants, e.participantCount,
                 null,
                 e.createdAt, e.updatedAt,
-                e.sourceUrl
-        );
+                e.sourceUrl);
     }
 
 }

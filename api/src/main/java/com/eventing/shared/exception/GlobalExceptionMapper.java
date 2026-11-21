@@ -1,6 +1,9 @@
 package com.eventing.shared.exception;
 
+import com.eventing.shared.i18n.LocaleResolver;
+import com.eventing.shared.i18n.MessageService;
 import com.eventing.shared.response.ApiResponse;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
@@ -10,68 +13,64 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
+
 import java.util.List;
+import java.util.Locale;
 
 @Provider
 public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
 
-    @Override
-    public Response toResponse(Exception exception) {
-        return switch (exception) {
-            case ApiException e -> Response
-                    .status(e.getStatus())
-                    .entity(e.getErrorCode() != null
-                            ? ApiResponse.errorWithCode(e.getMessage(), e.getErrorCode())
-                            : ApiResponse.error(e.getMessage()))
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
+        @Inject
+        MessageService messages;
+        @Inject
+        LocaleResolver localeResolver;
 
-            case ConstraintViolationException e -> {
-                List<String> errors = e.getConstraintViolations().stream()
-                        .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                        .toList();
-                yield Response
-                        .status(Response.Status.BAD_REQUEST)
-                        .entity(ApiResponse.validationErrors(errors))
-                        .type(MediaType.APPLICATION_JSON)
-                        .build();
-            }
+        @Override
+        public Response toResponse(Exception exception) {
+                Locale locale = localeResolver.resolve();
 
-            case EntityExistsException e -> Response
-                    .status(Response.Status.CONFLICT)
-                    .entity(ApiResponse.error("Recurso já existe"))
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
+                return switch (exception) {
+                        case ApiException e -> {
+                                String message = e.getMessageKey() != null
+                                                ? messages.get(e.getMessageKey(), locale, e.getMessageArgs())
+                                                : e.getFallback();
+                                yield json(e.getStatus(), e.getErrorCode() != null
+                                                ? ApiResponse.errorWithCode(message, e.getErrorCode())
+                                                : ApiResponse.error(message));
+                        }
 
-            case EntityNotFoundException e -> Response
-                    .status(Response.Status.NOT_FOUND)
-                    .entity(ApiResponse.error("Recurso não encontrado"))
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
+                        case ConstraintViolationException e -> {
+                                List<String> errors = e.getConstraintViolations().stream()
+                                                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                                                .toList();
+                                yield json(Response.Status.BAD_REQUEST,
+                                                ApiResponse.validationErrors(messages.get("error.validation", locale),
+                                                                errors));
+                        }
 
-            case NotFoundException e -> Response
-                    .status(Response.Status.NOT_FOUND)
-                    .entity(ApiResponse.error("Recurso não encontrado"))
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
+                        case EntityExistsException e -> json(Response.Status.CONFLICT,
+                                        ApiResponse.error(messages.get("error.resourceExists", locale)));
 
-            case SecurityException e -> Response
-                    .status(Response.Status.UNAUTHORIZED)
-                    .entity(ApiResponse.error("Não autorizado"))
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
+                        case EntityNotFoundException e -> json(Response.Status.NOT_FOUND,
+                                        ApiResponse.error(messages.get("error.resourceNotFound", locale)));
 
-            case WebApplicationException e -> Response
-                    .status(e.getResponse().getStatus())
-                    .entity(ApiResponse.error(e.getMessage()))
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
+                        case NotFoundException e -> json(Response.Status.NOT_FOUND,
+                                        ApiResponse.error(messages.get("error.resourceNotFound", locale)));
 
-            default -> Response
-                    .status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(ApiResponse.error("Erro interno do servidor"))
-                    .type(MediaType.APPLICATION_JSON)
-                    .build();
-        };
-    }
+                        case SecurityException e -> json(Response.Status.UNAUTHORIZED,
+                                        ApiResponse.error(messages.get("error.unauthorized", locale)));
+
+                        case WebApplicationException e ->
+                                json(Response.Status.fromStatusCode(e.getResponse().getStatus()),
+                                                ApiResponse.error(e.getMessage() != null ? e.getMessage()
+                                                                : messages.get("error.badRequest", locale)));
+
+                        default -> json(Response.Status.INTERNAL_SERVER_ERROR,
+                                        ApiResponse.error(messages.get("error.internal", locale)));
+                };
+        }
+
+        private Response json(Response.Status status, ApiResponse<?> body) {
+                return Response.status(status).entity(body).type(MediaType.APPLICATION_JSON).build();
+        }
 }

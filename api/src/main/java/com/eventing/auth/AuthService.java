@@ -20,17 +20,20 @@ public class AuthService {
 
     @Inject
     UserRepository userRepository;
-
     @Inject
     AppConfig appConfig;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw ApiException.conflict("Email já cadastrado");
+            throw ApiException.conflict(
+                    "error.auth.emailTaken",
+                    "Email already registered");
         }
         if (userRepository.existsByUsername(request.username())) {
-            throw ApiException.conflict("Username já utilizado");
+            throw ApiException.conflict(
+                    "error.auth.usernameTaken",
+                    "Username already in use");
         }
         User user = new User();
         user.email = request.email();

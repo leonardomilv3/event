@@ -44,7 +44,9 @@
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "notFound": "Not found",
-    "network": "Could not connect to the server."
+    "network": "Could not connect to the server.",
+    "httpError": "HTTP error {{status}}",
+    "sessionExpired": "Session expired. Please sign in again."
   },
   "date": { "until": "until" },
   "language": { "label": "Language" }

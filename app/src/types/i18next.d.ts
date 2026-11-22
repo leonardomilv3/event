@@ -1,12 +1,13 @@
 import 'i18next'
 
-import type Common from '../locales/pt-BR/common.json'
-import type Auth from '../locales/pt-BR/auth.json'
-import type Events from '../locales/pt-BR/events.json'
-import type Social from '../locales/pt-BR/social.json'
-import type Landing from '../locales/pt-BR/landing.json'
-import type Dashboard from '../locales/pt-BR/dashboard.json'
-import type Settings from '../locales/pt-BR/settings.json'
+import type Common from '../locales/en/common.json'
+import type Auth from '../locales/en/auth.json'
+import type Events from '../locales/en/events.json'
+import type Social from '../locales/en/social.json'
+import type Landing from '../locales/en/landing.json'
+import type Dashboard from '../locales/en/dashboard.json'
+import type Settings from '../locales/en/settings.json'
+import type Calendar from '../locales/en/calendar.json'
 
 declare module 'i18next' {
   interface CustomTypeOptions {
@@ -19,6 +20,7 @@ declare module 'i18next' {
       landing: typeof Landing
       dashboard: typeof Dashboard
       settings: typeof Settings
+      calendar: typeof Calendar
     }
   }
 }

@@ -8,6 +8,7 @@ import ptBRSocial from '../locales/pt-BR/social.json'
 import ptBRLanding from '../locales/pt-BR/landing.json'
 import ptBRDashboard from '../locales/pt-BR/dashboard.json'
 import ptBRSettings from '../locales/pt-BR/settings.json'
+import ptBRCalendar from '../locales/pt-BR/calendar.json'
 
 import enCommon from '../locales/en/common.json'
 import enAuth from '../locales/en/auth.json'
@@ -16,6 +17,7 @@ import enSocial from '../locales/en/social.json'
 import enLanding from '../locales/en/landing.json'
 import enDashboard from '../locales/en/dashboard.json'
 import enSettings from '../locales/en/settings.json'
+import enCalendar from '../locales/en/calendar.json'
 
 export const SUPPORTED_LANGUAGES = ['pt-BR', 'en'] as const
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number]
@@ -34,6 +36,7 @@ export const resources = {
     landing: ptBRLanding,
     dashboard: ptBRDashboard,
     settings: ptBRSettings,
+    calendar: ptBRCalendar
   },
   en: {
     common: enCommon,
@@ -43,6 +46,7 @@ export const resources = {
     landing: enLanding,
     dashboard: enDashboard,
     settings: enSettings,
+    calendar: enCalendar
   },
 } as const
 
@@ -54,6 +58,7 @@ export const NAMESPACES = [
   'landing',
   'dashboard',
   'settings',
+  'calendar'
 ] as const
 
 const STORAGE_KEY = 'eventing.language'

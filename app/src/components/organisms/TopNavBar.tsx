@@ -10,9 +10,11 @@ export default function TopNavBar() {
   const { t } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
 
+  const logoImgUrl = '/logo-eventing.svg'
+
   const NAV_LINKS = [
     { label: t('nav.explore'), href: '/' },
-    { label: t('nav.calendar'), href: '/calendar' },
+    { label: t('nav.myEvents'), href: '/my-events' },
     { label: t('nav.venues'), href: '/venues' },
     { label: t('nav.collective'), href: '/collective' },
   ]
@@ -33,8 +35,16 @@ export default function TopNavBar() {
       ].join(' ')}
     >
       <div className="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-        <Link to="/" className="flex-shrink-0">
-          <span className="font-serif text-display-lg-mobile md:text-display-lg text-primary-container tracking-tighter leading-none">
+        <Link
+          to="/"
+          className="flex items-center gap-2 flex-shrink-0 h-full py-3"
+        >
+          <img
+            src={logoImgUrl}
+            alt={t('app.name')}
+            className="h-full w-auto max-h-12 object-contain"
+          />
+          <span className="font-serif mb-1.5 text-3xl md:text-5xl text-primary-container tracking-tighter leading-none whitespace-nowrap">
             {t('app.name')}
           </span>
         </Link>

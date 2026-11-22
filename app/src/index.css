@@ -170,3 +170,50 @@
     animation: breath 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
+
+/* ── Calendar month carousel transitions ─────────────────────────── */
+@keyframes calendar-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes calendar-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes calendar-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.calendar-enter-right {
+  animation: calendar-enter-right 240ms ease-out;
+}
+
+.calendar-enter-left {
+  animation: calendar-enter-left 240ms ease-out;
+}
+
+.calendar-pop {
+  animation: calendar-pop 160ms ease-out;
+  transform-origin: center top; /* expande a partir da célula ancorada */
+}

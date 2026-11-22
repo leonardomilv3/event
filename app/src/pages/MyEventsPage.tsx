@@ -1,20 +1,60 @@
-import { Link } from 'react-router-dom'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import TopNavBar from '../components/organisms/TopNavBar'
 import SideNavBar from '../components/organisms/SideNavBar'
 import BottomNav from '../components/organisms/BottomNav'
 import Footer from '../components/organisms/Footer'
-import EventCard from '../components/molecules/EventCard'
 import Icon from '../components/atoms/Icon'
-import { useMyEvents } from '../hooks/useMyEvents'
-import { formatEventDateRange } from '../utils/date'
+import ViewToggle from '../components/atoms/ViewToggle'
+import CalendarMonthNavigator from '../components/molecules/CalendarMonthNavigator'
+import CalendarGrid from '../components/organisms/CalendarGrid'
+import EventsListView from '../components/organisms/EventsListView'
+import { useMonthEvents } from '../hooks/useMonthEvents'
+import { buildMonthGrid, formatMonthLabel } from '../utils/calendar'
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=900&q=80'
+type ViewMode = 'list' | 'calendar'
+type Direction = 'next' | 'prev' | null
 
 export default function MyEventsPage() {
-  const { events, loading, error } = useMyEvents()
   const { t, i18n } = useTranslation('events')
-  const { t: tCommon } = useTranslation()
+  const { t: tCalendar } = useTranslation('calendar')
+  const [today] = useState(() => new Date())
+  const [view, setView] = useState<ViewMode>('calendar')
+  const [direction, setDirection] = useState<Direction>(null)
+  const [cursor, setCursor] = useState({
+    year: today.getFullYear(),
+    month: today.getMonth(),
+  })
+
+  const { eventsByDay, loading, error } = useMonthEvents(cursor.year, cursor.month)
+  const cells = useMemo(() => buildMonthGrid(cursor.year, cursor.month), [cursor])
+  const monthLabel = formatMonthLabel(cursor.year, cursor.month, i18n.language)
+  const monthKey = `${cursor.year}-${cursor.month}`
+
+  const go = useCallback((delta: number) => {
+    setDirection(delta > 0 ? 'next' : 'prev')
+    setCursor((prev) => {
+      const d = new Date(prev.year, prev.month + delta, 1)
+      return { year: d.getFullYear(), month: d.getMonth() }
+    })
+  }, [])
+
+  const goToday = useCallback(() => {
+    setDirection(null)
+    setCursor({ year: today.getFullYear(), month: today.getMonth() })
+  }, [today])
+
+  const animationClass =
+    direction === 'next'
+      ? 'calendar-enter-right'
+      : direction === 'prev'
+        ? 'calendar-enter-left'
+        : ''
+
+  const viewOptions = [
+    { value: 'list', label: tCalendar('views.list'), icon: 'list' },
+    { value: 'calendar', label: tCalendar('views.calendar'), icon: 'calendar_month' },
+  ]
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
@@ -22,66 +62,61 @@ export default function MyEventsPage() {
       <SideNavBar topOffset="top-20" />
       <div className="flex min-h-screen pt-20">
         <div className="hidden md:block w-64 flex-shrink-0" />
-        <main className="flex-1 px-margin-mobile md:px-margin-desktop py-stack-lg max-w-full">
-          <header className="mb-stack-lg">
-            <h1 className="font-serif text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">{t('myEvents.title')}</h1>
-            <p className="font-sans text-body-md text-on-surface-variant">{t('myEvents.subtitle')}</p>
+        <main className="flex-1 px-margin-mobile md:px-margin-desktop py-stack-lg max-w-full overflow-x-hidden">
+          <header className="mb-stack-lg flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h1 className="font-serif text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">
+                {t('myEvents.title')}
+              </h1>
+              <p className="font-sans text-body-md text-on-surface-variant">
+                {t('myEvents.subtitle')}
+              </p>
+            </div>
+            <ViewToggle
+              value={view}
+              options={viewOptions}
+              onChange={(v) => setView(v as ViewMode)}
+            />
           </header>
+
+          <CalendarMonthNavigator
+            label={monthLabel}
+            onPrev={() => go(-1)}
+            onNext={() => go(1)}
+            onToday={goToday}
+          />
 
           {loading && (
             <div className="flex items-center justify-center py-stack-xl">
-              <Icon name="progress_activity" size={32} className="animate-spin text-primary-container" />
+              <Icon
+                name="progress_activity"
+                size={32}
+                className="animate-spin text-primary-container"
+              />
+              <span className="ml-3 font-label-md text-label-md text-on-surface-variant">
+                {tCalendar('loading')}
+              </span>
             </div>
           )}
 
           {!loading && error && (
             <div className="flex items-center justify-center py-stack-xl gap-3">
               <Icon name="error" size={24} className="text-error" />
-              <p className="font-label-md text-label-md text-error">{error}</p>
+              <p className="font-label-md text-label-md text-error">{tCalendar('error')}</p>
             </div>
           )}
 
-          {!loading && !error && events.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-stack-xl text-center">
-              <div className="relative mb-stack-lg">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-48 h-48 bg-primary-container/5 rounded-full blur-3xl" />
-                </div>
-                <div className="relative w-32 h-32 flex items-center justify-center">
-                  <div className="pulse-ring" />
-                  <div className="relative z-10 w-24 h-24 rounded-full bg-surface-container border border-white/10 glass-panel flex items-center justify-center">
-                    <Icon name="confirmation_number" size={48} className="text-primary-container" />
-                  </div>
-                </div>
-              </div>
-              <div className="max-w-md mx-auto mb-stack-lg">
-                <p className="font-body-lg text-body-lg text-on-surface mb-stack-sm">{t('myEvents.emptyTitle')}</p>
-                <p className="font-body-md text-body-md text-on-surface-variant">{t('myEvents.emptyBody')}</p>
-              </div>
-              <Link to="/" className="px-10 py-4 bg-primary-container text-on-primary font-bold rounded-full mint-glow-primary hover:bg-primary-fixed transition-all active:scale-95 font-label-md">
-                {t('myEvents.exploreButton')}
-              </Link>
-            </div>
-          )}
-
-          {!loading && !error && events.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-              {events.map((event) => (
-                <div key={event.id} className="flex flex-col">
-                  <EventCard title={event.title} category={event.category} imageUrl={event.coverImageUrl ?? FALLBACK_IMAGE} href={`/events/${event.id}`} className="!w-full" />
-                  <div className="mt-stack-sm px-2 space-y-stack-xs">
-                    <p className="font-label-caps text-label-caps text-primary-container uppercase">
-                      {formatEventDateRange(event.startsAt, event.endsAt, i18n.language, tCommon('date.until'))}
-                    </p>
-                    {event.locationName && (
-                      <p className="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">
-                        <Icon name="location_on" size={14} />
-                        {event.locationName}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
+          {!loading && !error && (
+            <div key={monthKey} className={animationClass}>
+              {view === 'calendar' ? (
+                <CalendarGrid cells={cells} eventsByDay={eventsByDay} />
+              ) : (
+                <EventsListView
+                  eventsByDay={eventsByDay}
+                  year={cursor.year}
+                  month={cursor.month}
+                />
+              )}
             </div>
           )}
         </main>

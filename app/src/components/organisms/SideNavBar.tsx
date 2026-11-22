@@ -35,14 +35,6 @@ export default function SideNavBar({ topOffset = 'top-0' }: SideNavBarProps) {
     <aside
       className={`hidden md:flex flex-col h-screen w-64 fixed left-0 ${topOffset} bg-surface-container py-8 px-4 z-40`}
     >
-      <div className="mb-10 px-2">
-        <Link to="/">
-          <span className="font-serif text-headline-md text-primary-container tracking-tighter">
-            {t('app.name')}
-          </span>
-        </Link>
-      </div>
-
       <div className="mb-8 px-2 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full overflow-hidden border border-primary-container/20 bg-surface-variant flex-shrink-0 flex items-center justify-center">
           {userAvatar ? (

@@ -16,6 +16,7 @@ import { useProfile } from '../hooks/useProfile'
 import { useMyEvents } from '../hooks/useMyEvents'
 import { useCreatedEvents } from '../hooks/useCreatedEvents'
 import { parseApiDate } from '../utils/date'
+import TopNavBar from '../components/organisms/TopNavBar'
 
 const INPUT_CLASS = [
   'w-full bg-surface-container-low border border-outline-variant rounded-lg',
@@ -118,6 +119,7 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
+      <TopNavBar />
       <SideNavBar />
 
       <main className="md:ml-64 min-h-screen pb-stack-xl">

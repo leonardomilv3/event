@@ -1,0 +1,20 @@
+{
+  "views": { "list": "List", "calendar": "Calendar" },
+  "navigation": {
+    "previous": "Previous month",
+    "next": "Next month",
+    "today": "Today"
+  },
+  "loading": "Loading events...",
+  "error": "Could not load events for this month",
+  "empty": "No events this month",
+  "dayEmpty": "No events on this day",
+  "eventsCount_one": "{{count}} event",
+  "eventsCount_other": "{{count}} events",
+  "moreEvents_one": "+{{count}} event",
+  "moreEvents_other": "+{{count}} events",
+  "weekdays": {
+    "sun": "Sun", "mon": "Mon", "tue": "Tue", "wed": "Wed",
+    "thu": "Thu", "fri": "Fri", "sat": "Sat"
+  }
+}

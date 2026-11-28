@@ -97,3 +97,13 @@ export function formatLongDate(date: Date, locale: string): string {
     .format(date)
     .replace(/^\p{L}/u, (c) => c.toUpperCase())
 }
+
+export function formatEventTimeRange(
+  startsAt: string,
+  endsAt: string | null | undefined,
+  locale: string,
+): { start: string; end: string | null } {
+  const start = formatEventTime(startsAt, locale)
+  if (!endsAt) return { start, end: null }
+  return { start, end: formatEventTime(endsAt, locale) }
+}

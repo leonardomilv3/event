@@ -3,7 +3,7 @@
   "navigation": {
     "previous": "Previous month",
     "next": "Next month",
-    "today": "Today"
+    "goToToday": "Go to today"
   },
   "loading": "Loading events...",
   "error": "Could not load events for this month",
@@ -13,6 +13,20 @@
   "eventsCount_other": "{{count}} events",
   "moreEvents_one": "+{{count}} event",
   "moreEvents_other": "+{{count}} events",
+  "seeOnList": "See in list",
+  "tooltips": {
+    "viewList": "View as list",
+    "viewCalendar": "View as calendar",
+    "dayWithEvents_one": "{{count}} event — click to see details",
+    "dayWithEvents_other": "{{count}} events — click to see details",
+    "seeOnList": "See all events for this day in list view",
+    "close": "Close"
+  },
+  "picker": {
+    "openLabel": "Pick month and year",
+    "previousYear": "Previous year",
+    "nextYear": "Next year"
+  },
   "weekdays": {
     "sun": "Sun", "mon": "Mon", "tue": "Tue", "wed": "Wed",
     "thu": "Thu", "fri": "Fri", "sat": "Sat"

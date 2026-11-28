@@ -1,20 +1,34 @@
 {
-  "views": { "list": "List", "calendar": "Calendar" },
+  "views": { "list": "Lista", "calendar": "Calendário" },
   "navigation": {
-    "previous": "Previous month",
-    "next": "Next month",
-    "today": "Today"
+    "previous": "Mês anterior",
+    "next": "Próximo mês",
+    "goToToday": "Ir para hoje"
   },
-  "loading": "Loading events...",
-  "error": "Could not load events for this month",
-  "empty": "No events this month",
-  "dayEmpty": "No events on this day",
-  "eventsCount_one": "{{count}} event",
-  "eventsCount_other": "{{count}} events",
-  "moreEvents_one": "+{{count}} event",
-  "moreEvents_other": "+{{count}} events",
+  "loading": "Carregando eventos...",
+  "error": "Não foi possível carregar os eventos deste mês",
+  "empty": "Nenhum evento neste mês",
+  "dayEmpty": "Nenhum evento neste dia",
+  "eventsCount_one": "{{count}} evento",
+  "eventsCount_other": "{{count}} eventos",
+  "moreEvents_one": "+{{count}} evento",
+  "moreEvents_other": "+{{count}} eventos",
+  "seeOnList": "Ver na lista",
+  "tooltips": {
+    "viewList": "Visualizar como lista",
+    "viewCalendar": "Visualizar como calendário",
+    "dayWithEvents_one": "{{count}} evento — clique para ver detalhes",
+    "dayWithEvents_other": "{{count}} eventos — clique para ver detalhes",
+    "seeOnList": "Ver todos os eventos deste dia na lista",
+    "close": "Fechar"
+  },
+  "picker": {
+    "openLabel": "Selecionar mês e ano",
+    "previousYear": "Ano anterior",
+    "nextYear": "Próximo ano"
+  },
   "weekdays": {
-    "sun": "Sun", "mon": "Mon", "tue": "Tue", "wed": "Wed",
-    "thu": "Thu", "fri": "Fri", "sat": "Sat"
+    "sun": "Dom", "mon": "Seg", "tue": "Ter", "wed": "Qua",
+    "thu": "Qui", "fri": "Sex", "sat": "Sáb"
   }
 }

@@ -4,6 +4,7 @@ export interface ViewOption {
   value: string
   label: string
   icon?: string
+  tooltip?: string
 }
 
 interface Props {
@@ -26,6 +27,8 @@ export default function ViewToggle({ value, options, onChange }: Props) {
             type="button"
             role="tab"
             aria-selected={active}
+            aria-label={opt.tooltip ?? opt.label}
+            title={opt.tooltip ?? opt.label}
             onClick={() => onChange(opt.value)}
             className={[
               'flex items-center gap-2 px-3 py-1.5 rounded-full font-label-md text-label-md transition-all',

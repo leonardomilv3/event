@@ -9,6 +9,26 @@ const MOCK_TEMPLATES = [
   { title: 'Festa Underground', category: 'NIGHTLIFE', locationName: 'Club Sub', hour: 23, durationMin: 300, description: 'Line-up secreto, som pesado, ambiente intimista.' },
 ] as const
 
+/** Empty month for testing the empty-state UI. */
+const EMPTY_MONTH = { year: 2026, month: 11 } // December 2026 (0-indexed)
+
+/**
+ * Days with a forced event count (for testing specific limits).
+ * Key = day of month; value = number of events.
+ * Only applies to months that are not EMPTY_MONTH.
+ */
+const FORCED_DAYS: Record<number, number> = {
+  5: 7,   // overflow: 5 shown in popover + 2 hidden
+  10: 5,  // exactly at popover limit — no overflow
+  15: 8,  // heavy overflow (mock "busy night")
+  20: 6,  // just over the limit
+  3: 0,   // empty day in a busy month
+  7: 0,
+  14: 0,
+  21: 0,
+  25: 0,
+}
+
 function hash(n: number): number {
   let x = n | 0
   x = ((x >> 16) ^ x) * 0x45d9f3b | 0
@@ -23,25 +43,35 @@ function mockEventId(year: number, month: number, day: number, idx: number): str
 }
 
 function generateMockEvents(year: number, month: number): EventResponse[] {
+  if (year === EMPTY_MONTH.year && month === EMPTY_MONTH.month) return []
+
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const events: EventResponse[] = []
 
   for (let day = 1; day <= daysInMonth; day++) {
-    const seed = hash(year * 10000 + month * 100 + day)
-    const r = seed % 100
-    // 40% empty, 35% one event, 17% two, 8% three
-    const numEvents = r < 40 ? 0 : r < 75 ? 1 : r < 92 ? 2 : 3
+    let numEvents: number
+    if (day in FORCED_DAYS) {
+      numEvents = FORCED_DAYS[day]
+    } else {
+      const seed = hash(year * 10000 + month * 100 + day)
+      const r = seed % 100
+      numEvents = r < 45 ? 1 : r < 75 ? 2 : r < 92 ? 3 : 4
+    }
 
     for (let idx = 0; idx < numEvents; idx++) {
+      const seed = hash(year * 10000 + month * 100 + day * 31 + idx * 7)
       const template = MOCK_TEMPLATES[(seed + idx * 7) % MOCK_TEMPLATES.length]
-      const startsAt = new Date(year, month, day, template.hour, 0, 0)
+      // Stagger start times so multiple events on the same day don't overlap exactly
+      const startHour = template.hour + (idx === 0 ? 0 : idx === 1 ? 1 : idx * 0.5)
+      const startMinute = idx % 2 === 0 ? 0 : 30
+      const startsAt = new Date(year, month, day, Math.floor(startHour), startMinute, 0)
       const endsAt = new Date(startsAt.getTime() + template.durationMin * 60_000)
 
       events.push({
         id: mockEventId(year, month, day, idx),
         creatorId: 'mock-creator',
         creatorUsername: 'mock.user',
-        title: template.title,
+        title: `${template.title}${idx > 0 ? ` #${idx + 1}` : ''}`,
         description: template.description,
         category: template.category,
         visibility: 'PUBLIC',
@@ -62,13 +92,9 @@ function generateMockEvents(year: number, month: number): EventResponse[] {
 /**
  * Fetches the current user's events for the given month.
  *
- * Currently mocked — no per-month endpoint exists yet. When the backend
- * exposes one (e.g. `GET /api/events/my/month?year=YYYY&month=M` with M 1-indexed),
- * replace the body with:
+ * Currently mocked — the swap to the real backend is a one-liner:
  *
  *   return http.get<EventResponse[]>(`/api/events/my/month?year=${year}&month=${month + 1}`)
- *
- * Nothing else in the calendar (hook, components, UI) needs to change.
  */
 export async function getEventsForMonth(year: number, month: number): Promise<EventResponse[]> {
   return generateMockEvents(year, month)

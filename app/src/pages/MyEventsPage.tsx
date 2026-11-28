@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import TopNavBar from '../components/organisms/TopNavBar'
 import SideNavBar from '../components/organisms/SideNavBar'
@@ -25,6 +25,8 @@ export default function MyEventsPage() {
     year: today.getFullYear(),
     month: today.getMonth(),
   })
+  const [highlightDay, setHighlightDay] = useState<number | null>(null)
+  const pendingScrollRef = useRef<string | null>(null)
 
   const { eventsByDay, loading, error } = useMonthEvents(cursor.year, cursor.month)
   const cells = useMemo(() => buildMonthGrid(cursor.year, cursor.month), [cursor])
@@ -44,6 +46,32 @@ export default function MyEventsPage() {
     setCursor({ year: today.getFullYear(), month: today.getMonth() })
   }, [today])
 
+  const jumpTo = useCallback((year: number, month: number) => {
+    setDirection(null)
+    setCursor({ year, month })
+  }, [])
+
+  const handleSeeAll = useCallback((date: Date) => {
+    pendingScrollRef.current = `list-day-${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+    setHighlightDay(date.getDate())
+    setView('list')
+    if (cursor.year !== date.getFullYear() || cursor.month !== date.getMonth()) {
+      setCursor({ year: date.getFullYear(), month: date.getMonth() })
+    }
+  }, [cursor.year, cursor.month])
+
+  useEffect(() => {
+    if (view !== 'list' || !pendingScrollRef.current) return
+    const id = pendingScrollRef.current
+    pendingScrollRef.current = null
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+    const t = setTimeout(() => setHighlightDay(null), 2500)
+    return () => clearTimeout(t)
+  }, [view, monthKey])
+
   const animationClass =
     direction === 'next'
       ? 'calendar-enter-right'
@@ -52,8 +80,18 @@ export default function MyEventsPage() {
         : ''
 
   const viewOptions = [
-    { value: 'list', label: tCalendar('views.list'), icon: 'list' },
-    { value: 'calendar', label: tCalendar('views.calendar'), icon: 'calendar_month' },
+    {
+      value: 'list',
+      label: tCalendar('views.list'),
+      icon: 'list',
+      tooltip: tCalendar('tooltips.viewList'),
+    },
+    {
+      value: 'calendar',
+      label: tCalendar('views.calendar'),
+      icon: 'calendar_month',
+      tooltip: tCalendar('tooltips.viewCalendar'),
+    },
   ]
 
   return (
@@ -81,9 +119,12 @@ export default function MyEventsPage() {
 
           <CalendarMonthNavigator
             label={monthLabel}
+            year={cursor.year}
+            month={cursor.month}
             onPrev={() => go(-1)}
             onNext={() => go(1)}
             onToday={goToday}
+            onSelect={jumpTo}
           />
 
           {loading && (
@@ -109,12 +150,17 @@ export default function MyEventsPage() {
           {!loading && !error && (
             <div key={monthKey} className={animationClass}>
               {view === 'calendar' ? (
-                <CalendarGrid cells={cells} eventsByDay={eventsByDay} />
+                <CalendarGrid
+                  cells={cells}
+                  eventsByDay={eventsByDay}
+                  onSeeAll={handleSeeAll}
+                />
               ) : (
                 <EventsListView
                   eventsByDay={eventsByDay}
                   year={cursor.year}
                   month={cursor.month}
+                  highlightDay={highlightDay}
                 />
               )}
             </div>

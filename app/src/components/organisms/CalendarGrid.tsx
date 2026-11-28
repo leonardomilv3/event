@@ -7,47 +7,93 @@ import CalendarWeekdayHeader from '../molecules/CalendarWeekdayHeader'
 interface Props {
   cells: CalendarCell[]
   eventsByDay: Map<number, EventResponse[]>
+  onSeeAll: (date: Date) => void
 }
 
-const CLOSE_DELAY_MS = 260
+const OPEN_DELAY_MS = 200
+const CLOSE_DELAY_MS = 300
 
 function cellKeyOf(cell: CalendarCell): string {
   const d = cell.date
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
 }
 
-export default function CalendarGrid({ cells, eventsByDay }: Props) {
+export default function CalendarGrid({ cells, eventsByDay, onSeeAll }: Props) {
   const [openCellKey, setOpenCellKey] = useState<string | null>(null)
+  const openCellRef = useRef<string | null>(null)
+  const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const cancelClose = useCallback(() => {
+  const setOpen = useCallback((key: string | null) => {
+    openCellRef.current = key
+    setOpenCellKey(key)
+  }, [])
+
+  const clearOpenTimer = useCallback(() => {
+    if (openTimerRef.current) {
+      clearTimeout(openTimerRef.current)
+      openTimerRef.current = null
+    }
+  }, [])
+
+  const clearCloseTimer = useCallback(() => {
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current)
       closeTimerRef.current = null
     }
   }, [])
 
-  const scheduleClose = useCallback(() => {
-    cancelClose()
-    closeTimerRef.current = setTimeout(() => setOpenCellKey(null), CLOSE_DELAY_MS)
-  }, [cancelClose])
-
-  const openCell = useCallback(
+  const requestOpen = useCallback(
     (key: string) => {
-      cancelClose()
-      setOpenCellKey(key)
+      clearCloseTimer()
+      if (openCellRef.current === key) {
+        clearOpenTimer()
+        return
+      }
+      clearOpenTimer()
+      openTimerRef.current = setTimeout(() => {
+        setOpen(key)
+        openTimerRef.current = null
+      }, OPEN_DELAY_MS)
     },
-    [cancelClose],
+    [clearCloseTimer, clearOpenTimer, setOpen],
   )
 
-  const closeCell = useCallback(() => {
-    cancelClose()
-    setOpenCellKey(null)
-  }, [cancelClose])
+  const requestClose = useCallback(() => {
+    clearOpenTimer()
+    clearCloseTimer()
+    closeTimerRef.current = setTimeout(() => {
+      setOpen(null)
+      closeTimerRef.current = null
+    }, CLOSE_DELAY_MS)
+  }, [clearOpenTimer, clearCloseTimer, setOpen])
 
-  // Cleanup no unmount (troca de mês remonta o CalendarGrid, mas garante que
-  // nenhum timer órfão feche um popover recém-montado).
-  useEffect(() => () => cancelClose(), [cancelClose])
+  const cancelClose = useCallback(() => {
+    clearCloseTimer()
+  }, [clearCloseTimer])
+
+  const forceClose = useCallback(() => {
+    clearOpenTimer()
+    clearCloseTimer()
+    setOpen(null)
+  }, [clearOpenTimer, clearCloseTimer, setOpen])
+
+  const toggleCell = useCallback(
+    (key: string) => {
+      clearOpenTimer()
+      clearCloseTimer()
+      setOpen(openCellRef.current === key ? null : key)
+    },
+    [clearOpenTimer, clearCloseTimer, setOpen],
+  )
+
+  useEffect(
+    () => () => {
+      clearOpenTimer()
+      clearCloseTimer()
+    },
+    [clearOpenTimer, clearCloseTimer],
+  )
 
   return (
     <div className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest relative">
@@ -65,10 +111,13 @@ export default function CalendarGrid({ cells, eventsByDay }: Props) {
               cellKey={key}
               events={events}
               isOpen={openCellKey === key}
-              onOpen={openCell}
-              onScheduleClose={scheduleClose}
+              openCellKey={openCellKey}
+              onEnter={requestOpen}
+              onLeave={requestClose}
               onCancelClose={cancelClose}
-              onClose={closeCell}
+              onForceClose={forceClose}
+              onToggle={toggleCell}
+              onSeeAll={onSeeAll}
             />
           )
         })}
